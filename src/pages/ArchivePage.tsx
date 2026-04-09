@@ -77,6 +77,11 @@ export function ArchivePage() {
  
               <div className="text-[22px] text-[rgba(0,0,0,0.55)] leading-none">{archive.name}</div>
               <div className="text-[10px] text-[rgba(0,0,0,0.28)] tracking-wide">{archive.entryCount}개</div>
+              {archive.icon && (
+                <div className="absolute top-1 left-1 text-[16px] text-[rgba(0,0,0,0.4)]">
+                  {archive.icon}
+                </div>
+              )}
  
               {/* Menu icon - visible on hover */}
               <button
