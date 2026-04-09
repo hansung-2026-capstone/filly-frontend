@@ -1,12 +1,22 @@
 import { useState } from 'react'
-import { Plus } from 'lucide-react'
+import { Plus, ArrowLeft, Star } from 'lucide-react'
 import { useArchive } from '../hook/useArchive'
-import type { Diary } from '../types/diary'
 import { hexToShadow } from '../lib/utils'
+import type { Diary } from '../types/diary'
  
 export function ArchivePage() {
-  const { archives, selectedArchiveId, setSelectedArchiveId } = useArchive()
+  const { archives, selectedArchiveId, setSelectedArchiveId, diaries } = useArchive()
   const [showModal, setShowModal] = useState(false)
+
+  function getArchiveName(): string {
+    if (selectedArchiveId === null) return '전체'
+    return archives.find(a => a.id === selectedArchiveId)?.name ?? '전체'
+  }
+
+  function handleDiaryClick(_entry: Diary) {
+    // TODO: navigate to diary detail
+  }
+
  
   return (
     <div
@@ -67,7 +77,71 @@ export function ArchivePage() {
  
       {/* Right page - Diary list */}
       <div className="flex-1 flex flex-col py-3.5 px-6 pl-7 gap-0 overflow-hidden">
-        
+        <div className="flex items-center gap-2 pb-2.5 border-b border-[rgba(160,140,120,0.12)] mb-1 flex-shrink-0">
+          {selectedArchiveId !== null && (
+            <button
+              onClick={() => setSelectedArchiveId(null)}
+              className="w-6 h-6 flex items-center justify-center rounded-md border-none bg-transparent
+                cursor-pointer text-[rgba(80,60,40,0.6)] hover:bg-[rgba(160,140,120,0.08)]
+                transition-all duration-150"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </button>
+          )}
+          <div className="text-sm text-[rgba(70,55,35,0.65)] tracking-wide">
+            {getArchiveName()}
+          </div>
+        </div>
+ 
+        <div className="flex-1 overflow-y-auto">
+          {diaries.map((entry) => (
+            <div
+              key={entry.id}
+              className="flex items-center gap-3 py-2.5 px-3 border-b border-[rgba(160,140,120,0.08)]
+                cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(160,140,120,0.06)]"
+              onClick={() => handleDiaryClick(entry)}
+            >
+              {entry.thumbnailUrl
+                ? (
+                  <img
+                    src={entry.thumbnailUrl}
+                    alt={entry.writtenAt}
+                    className="w-11 h-11 rounded-lg object-cover flex-shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.1)]
+                      border border-[rgba(220,210,195,0.5)]"
+                  />
+                )
+                : (
+                  <div className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0
+                    bg-[rgba(240,235,225,0.8)] shadow-[0_1px_3px_rgba(0,0,0,0.1)]
+                    border border-[rgba(220,210,195,0.5)] text-xl">
+                    {entry.emoji}
+                  </div>
+                )
+              }
+              <div className="flex-1 flex flex-col gap-0.5 min-w-0">
+                <div className="text-[10px] text-[rgba(120,105,85,0.45)] tracking-[0.5px]">
+                  {entry.writtenAt}
+                </div>
+                <div className="text-xs text-[rgba(60,45,30,0.7)] leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis">
+                  {entry.finalText || entry.writtenAt}
+                </div>
+                <div className="flex gap-0">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`w-2 h-2 ${
+                        i < entry.starRating
+                          ? 'fill-[rgba(210,175,80,0.7)] stroke-[rgba(190,155,60,0.6)]'
+                          : 'fill-none stroke-[rgba(180,160,120,0.4)]'
+                      }`}
+                      strokeWidth={1.5}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Modal stub */}
