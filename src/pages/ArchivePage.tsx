@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Plus, ArrowLeft, Star } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Plus, ArrowLeft, Star, MoreVertical } from 'lucide-react'
 import { useArchive } from '../hook/useArchive'
 import { hexToShadow } from '../lib/utils'
 import type { Diary } from '../types/diary'
@@ -7,21 +7,28 @@ import type { Diary } from '../types/diary'
 export function ArchivePage() {
   const { archives, selectedArchiveId, setSelectedArchiveId, diaries } = useArchive()
   const [showModal, setShowModal] = useState(false)
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null)
+
+  useEffect(() => {
+    if (openMenuId === null) return
+    const handler = () => setOpenMenuId(null)
+    document.addEventListener('click', handler)
+    return () => document.removeEventListener('click', handler)
+  }, [openMenuId])
 
   function getArchiveName(): string {
     if (selectedArchiveId === null) return '전체'
     return archives.find(a => a.id === selectedArchiveId)?.name ?? '전체'
   }
-
+ 
   function handleDiaryClick(_entry: Diary) {
     // TODO: navigate to diary detail
   }
-
+ 
  
   return (
     <div
       className="flex w-full h-full font-['Nanum_Myeongjo']"
-      onClick={() => {}}
     >
       {/* Left page - Archives grid */}
       <div className="flex-1 flex flex-col py-3 px-4 pl-5 overflow-y-auto">
@@ -70,6 +77,34 @@ export function ArchivePage() {
  
               <div className="text-[22px] text-[rgba(0,0,0,0.55)] leading-none">{archive.name}</div>
               <div className="text-[10px] text-[rgba(0,0,0,0.28)] tracking-wide">{archive.entryCount}개</div>
+ 
+              {/* Menu icon - visible on hover */}
+              <button
+                onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === archive.id ? null : archive.id) }}
+                className="absolute top-1 right-1 w-5 h-5 flex items-center justify-center
+                  rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150
+                  bg-[rgba(0,0,0,0.08)] hover:bg-[rgba(0,0,0,0.15)]"
+              >
+                <MoreVertical className="w-3 h-3 text-[rgba(0,0,0,0.45)]" />
+              </button>
+ 
+              {/* Dropdown menu */}
+              {openMenuId === archive.id && (
+                <div
+                  className="absolute top-6 right-1 z-10 bg-[#fffdf7] rounded shadow-md
+                    border border-[rgba(160,140,120,0.15)] py-1 min-w-[80px]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <button className="w-full text-left px-3 py-1.5 text-xs text-[rgba(60,45,30,0.7)]
+                    hover:bg-[rgba(160,140,120,0.08)] font-['Nanum_Myeongjo']">
+                    수정
+                  </button>
+                  <button className="w-full text-left px-3 py-1.5 text-xs text-[rgba(180,60,40,0.7)]
+                    hover:bg-[rgba(160,140,120,0.08)] font-['Nanum_Myeongjo']">
+                    삭제
+                  </button>
+                </div>
+              )}
             </button>
           ))}
         </div>
@@ -143,7 +178,7 @@ export function ArchivePage() {
           ))}
         </div>
       </div>
-
+ 
       {/* Modal stub */}
       {showModal && (
         <div
