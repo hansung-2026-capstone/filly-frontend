@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { useArchive } from '../hook/useArchive'
 import type { Diary } from '../types/diary'
@@ -5,6 +6,7 @@ import { hexToShadow } from '../lib/utils'
  
 export function ArchivePage() {
   const { archives, selectedArchiveId, setSelectedArchiveId } = useArchive()
+  const [showModal, setShowModal] = useState(false)
  
   return (
     <div
@@ -20,7 +22,7 @@ export function ArchivePage() {
         <div className="grid grid-cols-3 gap-2.5 flex-1 content-start">
           {/* Add new button */}
           <button
-            onClick={() => {}}
+            onClick={() => setShowModal(true)}
             className="relative border-none cursor-pointer font-['Nanum_Pen_Script'] aspect-square
               border-2 border-dashed border-[rgba(160,140,120,0.25)] rounded-sm flex flex-col items-center
               justify-center bg-[rgba(240,235,225,0.6)] transition-all duration-200
@@ -67,6 +69,23 @@ export function ArchivePage() {
       <div className="flex-1 flex flex-col py-3.5 px-6 pl-7 gap-0 overflow-hidden">
         
       </div>
+
+      {/* Modal stub */}
+      {showModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(0,0,0,0.2)]"
+          onClick={() => setShowModal(false)}
+        >
+          <div
+            className="bg-[#fffdf7] rounded-lg p-6 shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <p className="font-['Nanum_Myeongjo'] text-sm text-[rgba(60,45,30,0.7)]">
+              아카이브 추가 (추후 구현)
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
