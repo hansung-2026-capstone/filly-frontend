@@ -1,25 +1,11 @@
-import {
-  Star,
-  Mic,
-  Bold,
-  Italic,
-  Underline,
-  List,
-  ListOrdered,
-  RotateCcw,
-  RotateCw,
-  Link2,
-  Smile,
-  Calendar,
-} from "lucide-react";
+import { Star, Mic, Calendar } from "lucide-react";
 import { useState } from "react";
 import { usePhotoUpload } from "../hook/usePhotoUpload";
 import { PhotoUploadSection } from "../components/PhotoUploadSection";
-import { ToolbarButton } from "../components/ToolbarButton";
+import { TiptapEditor } from "../components/TiptapEditor";
 
 export function WritePage() {
   const [rating, setRating] = useState(0);
-  const [content, setContent] = useState("");
   const [currentDate] = useState("2026년 4월 9일");
   const [currentDay] = useState("수요일");
 
@@ -41,19 +27,12 @@ export function WritePage() {
           <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
             본문
           </h3>
-          <div className="bg-[rgba(255,253,247,0.8)] rounded-lg border border-[rgba(160,140,120,0.2)] p-3.5 flex-1 flex flex-col">
-            <textarea
-              placeholder="오늘 하루는 어땠나요? 자유롭게 기록해보세요..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full flex-1 border-none resize-none bg-transparent
-                font-['Nanum_Myeongjo'] text-[13px] text-[rgba(55,40,25,0.8)] outline-none leading-[1.7]
-                placeholder:text-[rgba(140,120,90,0.35)]"
-            />
-            <div className="text-[9px] text-[rgba(120,100,80,0.4)] mt-1.5 text-right">
-              {content.split("").filter((char) => char.trim()).length}/500글자
-            </div>
-          </div>
+          <TiptapEditor
+            placeholder="오늘 하루는 어땠나요? 자유롭게 기록해보세요..."
+            maxLength={500}
+            showToolbar={false}
+            className="flex-1"
+          />
         </div>
 
         {/* 사진 */}
@@ -70,10 +49,7 @@ export function WritePage() {
                 flex items-center justify-center hover:bg-[rgba(220,200,185,0.6)]
                 transition-all duration-150 bg-[rgba(220,200,185,0.4)] border-[rgba(160,140,120,0.25)] border-dashed"
             >
-              <Mic
-                className="w-7 h-7 text-[rgba(100,80,60,0.6)]"
-                strokeWidth={2}
-              />
+              <Mic className="w-7 h-7 text-[rgba(100,80,60,0.6)]" strokeWidth={2} />
             </button>
           </div>
           <div className="flex justify-end pt-2">
@@ -93,12 +69,8 @@ export function WritePage() {
         {/* Date Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[rgba(160,140,120,0.15)]">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-[rgba(80,60,40,0.75)] tracking-wide">
-              {currentDate}
-            </span>
-            <span className="text-sm text-[rgba(120,100,80,0.5)]">
-              {currentDay}
-            </span>
+            <span className="text-sm text-[rgba(80,60,40,0.75)] tracking-wide">{currentDate}</span>
+            <span className="text-sm text-[rgba(120,100,80,0.5)]">{currentDay}</span>
           </div>
           <button
             className="w-7 h-7 flex items-center justify-center rounded-md border-none bg-transparent
@@ -118,10 +90,9 @@ export function WritePage() {
               <Star
                 key={i}
                 className={`w-[22px] h-[22px] cursor-pointer transition-all duration-150 hover:scale-110
-                  ${
-                    i < rating
-                      ? "fill-[rgba(230,190,60,0.85)] stroke-[rgba(200,160,40,0.7)]"
-                      : "fill-none stroke-[rgba(200,180,120,0.4)]"
+                  ${i < rating
+                    ? "fill-[rgba(230,190,60,0.85)] stroke-[rgba(200,160,40,0.7)]"
+                    : "fill-none stroke-[rgba(200,180,120,0.4)]"
                   }`}
                 strokeWidth={1.5}
                 onClick={() => setRating(i + 1)}
@@ -135,29 +106,15 @@ export function WritePage() {
           <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
             본문
           </h3>
-          <div className="flex items-center gap-1 py-1.5 px-2.5 bg-[rgba(240,235,225,0.5)] rounded-md border border-[rgba(160,140,120,0.15)]">
-            <ToolbarButton icon={Bold} strokeWidth={2.5} />
-            <ToolbarButton icon={Italic} />
-            <ToolbarButton icon={Underline} />
-            <div className="w-px h-4 bg-[rgba(160,140,120,0.2)] mx-0.5" />
-            <ToolbarButton icon={List} />
-            <ToolbarButton icon={ListOrdered} />
-            <div className="w-px h-4 bg-[rgba(160,140,120,0.2)] mx-0.5" />
-            <ToolbarButton icon={RotateCcw} />
-            <ToolbarButton icon={RotateCw} />
-            <div className="w-px h-4 bg-[rgba(160,140,120,0.2)] mx-0.5" />
-            <ToolbarButton icon={Link2} />
-            <ToolbarButton icon={Smile} className="ml-auto" />
-          </div>
-          <div className="bg-[rgba(255,253,247,0.8)] rounded-lg border border-[rgba(160,140,120,0.2)] p-3.5 flex-1">
-            <p className="text-[13px] text-[rgba(140,120,90,0.35)] m-0 leading-[1.7]">
-              AI가 생성한 초안이 여기에 표시됩니다...
-            </p>
-          </div>
+          <TiptapEditor
+            placeholder="AI가 생성한 초안이 여기에 표시됩니다..."
+            showToolbar={true}
+            className="flex-1"
+          />
         </div>
 
         {/* 사진 */}
-        <PhotoUploadSection title="사진" {...diaryPhotos} />
+        <PhotoUploadSection title="사진 및 동영상" {...diaryPhotos} />
 
         {/* 일기 작성 버튼 */}
         <div className="flex justify-end">
