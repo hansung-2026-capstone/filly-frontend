@@ -3,14 +3,38 @@ import { useState } from "react";
 import { usePhotoUpload } from "../hook/usePhotoUpload";
 import { PhotoUploadSection } from "../components/PhotoUploadSection";
 import { TiptapEditor } from "../components/TiptapEditor";
+import { DatePickerModal } from "../components/DatePickerModal";
 
 export function WritePage() {
   const [rating, setRating] = useState(0);
-  const [currentDate] = useState("2026년 4월 9일");
-  const [currentDay] = useState("수요일");
+  const [selectedDate, setSelectedDate] = useState(new Date(2026, 3, 9)); // 2026년 4월 9일
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const aiPhotos = usePhotoUpload();
   const diaryPhotos = usePhotoUpload();
+
+  const getFormattedDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}년 ${month}월 ${day}일`;
+  };
+
+  const getDayOfWeek = (date: Date) => {
+    const days = [
+      "일요일",
+      "월요일",
+      "화요일",
+      "수요일",
+      "목요일",
+      "금요일",
+      "토요일",
+    ];
+    return days[date.getDay()];
+  };
+
+  const currentDate = getFormattedDate(selectedDate);
+  const currentDay = getDayOfWeek(selectedDate);
 
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">
@@ -49,7 +73,10 @@ export function WritePage() {
                 flex items-center justify-center hover:bg-[rgba(220,200,185,0.6)]
                 transition-all duration-150 bg-[rgba(220,200,185,0.4)] border-[rgba(160,140,120,0.25)] border-dashed"
             >
-              <Mic className="w-7 h-7 text-[rgba(100,80,60,0.6)]" strokeWidth={2} />
+              <Mic
+                className="w-7 h-7 text-[rgba(100,80,60,0.6)]"
+                strokeWidth={2}
+              />
             </button>
           </div>
           <div className="flex justify-end pt-2">
@@ -69,10 +96,15 @@ export function WritePage() {
         {/* Date Header */}
         <div className="flex items-center justify-between pb-3 border-b border-[rgba(160,140,120,0.15)]">
           <div className="flex items-center gap-2">
-            <span className="text-sm text-[rgba(80,60,40,0.75)] tracking-wide">{currentDate}</span>
-            <span className="text-sm text-[rgba(120,100,80,0.5)]">{currentDay}</span>
+            <span className="text-sm text-[rgba(80,60,40,0.75)] tracking-wide">
+              {currentDate}
+            </span>
+            <span className="text-sm text-[rgba(120,100,80,0.5)]">
+              {currentDay}
+            </span>
           </div>
           <button
+            onClick={() => setShowDatePicker(true)}
             className="w-7 h-7 flex items-center justify-center rounded-md border-none bg-transparent
             cursor-pointer text-[rgba(80,60,40,0.5)] hover:bg-[rgba(160,140,120,0.08)] transition-all duration-150"
           >
@@ -90,9 +122,10 @@ export function WritePage() {
               <Star
                 key={i}
                 className={`w-[22px] h-[22px] cursor-pointer transition-all duration-150 hover:scale-110
-                  ${i < rating
-                    ? "fill-[rgba(230,190,60,0.85)] stroke-[rgba(200,160,40,0.7)]"
-                    : "fill-none stroke-[rgba(200,180,120,0.4)]"
+                  ${
+                    i < rating
+                      ? "fill-[rgba(230,190,60,0.85)] stroke-[rgba(200,160,40,0.7)]"
+                      : "fill-none stroke-[rgba(200,180,120,0.4)]"
                   }`}
                 strokeWidth={1.5}
                 onClick={() => setRating(i + 1)}
@@ -127,6 +160,17 @@ export function WritePage() {
           </button>
         </div>
       </div>
+
+      {/* Date Picker Modal */}
+      <DatePickerModal
+        isOpen={showDatePicker}
+        selectedDate={selectedDate}
+        onDateSelect={(date) => {
+          setSelectedDate(date);
+          setShowDatePicker(false);
+        }}
+        onClose={() => setShowDatePicker(false)}
+      />
     </div>
   );
 }
