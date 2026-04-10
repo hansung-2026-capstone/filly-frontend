@@ -1,7 +1,204 @@
+import { Mic, X, Pause, Play } from "lucide-react";
+import { useState } from "react";
+
 export function WritePage() {
+  const [content, setContent] = useState("");
+  const [photos, setPhotos] = useState<
+    { id: number; color: string; label: string }[]
+  >([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [hasVoiceRecording, setHasVoiceRecording] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const removePhoto = (id: number) => {
+    setPhotos(photos.filter((photo) => photo.id !== id));
+  };
+
+  const addPhoto = () => {
+    const colors = ["#d4b3a5", "#b8a89a", "#c9b8aa", "#a89888", "#b8a090"];
+    const newId =
+      photos.length > 0 ? Math.max(...photos.map((p) => p.id)) + 1 : 1;
+    setPhotos([
+      ...photos,
+      {
+        id: newId,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        label: `사진 ${newId}`,
+      },
+    ]);
+  };
+
+  const toggleRecording = () => {
+    setIsRecording(!isRecording);
+    if (!isRecording) {
+      setHasVoiceRecording(true);
+    }
+  };
+
   return (
-    <div className="flex w-full h-full font-['Nanum_Myeongjo'] items-center justify-center">
-      <h1 className="text-4xl font-bold">글쓰기</h1>
+    <div className="flex w-full h-full font-['Nanum_Myeongjo']">
+      {/* Left page - Draft Writing */}
+      <div className="flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto">
+        {/* 작성 툴 Header */}
+        <div className="pb-3 border-b border-[rgba(160,140,120,0.15)]">
+          <h2 className="text-base text-[rgba(60,45,30,0.85)] tracking-wide m-0 font-medium">
+            AI 작성 툴
+          </h2>
+        </div>
+
+        {/* 본문 Section */}
+        <div className="flex flex-col gap-2.5 flex-1">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
+              본문
+            </h3>
+          </div>
+
+          {/* Content Input */}
+          <div className="bg-[rgba(255,253,247,0.8)] rounded-lg border border-[rgba(160,140,120,0.2)] p-3.5 flex-1 flex flex-col">
+            <textarea
+              placeholder="오늘 하루는 어땠나요? 자유롭게 기록해보세요..."
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              className="w-full flex-1 border-none resize-none bg-transparent
+                font-['Nanum_Myeongjo'] text-[13px] text-[rgba(55,40,25,0.8)] outline-none leading-[1.7]
+                placeholder:text-[rgba(140,120,90,0.35)]"
+            />
+            <div className="text-[9px] text-[rgba(120,100,80,0.4)] mt-1.5 text-right">
+              {content.split(/\s+/).filter((word) => word.length > 0).length}
+              /500 단어
+            </div>
+          </div>
+        </div>
+
+        {/* 사진 및 동영상 Section */}
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
+              사진
+            </h3>
+          </div>
+
+          <div className="flex gap-2.5 flex-wrap">
+            <button
+              onClick={addPhoto}
+              className="w-[67px] h-[67px] bg-[rgba(220,200,185,0.4)] rounded-lg border-2 border-dashed 
+                border-[rgba(160,140,120,0.25)] cursor-pointer flex items-center justify-center 
+                text-2xl text-[rgba(140,120,90,0.4)] hover:bg-[rgba(220,200,185,0.6)] 
+                hover:border-[rgba(140,120,90,0.35)] transition-all duration-150"
+            >
+              +
+            </button>
+            {photos.map((photo) => (
+              <div
+                key={photo.id}
+                className="w-[67px] h-[67px] rounded-lg flex items-center justify-center relative
+                  shadow-[0_2px_6px_rgba(0,0,0,0.08)] border border-[rgba(220,210,195,0.5)]"
+                style={{ background: photo.color }}
+              >
+                <span className="text-[9px] text-[rgba(255,255,255,0.7)]">
+                  {photo.label}
+                </span>
+                <button
+                  onClick={() => removePhoto(photo.id)}
+                  className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[rgba(80,60,40,0.85)]
+                    border-2 border-[#faf6ed] flex items-center justify-center
+                    text-white cursor-pointer transition-all duration-150 hover:bg-[rgba(60,40,20,0.95)]
+                    shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
+                >
+                  <X className="w-3 h-3" strokeWidth={2.5} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 음성 Section */}
+        <div className="flex flex-col gap-2.5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
+              음성 녹음
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              onClick={toggleRecording}
+              className={`w-[67px] h-[67px] rounded-lg border-2 cursor-pointer
+                flex items-center justify-center hover:bg-[rgba(220,200,185,0.6)] 
+                transition-all duration-150 ${
+                  isRecording
+                    ? "bg-[rgba(240,180,180,0.4)] border-[rgba(200,100,100,0.4)]"
+                    : "bg-[rgba(220,200,185,0.4)] border-[rgba(160,140,120,0.25)] border-dashed"
+                }`}
+            >
+              <Mic
+                className={`w-7 h-7 ${isRecording ? "text-[rgba(200,80,80,0.8)]" : "text-[rgba(100,80,60,0.6)]"}`}
+                strokeWidth={2}
+              />
+            </button>
+
+            {hasVoiceRecording && (
+              <>
+                <button
+                  onClick={() => setIsPlaying(!isPlaying)}
+                  className="w-[34px] h-[34px] bg-[rgba(255,253,247,0.9)] border-2 border-[rgba(160,140,120,0.25)] rounded-full
+                    flex items-center justify-center cursor-pointer hover:bg-[rgba(240,235,225,0.9)]
+                    transition-all duration-150 shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
+                >
+                  {isPlaying ? (
+                    <Pause
+                      className="w-[14px] h-[14px] text-[rgba(80,60,40,0.7)]"
+                      fill="currentColor"
+                    />
+                  ) : (
+                    <Play
+                      className="w-[14px] h-[14px] text-[rgba(80,60,40,0.7)] ml-0.5"
+                      fill="currentColor"
+                    />
+                  )}
+                </button>
+
+                <div className="flex-1 flex items-center gap-2.5">
+                  <span className="text-xs text-[rgba(100,80,60,0.6)] font-mono">
+                    00:05
+                  </span>
+                  <div className="flex-1 h-2 bg-[rgba(200,180,160,0.2)] rounded-full relative">
+                    <div className="absolute left-0 top-0 h-full w-1/3 bg-[rgba(180,160,140,0.5)] rounded-full" />
+                    <div
+                      className="absolute left-1/3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-[rgba(140,120,90,0.8)] 
+                      rounded-full cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.15)]"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  className="w-6 h-6 rounded-full bg-[rgba(80,60,40,0.85)]
+                    border-2 border-[#faf6ed] flex items-center justify-center
+                    text-white cursor-pointer transition-all duration-150 hover:bg-[rgba(60,40,20,0.95)]
+                    shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
+                  onClick={() => setHasVoiceRecording(false)}
+                >
+                  <X className="w-3 h-3" strokeWidth={2.5} />
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button
+              className="py-2.5 px-8 bg-[rgba(80,60,40,0.85)] text-[#faf6ed] border-none rounded-md
+              cursor-pointer font-['Nanum_Myeongjo'] text-sm transition-all duration-150
+              hover:bg-[rgba(60,40,20,0.95)] shadow-[0_2px_6px_rgba(0,0,0,0.15)]"
+            >
+              초안 생성
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Right page - Preview */}
+      <div className="flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto"></div>
     </div>
   );
 }
