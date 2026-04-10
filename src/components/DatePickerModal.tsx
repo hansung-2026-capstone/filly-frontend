@@ -1,5 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 interface DatePickerModalProps {
   isOpen: boolean;
@@ -68,15 +69,21 @@ export function DatePickerModal({
   const calendarDays = generateCalendarDays();
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
-  if (!isOpen) return null;
+  const [mounted, setMounted] = useState(false);
 
-  return (
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
     <div
-      className="fixed inset-0 bg-[rgba(0,0,0,0.2)] flex items-center justify-center z-50"
+      className="fixed inset-0 bg-[rgba(0,0,0,0.2)] flex items-center justify-center z-[9999]"
       onClick={onClose}
     >
       <div
-        className="bg-[#faf6ed] rounded-lg p-6 shadow-lg w-80"
+        className="relative z-[91] bg-[#faf6ed] rounded-lg p-6 shadow-lg w-80"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -147,6 +154,7 @@ export function DatePickerModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
