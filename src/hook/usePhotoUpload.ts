@@ -1,10 +1,16 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type Photo = { id: number; url: string; file: File };
 
 export function usePhotoUpload(max = 4) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
+  const photosRef = useRef(photos);
+  photosRef.current = photos;
+
+  useEffect(() => () => {
+    photosRef.current.forEach((p) => URL.revokeObjectURL(p.url));
+  }, []);
 
   const handleButtonClick = () => {
     if (photos.length >= max) {
