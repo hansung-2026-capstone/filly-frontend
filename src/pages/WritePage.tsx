@@ -18,74 +18,74 @@ import { useRef, useState } from "react";
 export function WritePage() {
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
-  const [photos, setPhotos] = useState<
+  const [aiPhotos, setAiPhotos] = useState<
     { id: number; url: string; file: File }[]
   >([]);
-  const [previewPhotos, setPreviewPhotos] = useState<
+  const [diaryPhotos, setDiaryPhotos] = useState<
     { id: number; url: string; file: File }[]
   >([]);
   const [currentDate] = useState("2026년 4월 9일");
   const [currentDay] = useState("수요일");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const previewFileInputRef = useRef<HTMLInputElement>(null);
+  const aiFileInputRef = useRef<HTMLInputElement>(null);
+  const diaryFileInputRef = useRef<HTMLInputElement>(null);
 
   const MAX_PHOTOS = 4;
 
-  const removePhoto = (id: number) => {
-    setPhotos((prev) => {
+  const removeAiPhoto = (id: number) => {
+    setAiPhotos((prev) => {
       const photo = prev.find((p) => p.id === id);
       if (photo) URL.revokeObjectURL(photo.url);
       return prev.filter((p) => p.id !== id);
     });
   };
 
-  const removePreviewPhoto = (id: number) => {
-    setPreviewPhotos((prev) => {
+  const removeDiaryPhoto = (id: number) => {
+    setDiaryPhotos((prev) => {
       const photo = prev.find((p) => p.id === id);
       if (photo) URL.revokeObjectURL(photo.url);
       return prev.filter((p) => p.id !== id);
     });
   };
 
-  const handlePhotoButtonClick = () => {
-    if (photos.length >= MAX_PHOTOS) {
+  const handleAiPhotoButtonClick = () => {
+    if (aiPhotos.length >= MAX_PHOTOS) {
       alert("사진은 최대 4장까지 추가할 수 있습니다.");
       return;
     }
-    fileInputRef.current?.click();
+    aiFileInputRef.current?.click();
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAiFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    const remaining = MAX_PHOTOS - photos.length;
+    const remaining = MAX_PHOTOS - aiPhotos.length;
     const allowed = files.slice(0, remaining);
     const newPhotos = allowed.map((file, i) => ({
       id: Date.now() + i,
       url: URL.createObjectURL(file),
       file,
     }));
-    setPhotos((prev) => [...prev, ...newPhotos]);
+    setAiPhotos((prev) => [...prev, ...newPhotos]);
     e.target.value = "";
   };
 
-  const handlePreviewPhotoButtonClick = () => {
-    if (previewPhotos.length >= MAX_PHOTOS) {
+  const handleDiaryPhotoButtonClick = () => {
+    if (diaryPhotos.length >= MAX_PHOTOS) {
       alert("사진은 최대 4장까지 추가할 수 있습니다.");
       return;
     }
-    previewFileInputRef.current?.click();
+    diaryFileInputRef.current?.click();
   };
 
-  const handlePreviewFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleDiaryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []);
-    const remaining = MAX_PHOTOS - previewPhotos.length;
+    const remaining = MAX_PHOTOS - diaryPhotos.length;
     const allowed = files.slice(0, remaining);
     const newPhotos = allowed.map((file, i) => ({
       id: Date.now() + i,
       url: URL.createObjectURL(file),
       file,
     }));
-    setPreviewPhotos((prev) => [...prev, ...newPhotos]);
+    setDiaryPhotos((prev) => [...prev, ...newPhotos]);
     e.target.value = "";
   };
 
@@ -119,8 +119,8 @@ export function WritePage() {
                 placeholder:text-[rgba(140,120,90,0.35)]"
             />
             <div className="text-[9px] text-[rgba(120,100,80,0.4)] mt-1.5 text-right">
-              {content.split(/\s+/).filter((word) => word.length > 0).length}
-              /500 단어
+              {content.split("").filter((char) => char.trim()).length}
+              /500글자
             </div>
           </div>
         </div>
@@ -132,22 +132,22 @@ export function WritePage() {
               사진
             </h3>
             <span className="text-[11px] text-[rgba(120,100,80,0.4)]">
-              {photos.length}/4
+              {aiPhotos.length}/4
             </span>
           </div>
 
           <input
-            ref={fileInputRef}
+            ref={aiFileInputRef}
             type="file"
             accept="image/*"
             multiple
             className="hidden"
-            onChange={handleFileChange}
+            onChange={handleAiFileChange}
           />
 
           <div className="flex gap-2.5 flex-wrap">
             <button
-              onClick={handlePhotoButtonClick}
+              onClick={handleAiPhotoButtonClick}
               className="w-[67px] h-[67px] bg-[rgba(220,200,185,0.4)] rounded-lg border-2 border-dashed
                 border-[rgba(160,140,120,0.25)] cursor-pointer flex items-center justify-center
                 text-2xl text-[rgba(140,120,90,0.4)] hover:bg-[rgba(220,200,185,0.6)]
@@ -155,7 +155,7 @@ export function WritePage() {
             >
               +
             </button>
-            {photos.map((photo) => (
+            {aiPhotos.map((photo) => (
               <div
                 key={photo.id}
                 className="w-[67px] h-[67px] rounded-lg overflow-visible relative
@@ -167,7 +167,7 @@ export function WritePage() {
                   className="w-full h-full object-cover rounded-lg border border-[rgba(220,210,195,0.5)]"
                 />
                 <button
-                  onClick={() => removePhoto(photo.id)}
+                  onClick={() => removeAiPhoto(photo.id)}
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[rgba(80,60,40,0.85)]
                     border-2 border-[#faf6ed] flex items-center justify-center
                     text-white cursor-pointer transition-all duration-150 hover:bg-[rgba(60,40,20,0.95)]
@@ -373,22 +373,22 @@ export function WritePage() {
               사진 및 동영상
             </h3>
             <span className="text-[11px] text-[rgba(120,100,80,0.4)]">
-              {previewPhotos.length}/4
+              {diaryPhotos.length}/4
             </span>
           </div>
 
           <input
-            ref={previewFileInputRef}
+            ref={diaryFileInputRef}
             type="file"
             accept="image/*"
             multiple
             className="hidden"
-            onChange={handlePreviewFileChange}
+            onChange={handleDiaryFileChange}
           />
 
           <div className="flex gap-2.5 flex-wrap">
             <button
-              onClick={handlePreviewPhotoButtonClick}
+              onClick={handleDiaryPhotoButtonClick}
               className="w-[67px] h-[67px] bg-[rgba(220,200,185,0.4)] rounded-lg border-2 border-dashed
                 border-[rgba(160,140,120,0.25)] cursor-pointer flex items-center justify-center
                 text-2xl text-[rgba(140,120,90,0.4)] hover:bg-[rgba(220,200,185,0.6)]
@@ -396,7 +396,7 @@ export function WritePage() {
             >
               +
             </button>
-            {previewPhotos.map((photo) => (
+            {diaryPhotos.map((photo) => (
               <div
                 key={photo.id}
                 className="w-[67px] h-[67px] rounded-lg overflow-visible relative
@@ -408,7 +408,7 @@ export function WritePage() {
                   className="w-full h-full object-cover rounded-lg border border-[rgba(220,210,195,0.5)]"
                 />
                 <button
-                  onClick={() => removePreviewPhoto(photo.id)}
+                  onClick={() => removeDiaryPhoto(photo.id)}
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[rgba(80,60,40,0.85)]
                     border-2 border-[#faf6ed] flex items-center justify-center
                     text-white cursor-pointer transition-all duration-150 hover:bg-[rgba(60,40,20,0.95)]
