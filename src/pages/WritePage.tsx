@@ -368,12 +368,27 @@ export function WritePage() {
 
         {/* 사진 Section */}
         <div className="flex flex-col gap-2.5">
-          <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
-            사진 및 동영상
-          </h3>
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
+              사진 및 동영상
+            </h3>
+            <span className="text-[11px] text-[rgba(120,100,80,0.4)]">
+              {previewPhotos.length}/4
+            </span>
+          </div>
+
+          <input
+            ref={previewFileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handlePreviewFileChange}
+          />
+
           <div className="flex gap-2.5 flex-wrap">
             <button
-              onClick={addPreviewPhoto}
+              onClick={handlePreviewPhotoButtonClick}
               className="w-[67px] h-[67px] bg-[rgba(220,200,185,0.4)] rounded-lg border-2 border-dashed
                 border-[rgba(160,140,120,0.25)] cursor-pointer flex items-center justify-center
                 text-2xl text-[rgba(140,120,90,0.4)] hover:bg-[rgba(220,200,185,0.6)]
@@ -384,13 +399,14 @@ export function WritePage() {
             {previewPhotos.map((photo) => (
               <div
                 key={photo.id}
-                className="w-[67px] h-[67px] rounded-lg flex items-center justify-center relative
-                  shadow-[0_2px_6px_rgba(0,0,0,0.08)] border border-[rgba(220,210,195,0.5)]"
-                style={{ background: photo.color }}
+                className="w-[67px] h-[67px] rounded-lg overflow-visible relative
+                  shadow-[0_2px_6px_rgba(0,0,0,0.08)]"
               >
-                <span className="text-[9px] text-[rgba(255,255,255,0.7)]">
-                  {photo.label}
-                </span>
+                <img
+                  src={photo.url}
+                  alt=""
+                  className="w-full h-full object-cover rounded-lg border border-[rgba(220,210,195,0.5)]"
+                />
                 <button
                   onClick={() => removePreviewPhoto(photo.id)}
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[rgba(80,60,40,0.85)]
