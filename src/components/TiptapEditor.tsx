@@ -107,7 +107,7 @@ export function TiptapEditor({
     () => () => {
       editor?.destroy();
     },
-    [editor],
+    [],
   );
 
   const charCount = editor?.storage.characterCount?.characters() ?? 0;
