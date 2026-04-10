@@ -1,9 +1,9 @@
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, useEditorState } from "@tiptap/react";
 import { StarterKit } from "@tiptap/starter-kit";
 import { TextStyle } from "@tiptap/extension-text-style";
 import CharacterCount from "@tiptap/extension-character-count";
 import Placeholder from "@tiptap/extension-placeholder";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Bold,
   Italic,
@@ -56,11 +56,14 @@ function EditorToolbarButton({
     <button
       onClick={onClick}
       className={`w-6 h-6 flex items-center justify-center hover:bg-[rgba(160,140,120,0.12)]
-        rounded transition-all duration-150 border-none bg-transparent cursor-pointer ${isActive ? "bg-[rgba(160,140,120,0.2)]" : ""} ${className ?? ""}`}
+        rounded transition-all duration-150 border-none cursor-pointer
+        ${isActive ? "bg-[rgba(120,100,75,0.25)] ring-1 ring-[rgba(120,100,75,0.3)]" : "bg-transparent"} ${className ?? ""}`}
     >
       <Icon
-        className="w-3.5 h-3.5 text-[rgba(60,45,30,0.7)]"
-        strokeWidth={strokeWidth ?? 2}
+        className={`w-3.5 h-3.5 transition-colors duration-150 ${
+          isActive ? "text-[rgba(60,45,30,0.9)]" : "text-[rgba(60,45,30,0.4)]"
+        }`}
+        strokeWidth={isActive ? (strokeWidth ?? 2.5) : (strokeWidth ?? 1.5)}
       />
     </button>
   );
@@ -73,8 +76,6 @@ export function TiptapEditor({
   onChange,
   className = "",
 }: TiptapEditorProps) {
-  const [selectedFontSize, setSelectedFontSize] = useState("12px");
-
   const editor = useEditor({
     extensions: [
       StarterKit.configure(),
@@ -98,17 +99,22 @@ export function TiptapEditor({
     onUpdate: ({ editor }) => {
       onChange?.(editor.getHTML());
     },
-    onSelectionUpdate: ({ editor }) => {
-      setSelectedFontSize(editor.getAttributes("textStyle").fontSize || "12px");
-    },
   });
 
-  useEffect(
-    () => () => {
-      editor?.destroy();
-    },
-    [],
-  );
+  const editorState = useEditorState({
+    editor,
+    selector: (ctx) => ({
+      isBold: ctx.editor?.isActive("bold") ?? false,
+      isItalic: ctx.editor?.isActive("italic") ?? false,
+      isUnderline: ctx.editor?.isActive("underline") ?? false,
+      isBulletList: ctx.editor?.isActive("bulletList") ?? false,
+      isOrderedList: ctx.editor?.isActive("orderedList") ?? false,
+      fontSize: ctx.editor?.getAttributes("textStyle").fontSize ?? "12px",
+    }),
+  });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => () => { editor?.destroy(); }, []);
 
   const charCount = editor?.storage.characterCount?.characters() ?? 0;
 
@@ -119,23 +125,22 @@ export function TiptapEditor({
           <EditorToolbarButton
             icon={Bold}
             strokeWidth={2.5}
-            isActive={editor?.isActive("bold") ?? false}
+            isActive={editorState?.isBold ?? false}
             onClick={() => editor?.chain().focus().toggleBold().run()}
           />
           <EditorToolbarButton
             icon={Italic}
-            isActive={editor?.isActive("italic") ?? false}
+            isActive={editorState?.isItalic ?? false}
             onClick={() => editor?.chain().focus().toggleItalic().run()}
           />
           <EditorToolbarButton
             icon={UnderlineIcon}
-            isActive={editor?.isActive("underline") ?? false}
+            isActive={editorState?.isUnderline ?? false}
             onClick={() => editor?.chain().focus().toggleUnderline().run()}
           />
           <select
-            value={selectedFontSize}
+            value={editorState?.fontSize ?? "12px"}
             onChange={(e) => {
-              setSelectedFontSize(e.target.value);
               editor
                 ?.chain()
                 .focus()
@@ -153,12 +158,12 @@ export function TiptapEditor({
           <div className="w-px h-4 bg-[rgba(160,140,120,0.2)] mx-0.5" />
           <EditorToolbarButton
             icon={List}
-            isActive={editor?.isActive("bulletList") ?? false}
+            isActive={editorState?.isBulletList ?? false}
             onClick={() => editor?.chain().focus().toggleBulletList().run()}
           />
           <EditorToolbarButton
             icon={ListOrdered}
-            isActive={editor?.isActive("orderedList") ?? false}
+            isActive={editorState?.isOrderedList ?? false}
             onClick={() => editor?.chain().focus().toggleOrderedList().run()}
           />
         </div>
