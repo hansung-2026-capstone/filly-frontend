@@ -135,7 +135,7 @@ export function Root() {
           />
 
           {/* Content overlay */}
-          <div className="absolute top-0 left-0 w-[880px] h-[600px] z-[9] flex pointer-events-none px-12">
+          <div className="absolute top-0 left-0 w-[880px] h-[600px] z-[9] flex pointer-events-none">
             <div className="pointer-events-auto w-full h-full">
               <Outlet />
             </div>
