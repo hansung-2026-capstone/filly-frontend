@@ -13,33 +13,80 @@ import {
   Smile,
   Calendar,
 } from "lucide-react";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export function WritePage() {
   const [rating, setRating] = useState(0);
   const [content, setContent] = useState("");
   const [photos, setPhotos] = useState<
-    { id: number; color: string; label: string }[]
+    { id: number; url: string; file: File }[]
+  >([]);
+  const [previewPhotos, setPreviewPhotos] = useState<
+    { id: number; url: string; file: File }[]
   >([]);
   const [currentDate] = useState("2026년 4월 9일");
   const [currentDay] = useState("수요일");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const previewFileInputRef = useRef<HTMLInputElement>(null);
+
+  const MAX_PHOTOS = 4;
 
   const removePhoto = (id: number) => {
-    setPhotos(photos.filter((photo) => photo.id !== id));
+    setPhotos((prev) => {
+      const photo = prev.find((p) => p.id === id);
+      if (photo) URL.revokeObjectURL(photo.url);
+      return prev.filter((p) => p.id !== id);
+    });
   };
 
-  const addPhoto = () => {
-    const colors = ["#d4b3a5", "#b8a89a", "#c9b8aa", "#a89888", "#b8a090"];
-    const newId =
-      photos.length > 0 ? Math.max(...photos.map((p) => p.id)) + 1 : 1;
-    setPhotos([
-      ...photos,
-      {
-        id: newId,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        label: `사진 ${newId}`,
-      },
-    ]);
+  const removePreviewPhoto = (id: number) => {
+    setPreviewPhotos((prev) => {
+      const photo = prev.find((p) => p.id === id);
+      if (photo) URL.revokeObjectURL(photo.url);
+      return prev.filter((p) => p.id !== id);
+    });
+  };
+
+  const handlePhotoButtonClick = () => {
+    if (photos.length >= MAX_PHOTOS) {
+      alert("사진은 최대 4장까지 추가할 수 있습니다.");
+      return;
+    }
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    const remaining = MAX_PHOTOS - photos.length;
+    const allowed = files.slice(0, remaining);
+    const newPhotos = allowed.map((file, i) => ({
+      id: Date.now() + i,
+      url: URL.createObjectURL(file),
+      file,
+    }));
+    setPhotos((prev) => [...prev, ...newPhotos]);
+    e.target.value = "";
+  };
+
+  const handlePreviewPhotoButtonClick = () => {
+    if (previewPhotos.length >= MAX_PHOTOS) {
+      alert("사진은 최대 4장까지 추가할 수 있습니다.");
+      return;
+    }
+    previewFileInputRef.current?.click();
+  };
+
+  const handlePreviewFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    const remaining = MAX_PHOTOS - previewPhotos.length;
+    const allowed = files.slice(0, remaining);
+    const newPhotos = allowed.map((file, i) => ({
+      id: Date.now() + i,
+      url: URL.createObjectURL(file),
+      file,
+    }));
+    setPreviewPhotos((prev) => [...prev, ...newPhotos]);
+    e.target.value = "";
   };
 
   return (
@@ -84,14 +131,26 @@ export function WritePage() {
             <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
               사진
             </h3>
+            <span className="text-[11px] text-[rgba(120,100,80,0.4)]">
+              {photos.length}/4
+            </span>
           </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            onChange={handleFileChange}
+          />
 
           <div className="flex gap-2.5 flex-wrap">
             <button
-              onClick={addPhoto}
-              className="w-[67px] h-[67px] bg-[rgba(220,200,185,0.4)] rounded-lg border-2 border-dashed 
-                border-[rgba(160,140,120,0.25)] cursor-pointer flex items-center justify-center 
-                text-2xl text-[rgba(140,120,90,0.4)] hover:bg-[rgba(220,200,185,0.6)] 
+              onClick={handlePhotoButtonClick}
+              className="w-[67px] h-[67px] bg-[rgba(220,200,185,0.4)] rounded-lg border-2 border-dashed
+                border-[rgba(160,140,120,0.25)] cursor-pointer flex items-center justify-center
+                text-2xl text-[rgba(140,120,90,0.4)] hover:bg-[rgba(220,200,185,0.6)]
                 hover:border-[rgba(140,120,90,0.35)] transition-all duration-150"
             >
               +
@@ -99,13 +158,14 @@ export function WritePage() {
             {photos.map((photo) => (
               <div
                 key={photo.id}
-                className="w-[67px] h-[67px] rounded-lg flex items-center justify-center relative
-                  shadow-[0_2px_6px_rgba(0,0,0,0.08)] border border-[rgba(220,210,195,0.5)]"
-                style={{ background: photo.color }}
+                className="w-[67px] h-[67px] rounded-lg overflow-visible relative
+                  shadow-[0_2px_6px_rgba(0,0,0,0.08)]"
               >
-                <span className="text-[9px] text-[rgba(255,255,255,0.7)]">
-                  {photo.label}
-                </span>
+                <img
+                  src={photo.url}
+                  alt=""
+                  className="w-full h-full object-cover rounded-lg border border-[rgba(220,210,195,0.5)]"
+                />
                 <button
                   onClick={() => removePhoto(photo.id)}
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[rgba(80,60,40,0.85)]
@@ -313,15 +373,15 @@ export function WritePage() {
           </h3>
           <div className="flex gap-2.5 flex-wrap">
             <button
-              onClick={addPhoto}
-              className="w-[67px] h-[67px] bg-[rgba(220,200,185,0.4)] rounded-lg border-2 border-dashed 
-                border-[rgba(160,140,120,0.25)] cursor-pointer flex items-center justify-center 
-                text-2xl text-[rgba(140,120,90,0.4)] hover:bg-[rgba(220,200,185,0.6)] 
+              onClick={addPreviewPhoto}
+              className="w-[67px] h-[67px] bg-[rgba(220,200,185,0.4)] rounded-lg border-2 border-dashed
+                border-[rgba(160,140,120,0.25)] cursor-pointer flex items-center justify-center
+                text-2xl text-[rgba(140,120,90,0.4)] hover:bg-[rgba(220,200,185,0.6)]
                 hover:border-[rgba(140,120,90,0.35)] transition-all duration-150"
             >
               +
             </button>
-            {photos.map((photo) => (
+            {previewPhotos.map((photo) => (
               <div
                 key={photo.id}
                 className="w-[67px] h-[67px] rounded-lg flex items-center justify-center relative
@@ -332,7 +392,7 @@ export function WritePage() {
                   {photo.label}
                 </span>
                 <button
-                  onClick={() => removePhoto(photo.id)}
+                  onClick={() => removePreviewPhoto(photo.id)}
                   className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-[rgba(80,60,40,0.85)]
                     border-2 border-[#faf6ed] flex items-center justify-center
                     text-white cursor-pointer transition-all duration-150 hover:bg-[rgba(60,40,20,0.95)]
