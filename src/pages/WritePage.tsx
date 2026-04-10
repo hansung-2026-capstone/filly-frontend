@@ -11,8 +11,6 @@ import {
   RotateCw,
   Link2,
   Smile,
-  Pause,
-  Play,
   Calendar,
 } from "lucide-react";
 import { useState } from "react";
@@ -25,9 +23,6 @@ export function WritePage() {
   >([]);
   const [currentDate] = useState("2026년 4월 9일");
   const [currentDay] = useState("수요일");
-  const [isRecording, setIsRecording] = useState(false);
-  const [hasVoiceRecording, setHasVoiceRecording] = useState(false);
-  const [isPlaying, setIsPlaying] = useState(false);
 
   const removePhoto = (id: number) => {
     setPhotos(photos.filter((photo) => photo.id !== id));
@@ -45,13 +40,6 @@ export function WritePage() {
         label: `사진 ${newId}`,
       },
     ]);
-  };
-
-  const toggleRecording = () => {
-    setIsRecording(!isRecording);
-    if (!isRecording) {
-      setHasVoiceRecording(true);
-    }
   };
 
   return (
@@ -142,66 +130,15 @@ export function WritePage() {
 
           <div className="flex items-center gap-3">
             <button
-              onClick={toggleRecording}
               className={`w-[67px] h-[67px] rounded-lg border-2 cursor-pointer
                 flex items-center justify-center hover:bg-[rgba(220,200,185,0.6)] 
-                transition-all duration-150 ${
-                  isRecording
-                    ? "bg-[rgba(240,180,180,0.4)] border-[rgba(200,100,100,0.4)]"
-                    : "bg-[rgba(220,200,185,0.4)] border-[rgba(160,140,120,0.25)] border-dashed"
-                }`}
+                transition-all duration-150 bg-[rgba(220,200,185,0.4)] border-[rgba(160,140,120,0.25)] border-dashed`}
             >
               <Mic
-                className={`w-7 h-7 ${isRecording ? "text-[rgba(200,80,80,0.8)]" : "text-[rgba(100,80,60,0.6)]"}`}
+                className={`w-7 h-7 text-[rgba(100,80,60,0.6)]`}
                 strokeWidth={2}
               />
             </button>
-
-            {hasVoiceRecording && (
-              <>
-                <button
-                  onClick={() => setIsPlaying(!isPlaying)}
-                  className="w-[34px] h-[34px] bg-[rgba(255,253,247,0.9)] border-2 border-[rgba(160,140,120,0.25)] rounded-full
-                    flex items-center justify-center cursor-pointer hover:bg-[rgba(240,235,225,0.9)]
-                    transition-all duration-150 shadow-[0_1px_3px_rgba(0,0,0,0.08)]"
-                >
-                  {isPlaying ? (
-                    <Pause
-                      className="w-[14px] h-[14px] text-[rgba(80,60,40,0.7)]"
-                      fill="currentColor"
-                    />
-                  ) : (
-                    <Play
-                      className="w-[14px] h-[14px] text-[rgba(80,60,40,0.7)] ml-0.5"
-                      fill="currentColor"
-                    />
-                  )}
-                </button>
-
-                <div className="flex-1 flex items-center gap-2.5">
-                  <span className="text-xs text-[rgba(100,80,60,0.6)] font-mono">
-                    00:05
-                  </span>
-                  <div className="flex-1 h-2 bg-[rgba(200,180,160,0.2)] rounded-full relative">
-                    <div className="absolute left-0 top-0 h-full w-1/3 bg-[rgba(180,160,140,0.5)] rounded-full" />
-                    <div
-                      className="absolute left-1/3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 bg-[rgba(140,120,90,0.8)] 
-                      rounded-full cursor-pointer shadow-[0_1px_3px_rgba(0,0,0,0.15)]"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  className="w-6 h-6 rounded-full bg-[rgba(80,60,40,0.85)]
-                    border-2 border-[#faf6ed] flex items-center justify-center
-                    text-white cursor-pointer transition-all duration-150 hover:bg-[rgba(60,40,20,0.95)]
-                    shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
-                  onClick={() => setHasVoiceRecording(false)}
-                >
-                  <X className="w-3 h-3" strokeWidth={2.5} />
-                </button>
-              </>
-            )}
           </div>
 
           <div className="flex justify-end pt-2">
