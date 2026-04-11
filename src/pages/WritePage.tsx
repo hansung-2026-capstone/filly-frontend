@@ -1,7 +1,9 @@
-import { Star, Mic, Calendar } from "lucide-react";
+import { Star, Calendar } from "lucide-react";
 import { useState } from "react";
 import { usePhotoUpload } from "../hook/usePhotoUpload";
+import { useVoiceRecorder } from "../hook/useVoiceRecorder";
 import { PhotoUploadSection } from "../components/PhotoUploadSection";
+import { VoiceRecorderSection } from "../components/VoiceRecorderSection";
 import { TiptapEditor } from "../components/TiptapEditor";
 import { DatePickerModal } from "../components/DatePickerModal";
 
@@ -12,6 +14,10 @@ export function WritePage() {
 
   const aiPhotos = usePhotoUpload();
   const diaryPhotos = usePhotoUpload();
+  const voiceRecorder = useVoiceRecorder();
+  const [mood, setMood] = useState<string | null>(null);
+
+  const MOODS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
 
   const getFormattedDate = (date: Date) => {
     const year = date.getFullYear();
@@ -46,14 +52,36 @@ export function WritePage() {
           </h2>
         </div>
 
+        {/* 오늘의 기분 이모지 */}
+        <div className="flex flex-col gap-2.5">
+          <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
+            오늘의 기분 이모지
+          </h3>
+          <div className="flex gap-1.5 flex-wrap">
+            {MOODS.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => setMood(mood === emoji ? null : emoji)}
+                className={`w-10 h-10 text-xl rounded-lg border transition-all duration-150 cursor-pointer
+                  ${mood === emoji
+                    ? "bg-[rgba(160,140,120,0.2)] border-[rgba(160,140,120,0.4)] scale-110"
+                    : "bg-[rgba(240,235,225,0.5)] border-[rgba(160,140,120,0.15)] hover:bg-[rgba(220,200,185,0.5)] hover:scale-105"
+                  }`}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* 본문 */}
         <div className="flex flex-col gap-2.5 flex-1">
           <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
-            본문
+            단문
           </h3>
           <TiptapEditor
             placeholder="오늘 하루는 어땠나요? 자유롭게 기록해보세요..."
-            maxLength={500}
+            maxLength={100}
             showToolbar={false}
             className="flex-1"
           />
@@ -64,21 +92,12 @@ export function WritePage() {
 
         {/* 음성 */}
         <div className="flex flex-col gap-2.5">
-          <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
-            음성 녹음
-          </h3>
-          <div className="flex items-center gap-3">
-            <button
-              className="w-[67px] h-[67px] rounded-lg border-2 cursor-pointer
-                flex items-center justify-center hover:bg-[rgba(220,200,185,0.6)]
-                transition-all duration-150 bg-[rgba(220,200,185,0.4)] border-[rgba(160,140,120,0.25)] border-dashed"
-            >
-              <Mic
-                className="w-7 h-7 text-[rgba(100,80,60,0.6)]"
-                strokeWidth={2}
-              />
-            </button>
-          </div>
+          <VoiceRecorderSection
+            record={voiceRecorder.record}
+            isRecording={voiceRecorder.isRecording}
+            onToggle={voiceRecorder.toggle}
+            onRemove={voiceRecorder.removeRecord}
+          />
           <div className="flex justify-end pt-2">
             <button
               className="py-2.5 px-8 bg-[rgba(80,60,40,0.85)] text-[#faf6ed] border-none rounded-md
