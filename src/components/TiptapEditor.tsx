@@ -110,13 +110,12 @@ export function TiptapEditor({
       isBulletList: ctx.editor?.isActive("bulletList") ?? false,
       isOrderedList: ctx.editor?.isActive("orderedList") ?? false,
       fontSize: ctx.editor?.getAttributes("textStyle").fontSize ?? "12px",
+      charCount: ctx.editor?.storage.characterCount?.characters() ?? 0,
     }),
   });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => () => { editor?.destroy(); }, []);
-
-  const charCount = editor?.storage.characterCount?.characters() ?? 0;
 
   return (
     <div className={`flex flex-col gap-2.5 ${className}`}>
@@ -173,7 +172,7 @@ export function TiptapEditor({
         <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
         {maxLength !== undefined && (
           <div className="text-[9px] text-[rgba(120,100,80,0.4)] mt-1.5 text-right">
-            {charCount}/{maxLength}글자
+            {editorState?.charCount ?? 0}/{maxLength}글자
           </div>
         )}
       </div>

@@ -141,6 +141,7 @@ export function WritePage() {
           </h3>
           <TiptapEditor
             placeholder="AI가 생성한 초안이 여기에 표시됩니다..."
+            maxLength={500}
             showToolbar={true}
             className="flex-1"
           />
