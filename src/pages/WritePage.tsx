@@ -15,6 +15,9 @@ export function WritePage() {
   const aiPhotos = usePhotoUpload();
   const diaryPhotos = usePhotoUpload();
   const voiceRecorder = useVoiceRecorder();
+  const [mood, setMood] = useState<string | null>(null);
+
+  const MOODS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
 
   const getFormattedDate = (date: Date) => {
     const year = date.getFullYear();
@@ -49,14 +52,36 @@ export function WritePage() {
           </h2>
         </div>
 
+        {/* 오늘의 기분 이모지 */}
+        <div className="flex flex-col gap-2.5">
+          <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
+            오늘의 기분 이모지
+          </h3>
+          <div className="flex gap-1.5 flex-wrap">
+            {MOODS.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => setMood(mood === emoji ? null : emoji)}
+                className={`w-10 h-10 text-xl rounded-lg border transition-all duration-150 cursor-pointer
+                  ${mood === emoji
+                    ? "bg-[rgba(160,140,120,0.2)] border-[rgba(160,140,120,0.4)] scale-110"
+                    : "bg-[rgba(240,235,225,0.5)] border-[rgba(160,140,120,0.15)] hover:bg-[rgba(220,200,185,0.5)] hover:scale-105"
+                  }`}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* 본문 */}
         <div className="flex flex-col gap-2.5 flex-1">
           <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
-            본문
+            단문
           </h3>
           <TiptapEditor
             placeholder="오늘 하루는 어땠나요? 자유롭게 기록해보세요..."
-            maxLength={500}
+            maxLength={100}
             showToolbar={false}
             className="flex-1"
           />
