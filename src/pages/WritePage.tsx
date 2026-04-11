@@ -1,30 +1,46 @@
-import {
-  Star,
-  Mic,
-  Bold,
-  Italic,
-  Underline,
-  List,
-  ListOrdered,
-  RotateCcw,
-  RotateCw,
-  Link2,
-  Smile,
-  Calendar,
-} from "lucide-react";
+import { Star, Calendar } from "lucide-react";
 import { useState } from "react";
 import { usePhotoUpload } from "../hook/usePhotoUpload";
+import { useVoiceRecorder } from "../hook/useVoiceRecorder";
 import { PhotoUploadSection } from "../components/PhotoUploadSection";
-import { ToolbarButton } from "../components/ToolbarButton";
+import { VoiceRecorderSection } from "../components/VoiceRecorderSection";
+import { TiptapEditor } from "../components/TiptapEditor";
+import { DatePickerModal } from "../components/DatePickerModal";
 
 export function WritePage() {
   const [rating, setRating] = useState(0);
-  const [content, setContent] = useState("");
-  const [currentDate] = useState("2026년 4월 9일");
-  const [currentDay] = useState("수요일");
+  const [selectedDate, setSelectedDate] = useState(new Date(2026, 3, 9)); // 2026년 4월 9일
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
   const aiPhotos = usePhotoUpload();
   const diaryPhotos = usePhotoUpload();
+  const voiceRecorder = useVoiceRecorder();
+  const [mood, setMood] = useState<string | null>(null);
+
+  const MOODS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
+
+  const getFormattedDate = (date: Date) => {
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${year}년 ${month}월 ${day}일`;
+  };
+
+  const getDayOfWeek = (date: Date) => {
+    const days = [
+      "일요일",
+      "월요일",
+      "화요일",
+      "수요일",
+      "목요일",
+      "금요일",
+      "토요일",
+    ];
+    return days[date.getDay()];
+  };
+
+  const currentDate = getFormattedDate(selectedDate);
+  const currentDay = getDayOfWeek(selectedDate);
 
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">
@@ -36,24 +52,39 @@ export function WritePage() {
           </h2>
         </div>
 
+        {/* 오늘의 기분 이모지 */}
+        <div className="flex flex-col gap-2.5">
+          <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
+            오늘의 기분 이모지
+          </h3>
+          <div className="flex gap-1.5 flex-wrap">
+            {MOODS.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => setMood(mood === emoji ? null : emoji)}
+                className={`w-10 h-10 text-xl rounded-lg border transition-all duration-150 cursor-pointer
+                  ${mood === emoji
+                    ? "bg-[rgba(160,140,120,0.2)] border-[rgba(160,140,120,0.4)] scale-110"
+                    : "bg-[rgba(240,235,225,0.5)] border-[rgba(160,140,120,0.15)] hover:bg-[rgba(220,200,185,0.5)] hover:scale-105"
+                  }`}
+              >
+                {emoji}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* 본문 */}
         <div className="flex flex-col gap-2.5 flex-1">
           <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
-            본문
+            단문
           </h3>
-          <div className="bg-[rgba(255,253,247,0.8)] rounded-lg border border-[rgba(160,140,120,0.2)] p-3.5 flex-1 flex flex-col">
-            <textarea
-              placeholder="오늘 하루는 어땠나요? 자유롭게 기록해보세요..."
-              value={content}
-              onChange={(e) => setContent(e.target.value)}
-              className="w-full flex-1 border-none resize-none bg-transparent
-                font-['Nanum_Myeongjo'] text-[13px] text-[rgba(55,40,25,0.8)] outline-none leading-[1.7]
-                placeholder:text-[rgba(140,120,90,0.35)]"
-            />
-            <div className="text-[9px] text-[rgba(120,100,80,0.4)] mt-1.5 text-right">
-              {content.split("").filter((char) => char.trim()).length}/500글자
-            </div>
-          </div>
+          <TiptapEditor
+            placeholder="오늘 하루는 어땠나요? 자유롭게 기록해보세요..."
+            maxLength={100}
+            showToolbar={false}
+            className="flex-1"
+          />
         </div>
 
         {/* 사진 */}
@@ -61,21 +92,12 @@ export function WritePage() {
 
         {/* 음성 */}
         <div className="flex flex-col gap-2.5">
-          <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
-            음성 녹음
-          </h3>
-          <div className="flex items-center gap-3">
-            <button
-              className="w-[67px] h-[67px] rounded-lg border-2 cursor-pointer
-                flex items-center justify-center hover:bg-[rgba(220,200,185,0.6)]
-                transition-all duration-150 bg-[rgba(220,200,185,0.4)] border-[rgba(160,140,120,0.25)] border-dashed"
-            >
-              <Mic
-                className="w-7 h-7 text-[rgba(100,80,60,0.6)]"
-                strokeWidth={2}
-              />
-            </button>
-          </div>
+          <VoiceRecorderSection
+            record={voiceRecorder.record}
+            isRecording={voiceRecorder.isRecording}
+            onToggle={voiceRecorder.toggle}
+            onRemove={voiceRecorder.removeRecord}
+          />
           <div className="flex justify-end pt-2">
             <button
               className="py-2.5 px-8 bg-[rgba(80,60,40,0.85)] text-[#faf6ed] border-none rounded-md
@@ -101,6 +123,7 @@ export function WritePage() {
             </span>
           </div>
           <button
+            onClick={() => setShowDatePicker(true)}
             className="w-7 h-7 flex items-center justify-center rounded-md border-none bg-transparent
             cursor-pointer text-[rgba(80,60,40,0.5)] hover:bg-[rgba(160,140,120,0.08)] transition-all duration-150"
           >
@@ -135,29 +158,16 @@ export function WritePage() {
           <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
             본문
           </h3>
-          <div className="flex items-center gap-1 py-1.5 px-2.5 bg-[rgba(240,235,225,0.5)] rounded-md border border-[rgba(160,140,120,0.15)]">
-            <ToolbarButton icon={Bold} strokeWidth={2.5} />
-            <ToolbarButton icon={Italic} />
-            <ToolbarButton icon={Underline} />
-            <div className="w-px h-4 bg-[rgba(160,140,120,0.2)] mx-0.5" />
-            <ToolbarButton icon={List} />
-            <ToolbarButton icon={ListOrdered} />
-            <div className="w-px h-4 bg-[rgba(160,140,120,0.2)] mx-0.5" />
-            <ToolbarButton icon={RotateCcw} />
-            <ToolbarButton icon={RotateCw} />
-            <div className="w-px h-4 bg-[rgba(160,140,120,0.2)] mx-0.5" />
-            <ToolbarButton icon={Link2} />
-            <ToolbarButton icon={Smile} className="ml-auto" />
-          </div>
-          <div className="bg-[rgba(255,253,247,0.8)] rounded-lg border border-[rgba(160,140,120,0.2)] p-3.5 flex-1">
-            <p className="text-[13px] text-[rgba(140,120,90,0.35)] m-0 leading-[1.7]">
-              AI가 생성한 초안이 여기에 표시됩니다...
-            </p>
-          </div>
+          <TiptapEditor
+            placeholder="AI가 생성한 초안이 여기에 표시됩니다..."
+            maxLength={500}
+            showToolbar={true}
+            className="flex-1"
+          />
         </div>
 
         {/* 사진 */}
-        <PhotoUploadSection title="사진" {...diaryPhotos} />
+        <PhotoUploadSection title="사진 및 동영상" {...diaryPhotos} />
 
         {/* 일기 작성 버튼 */}
         <div className="flex justify-end">
@@ -170,6 +180,17 @@ export function WritePage() {
           </button>
         </div>
       </div>
+
+      {/* Date Picker Modal */}
+      <DatePickerModal
+        isOpen={showDatePicker}
+        selectedDate={selectedDate}
+        onDateSelect={(date) => {
+          setSelectedDate(date);
+          setShowDatePicker(false);
+        }}
+        onClose={() => setShowDatePicker(false)}
+      />
     </div>
   );
 }

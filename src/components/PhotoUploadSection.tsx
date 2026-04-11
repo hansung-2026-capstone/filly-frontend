@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 import type { RefObject } from "react";
 import { type Photo } from "../hook/usePhotoUpload";
 
-interface Props {
+interface PhotoUploadSectionProps {
   title: string;
   photos: Photo[];
   inputRef: RefObject<HTMLInputElement | null>;
@@ -20,7 +20,7 @@ export function PhotoUploadSection({
   handleFileChange,
   removePhoto,
   max = 4,
-}: Props) {
+}: PhotoUploadSectionProps) {
   return (
     <div className="flex flex-col gap-2.5">
       <div className="flex items-center justify-between">
