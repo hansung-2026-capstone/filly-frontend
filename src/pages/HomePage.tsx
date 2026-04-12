@@ -22,9 +22,15 @@ const months = [
 const getWeeksInMonth = (year: number, month: number) => {
   const firstDay = new Date(year, month - 1, 1).getDay();
   const days = new Date(year, month, 0).getDate();
-  const allDays = Array.from({ length: firstDay }, () => null).concat(
-    Array.from({ length: days }, (_, i) => i + 1)
-  );
+  // const allDays = Array.from({ length: firstDay }, () => null).concat(
+  //   Array.from({ length: days }, (_, i) => i + 1)
+  // );
+
+  // Create an array with leading nulls for empty days, followed by day numbers
+  const allDays: (number | null)[] = [
+    ...Array.from({ length: firstDay }, () => null),
+    ...Array.from({ length: days }, (_, i) => i + 1),
+  ];
   const rows = [];
   for (let i = 0; i < allDays.length; i += 7) {
     rows.push(allDays.slice(i, i + 7));
