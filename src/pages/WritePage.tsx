@@ -53,10 +53,11 @@ export function WritePage() {
     setIsDraftGenerating(true);
     try {
       const form = new FormData();
-      if (shortText.trim()) form.append("content", shortText.trim());
       const writtenAt = selectedDate.toISOString().split("T")[0];
+
+      if (shortText.trim()) form.append("content", shortText.trim());
       form.append("writtenAt", writtenAt);
-      form.append("mode", "AI");
+      form.append("mode", "AI"); // Todo: 수정 필요 (mode 구분 방식 논의 후 결정)
       aiPhotos.photos.forEach((p) => form.append("images", p.file));
       if (voiceRecorder.record) form.append("voice", voiceRecorder.record.file);
 
@@ -73,7 +74,7 @@ export function WritePage() {
     try {
       const plainText = finalText.trim();
       const writtenAt = selectedDate.toISOString().split("T")[0];
-      const mode = draftContent ? "AI" : "DEFAULT";
+      const mode = draftContent ? "AI" : "DEFAULT"; // Todo: 수정 필요 (mode 구분 방식 논의 후 결정)
       await saveDiary({
         rawContent: plainText,
         writtenAt,
