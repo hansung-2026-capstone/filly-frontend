@@ -22,7 +22,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, children, onClick
   };
 
   const renderIcon = () => {
-    const iconStyle = "w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold";
+    // const iconStyle = "w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold";
     if (provider === 'kakao') return <RiKakaoTalkFill size={20} />;
     if (provider === 'naver') return <SiNaver size={16} />;
     if (provider === 'google') return <FcGoogle size={20} />;
