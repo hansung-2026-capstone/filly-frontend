@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Pencil, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Portal } from "../components/Portal"
@@ -38,16 +38,6 @@ export function HomePage() {
   const [showMonthModal, setShowMonthModal] = useState(false);
 
   const navigate = useNavigate();
-
-  //로그인 토큰 추출
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('accessToken');
-    if (token) {
-      localStorage.setItem('accessToken', token);
-      navigate('/', { replace: true });
-    }
-  }, [navigate]);
 
   const weeks = getWeeksInMonth(currentYear, currentMonth);
   const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
