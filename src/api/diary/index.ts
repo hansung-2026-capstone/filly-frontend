@@ -43,6 +43,7 @@ export const saveDiary = async (body: {
   const { data } = await api.post<{ data: { id: number } }>(
     "/api/v1/diaries",
     body,
+    { headers: { "Content-Type": "application/json" } },
   );
   return data.data;
 };
