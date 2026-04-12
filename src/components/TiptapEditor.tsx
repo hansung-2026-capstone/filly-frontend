@@ -36,6 +36,7 @@ interface TiptapEditorProps {
   showToolbar: boolean;
   onChange?: (html: string) => void;
   className?: string;
+  content?: string;
 }
 
 function EditorToolbarButton({
@@ -75,6 +76,7 @@ export function TiptapEditor({
   showToolbar,
   onChange,
   className = "",
+  content,
 }: TiptapEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -97,7 +99,7 @@ export function TiptapEditor({
       },
     },
     onUpdate: ({ editor }) => {
-      onChange?.(editor.getHTML());
+      onChange?.(editor.getText());
     },
   });
 
@@ -113,6 +115,12 @@ export function TiptapEditor({
       charCount: ctx.editor?.storage.characterCount?.characters() ?? 0,
     }),
   });
+
+  useEffect(() => {
+    if (content !== undefined && editor) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => () => { editor?.destroy(); }, []);
