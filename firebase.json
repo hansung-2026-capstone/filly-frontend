@@ -8,16 +8,9 @@
     ],
     "rewrites": [
       {
-        "source": "/api/**",
+        "source": "/api/**", 
         "run": {
           "serviceId": "filly-backend",
-          "region": "asia-northeast3"
-        }
-      },
-      {
-        "source": "/ai/**",
-        "run": {
-          "serviceId": "filly-ai-server",
           "region": "asia-northeast3"
         }
       },
