@@ -57,7 +57,9 @@ const LoginPage: React.FC = () => {
     console.log(`${provider} 로그인 시도`);
     
     // const BACKEND_URL = `https://filly-backend-997421794532.asia-northeast3.run.app`;
-    const BACKEND_URL = 'https://filly-diary.com';
+    const BACKEND_URL = window.location.hostname === 'localhost' 
+    ? 'http://localhost:8080' 
+    : 'https://filly-diary.com';
     window.location.href = `${BACKEND_URL}/api/oauth2/authorization/${provider}`;
   };
 
