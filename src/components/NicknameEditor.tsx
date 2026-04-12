@@ -52,23 +52,24 @@ export function NicknameEditor({ initialNickname }: NicknameEditorProps) {
   return (
     <div className="relative flex flex-col items-center">
       {/* [보기 모드] */}
-      <div className="flex items-center gap-1.5 group">
-        <span className="text-xs text-[rgba(80,60,40,0.7)] tracking-[0.5px] font-['Nanum_Myeongjo']">
+      <div className="relative flex items-center justify-center w-full py-1 group">
+        <span className="text-xs text-[rgba(80,60,40,0.7)] tracking-[0.5px] font-['Nanum_Myeongjo'] relative">
           {nickname}
         </span>
         <button
           onClick={handleEdit}
-          className="w-4 h-4 flex items-center justify-center rounded opacity-0 group-hover:opacity-100
-            transition-opacity hover:bg-[rgba(160,140,120,0.15)]"
+          className="absolute left-[calc(100%+6px)] top-1/2 -translate-y-1/2 w-4 h-4 
+            flex items-center justify-center rounded opacity-0 group-hover:opacity-100
+            transition-opacity hover:bg-[rgba(160,140,120,0.15)] shrink-0"
         >
-          <Pencil className="w-2.5 h-2.5 text-[rgba(120,100,75,0.6)]" />
-        </button>
+          <Pencil className="w-3 h-3 text-[rgba(120,100,75,0.6)]" />
+        </button> 
       </div>
 
       {/* [수정 모드 - 팝오버] */}
       {isEditing && (
         <div 
-          className="absolute top-5 -translate-y-1/2 left-0 z-[100] 
+          className="absolute top-3 -translate-y-1/2 left-0 z-[100] 
             flex items-center gap-2 p-1.5 px-2
             bg-[#fafaf8] border border-[rgba(160,140,120,0.3)] rounded-lg shadow-xl"
           style={{ width: '200px' }} 
