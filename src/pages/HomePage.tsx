@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Pencil, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Portal } from "../components/Portal"
+import { NicknameEditor } from "../components/NicknameEditor"
 
 const months = [
   { num: 1, name: 'JANUARY' },
@@ -85,7 +86,7 @@ export function HomePage() {
               alt="Profile"
               className="w-14 h-14 rounded-full object-cover border-2 border-[rgba(200,185,165,0.5)] shadow-sm"
             />
-            <div className="text-xs text-[rgba(80,60,40,0.7)] tracking-[0.5px]">소소한 하루</div>
+            <NicknameEditor initialNickname="소소한 하루" />
           </div>
 
           {/* 하단 작성 버튼 */}
