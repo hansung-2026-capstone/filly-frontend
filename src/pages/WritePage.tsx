@@ -12,7 +12,7 @@ import { createDraft, saveDiary } from "../api/diary";
 export function WritePage() {
   const navigate = useNavigate();
   const [rating, setRating] = useState(0);
-  const [selectedDate, setSelectedDate] = useState(new Date(2026, 3, 9)); // 2026년 4월 9일
+  const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isDraftGenerating, setIsDraftGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
