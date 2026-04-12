@@ -6,25 +6,72 @@ export const api = axios.create({
   timeout: 5000,
 });
 
-// 요청을 보낼 때마다 가로채서(Interceptors) 토큰을 넣어줍니다.
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('accessToken');
   if (token) {
-    // 백엔드 약속에 따라 Authorization 헤더에 토큰 주입
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
 
+let isRefreshing = false;
+let pendingRequests: Array<(token: string) => void> = [];
+
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      // 신분증이 없거나 만료됨 -> 로그인 페이지로 강제 압송
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
-      window.location.href = '/login';
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      if (!refreshToken) {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        // 갱신 중인 경우 대기 후 새 토큰으로 재시도
+        return new Promise((resolve) => {
+          pendingRequests.push((newToken: string) => {
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            resolve(api(originalRequest));
+          });
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const { data } = await axios.post('https://filly-diary.com/api/v1/auth/refresh', {
+          refreshToken,
+        });
+
+        const newAccessToken = data.data.accessToken;
+        const newRefreshToken = data.data.refreshToken;
+
+        localStorage.setItem('accessToken', newAccessToken);
+        localStorage.setItem('refreshToken', newRefreshToken);
+
+        // 대기 중인 요청들 재시도
+        pendingRequests.forEach((cb) => cb(newAccessToken));
+        pendingRequests = [];
+
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      } catch {
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
+        return Promise.reject(error);
+      } finally {
+        isRefreshing = false;
+      }
     }
+
     return Promise.reject(error);
   }
 );
