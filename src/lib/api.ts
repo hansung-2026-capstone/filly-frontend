@@ -21,8 +21,9 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // 신분증이 없거나 만료됨 -> 로그인 페이지로 강제 압송
-      localStorage.removeItem('userToken');
-      window.location.href = '/login'; 
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
