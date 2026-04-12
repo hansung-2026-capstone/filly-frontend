@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 export const api = axios.create({
-  baseURL: 'https://filly-backend-997421794532.asia-northeast3.run.app',
+  baseURL: 'https://filly-diary.com',
   timeout: 5000,
 });
 
