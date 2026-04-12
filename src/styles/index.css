@@ -1,0 +1,15 @@
+@import "tailwindcss";
+@import "./theme.css";
+
+/* TipTap 리스트 스타일 복원 (Tailwind preflight이 제거하기 때문) */
+.ProseMirror ul { list-style-type: disc; padding-left: 1.25rem; }
+.ProseMirror ol { list-style-type: decimal; padding-left: 1.25rem; }
+
+/* Placeholder 색상 */
+.tiptap p.is-editor-empty:first-child::before {
+  color: rgba(140, 120, 90, 0.35);
+  content: attr(data-placeholder);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
