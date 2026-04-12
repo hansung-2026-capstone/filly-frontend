@@ -23,7 +23,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, children, onClick
   };
 
   const renderIcon = () => {
-    const iconStyle = "w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold";
+    // const iconStyle = "w-5 h-5 flex items-center justify-center rounded-full text-xs font-bold";
     if (provider === 'kakao') return <RiKakaoTalkFill size={20} />;
     if (provider === 'naver') return <SiNaver size={16} />;
     if (provider === 'google') return <FcGoogle size={20} />;
@@ -56,8 +56,9 @@ const LoginPage: React.FC = () => {
   const handleSocialLogin = (provider: string) => {
     console.log(`${provider} 로그인 시도`);
     
-    const BACKEND_URL = `https://filly-backend-997421794532.asia-northeast3.run.app`;
-    window.location.href = `${BACKEND_URL}/oauth2/authorization/${provider}`;
+    // const BACKEND_URL = `https://filly-backend-997421794532.asia-northeast3.run.app`;
+    const BACKEND_URL = 'https://filly-diary.com';
+    window.location.href = `${BACKEND_URL}/api/oauth2/authorization/${provider}`;
   };
 
   return (
