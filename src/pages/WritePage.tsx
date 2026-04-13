@@ -75,12 +75,14 @@ export function WritePage() {
       const plainText = finalText.trim();
       const writtenAt = selectedDate.toISOString().split("T")[0];
       const mode = draftContent ? "AI" : "DEFAULT"; // Todo: 수정 필요 (mode 구분 방식 논의 후 결정)
-      await saveDiary({
-        rawContent: plainText,
-        writtenAt,
-        mode,
-        starRating: rating || null,
-      });
+
+      const form = new FormData();
+      if (plainText) form.append("rawContent", plainText);
+      form.append("writtenAt", writtenAt);
+      form.append("mode", mode);
+      diaryPhotos.photos.forEach((p) => form.append("images", p.file));
+
+      await saveDiary(form);
       navigate("/");
     } finally {
       setIsSaving(false);

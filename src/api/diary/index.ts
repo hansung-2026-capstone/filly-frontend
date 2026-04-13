@@ -34,16 +34,11 @@ export const createDraft = async (form: FormData) => {
   return data.data;
 };
 
-export const saveDiary = async (body: {
-  rawContent: string;
-  writtenAt: string;
-  mode: string;
-  starRating: number | null;
-}) => {
+export const saveDiary = async (form: FormData) => {
   const { data } = await api.post<{ data: { id: number } }>(
     "/api/v1/diaries",
-    body,
-    { headers: { "Content-Type": "application/json" } },
+    form,
+    { headers: { "Content-Type": "multipart/form-data" } },
   );
   return data.data;
 };
