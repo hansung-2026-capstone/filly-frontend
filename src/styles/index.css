@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "./theme.css";
 
+/* 스크롤바 숨김 */
+@layer base {
+  * { scrollbar-width: none; }
+  *::-webkit-scrollbar { display: none; }
+}
+
 /* TipTap 리스트 스타일 복원 (Tailwind preflight이 제거하기 때문) */
 .ProseMirror ul { list-style-type: disc; padding-left: 1.25rem; }
 .ProseMirror ol { list-style-type: decimal; padding-left: 1.25rem; }
