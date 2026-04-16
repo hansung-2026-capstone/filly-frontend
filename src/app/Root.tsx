@@ -161,7 +161,7 @@ export function Root() {
               data-page="home"
               className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                 font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-3 px-4 pr-0
+                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
                 bg-[var(--tab-home)] text-[var(--tab-home-text)]
                 hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
                 ${getActivePage() === "home" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
@@ -179,7 +179,7 @@ export function Root() {
               data-page="stats"
               className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                 font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-3 px-4 pr-0
+                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
                 bg-[var(--tab-stats)] text-[var(--tab-stats-text)]
                 hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
                 ${getActivePage() === "stats" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
@@ -197,7 +197,7 @@ export function Root() {
               data-page="recommend"
               className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                 font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-3 px-4 pr-0
+                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
                 bg-[var(--tab-recommend)] text-[var(--tab-recommend-text)]
                 hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
                 ${getActivePage() === "recommend" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
@@ -215,7 +215,7 @@ export function Root() {
               data-page="archive"
               className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                 font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-3 px-4 pr-0
+                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
                 bg-[var(--tab-archive)] text-[var(--tab-archive-text)]
                 hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
                 ${getActivePage() === "archive" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
