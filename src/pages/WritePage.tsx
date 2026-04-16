@@ -1,4 +1,4 @@
-import { Star, Calendar } from "lucide-react";
+import { Calendar } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { usePhotoUpload } from "../hook/usePhotoUpload";
@@ -11,7 +11,8 @@ import { createDraft, saveDiary } from "../api/diary";
 
 export function WritePage() {
   const navigate = useNavigate();
-  const [rating, setRating] = useState(0);
+  const EMOJIS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
+  const [emoji, setEmoji] = useState<string | null>(EMOJIS[0]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isDraftGenerating, setIsDraftGenerating] = useState(false);
@@ -80,6 +81,7 @@ export function WritePage() {
       if (plainText) form.append("rawContent", plainText);
       form.append("writtenAt", writtenAt);
       form.append("mode", mode);
+      if (emoji) form.append("emoji", emoji);
       diaryPhotos.photos.forEach((p) => form.append("images", p.file));
 
       await saveDiary(form);
@@ -180,24 +182,24 @@ export function WritePage() {
           </button>
         </div>
 
-        {/* 별점 */}
+        {/* 오늘의 기분 이모지 */}
         <div className="flex flex-col gap-2.5">
           <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">
-            오늘의 기분
+            오늘의 기분 이모지
           </h3>
-          <div className="flex gap-2">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Star
-                key={i}
-                className={`w-[22px] h-[22px] cursor-pointer transition-all duration-150 hover:scale-110
-                  ${
-                    i < rating
-                      ? "fill-[rgba(230,190,60,0.85)] stroke-[rgba(200,160,40,0.7)]"
-                      : "fill-none stroke-[rgba(200,180,120,0.4)]"
+          <div className="flex gap-1.5 flex-wrap">
+            {EMOJIS.map((e) => (
+              <button
+                key={e}
+                onClick={() => setEmoji(emoji === e ? null : e)}
+                className={`w-10 h-10 text-xl rounded-lg border transition-all duration-150 cursor-pointer
+                  ${emoji === e
+                    ? "bg-[rgba(160,140,120,0.2)] border-[rgba(160,140,120,0.4)] scale-110"
+                    : "bg-[rgba(240,235,225,0.5)] border-[rgba(160,140,120,0.15)] hover:bg-[rgba(220,200,185,0.5)] hover:scale-105"
                   }`}
-                strokeWidth={1.5}
-                onClick={() => setRating(i + 1)}
-              />
+              >
+                {e}
+              </button>
             ))}
           </div>
         </div>
