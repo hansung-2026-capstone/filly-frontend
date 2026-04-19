@@ -7,7 +7,7 @@ export interface DiaryItem {
   emoji: string;
   rawContent: string;
   starRating: number;
-  thumbnailUrl?: string;
+  mediaUrls: string[];
 }
 
 export interface DraftResponse {
@@ -40,5 +40,14 @@ export const saveDiary = async (form: FormData) => {
     form,
     { headers: { "Content-Type": "multipart/form-data" } },
   );
+  return data.data;
+};
+
+export const deleteDiary = async (id: number) => {
+  await api.delete(`/api/v1/diaries/${id}`);
+};
+
+export const updateDiary = async (id: number, body: { rawContent?: string; emoji?: string }) => {
+  const { data } = await api.put<{ data: DiaryItem }>(`/api/v1/diaries/${id}`, body);
   return data.data;
 };

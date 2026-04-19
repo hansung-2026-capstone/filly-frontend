@@ -34,6 +34,7 @@ interface TiptapEditorProps {
   placeholder?: string;
   maxLength?: number;
   showToolbar: boolean;
+  readOnly?: boolean;
   onChange?: (html: string) => void;
   className?: string;
   content?: string;
@@ -74,11 +75,13 @@ export function TiptapEditor({
   placeholder,
   maxLength,
   showToolbar,
-  onChange,
+  readOnly = false,
+  onChange = () => {},
   className = "",
   content,
 }: TiptapEditorProps) {
   const editor = useEditor({
+    editable: !readOnly,
     extensions: [
       StarterKit.configure(),
       CustomTextStyle,
@@ -123,7 +126,12 @@ export function TiptapEditor({
   }, [content, editor]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => () => { editor?.destroy(); }, []);
+  useEffect(
+    () => () => {
+      editor?.destroy();
+    },
+    [],
+  );
 
   return (
     <div className={`flex flex-col gap-2.5 ${className}`}>
