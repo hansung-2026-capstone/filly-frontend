@@ -42,3 +42,7 @@ export const saveDiary = async (form: FormData) => {
   );
   return data.data;
 };
+
+export const deleteDiary = async (id: number) => {
+  await api.delete(`/api/v1/diaries/${id}`);
+};
