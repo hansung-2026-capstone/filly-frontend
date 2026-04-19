@@ -7,7 +7,7 @@ export interface DiaryItem {
   emoji: string;
   rawContent: string;
   starRating: number;
-  thumbnailUrl?: string;
+  mediaUrls: string[];
 }
 
 export interface DraftResponse {

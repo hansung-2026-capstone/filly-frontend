@@ -5,6 +5,8 @@ import { Portal } from "../components/Portal"
 import { NicknameEditor } from "../components/NicknameEditor"
 import { useMonthlyDiaries } from "../hook/useMonthlyDiaries"
 import { CalendarCell } from "../components/CalendarCell"
+import { DiaryDetailModal } from "../components/DiaryDetailModal"
+import type { DiaryItem } from "../api/diary"
 
 const months = [
   { num: 1, name: 'JANUARY' },
@@ -49,6 +51,7 @@ export function HomePage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [showMonthModal, setShowMonthModal] = useState(false);
+  const [selectedDiary, setSelectedDiary] = useState<DiaryItem | null>(null);
 
   const navigate = useNavigate();
 
@@ -128,6 +131,7 @@ export function HomePage() {
                   diary={day ? diaries[toDateKey(currentYear, currentMonth, day)] : undefined}
                   loading={loading}
                   dayTextClass={i === 0 ? 'text-[rgba(185,75,65,0.6)]' : 'text-[rgba(60,45,30,0.6)]'}
+                  onClick={setSelectedDiary}
                 />
               ))
             )}
@@ -153,6 +157,7 @@ export function HomePage() {
                 diary={day ? diaries[toDateKey(currentYear, currentMonth, day)] : undefined}
                 loading={loading}
                 dayTextClass={i === 3 ? 'text-[rgba(65,95,165,0.55)]' : 'text-[rgba(60,45,30,0.6)]'}
+                onClick={setSelectedDiary}
               />
             ))
           )}
@@ -237,6 +242,12 @@ export function HomePage() {
             </div>
           </div>
         </Portal>
+      )}
+      {selectedDiary && (
+        <DiaryDetailModal
+          diary={selectedDiary}
+          onClose={() => setSelectedDiary(null)}
+        />
       )}
     </div>
   );
