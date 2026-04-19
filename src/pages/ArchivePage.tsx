@@ -154,9 +154,9 @@ export function ArchivePage() {
                 cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(160,140,120,0.06)]"
               onClick={() => handleDiaryClick(entry)}
             >
-              {entry.thumbnailUrl ? (
+              {entry.mediaUrls?.[0] ? (
                 <img
-                  src={entry.thumbnailUrl}
+                  src={entry.mediaUrls[0]}
                   alt={entry.writtenAt}
                   className="w-11 h-11 rounded-lg object-cover flex-shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.1)]
                       border border-[rgba(220,210,195,0.5)]"
