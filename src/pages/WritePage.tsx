@@ -54,7 +54,7 @@ export function WritePage() {
     setIsDraftGenerating(true);
     try {
       const form = new FormData();
-      const writtenAt = selectedDate.toISOString().split("T")[0];
+      const writtenAt = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
 
       if (shortText.trim()) form.append("content", shortText.trim());
       form.append("writtenAt", writtenAt);
@@ -74,7 +74,7 @@ export function WritePage() {
     setIsSaving(true);
     try {
       const plainText = finalText.trim();
-      const writtenAt = selectedDate.toISOString().split("T")[0];
+      const writtenAt = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
       const mode = draftContent ? "AI" : "DEFAULT"; // Todo: 수정 필요 (mode 구분 방식 논의 후 결정)
 
       const form = new FormData();
