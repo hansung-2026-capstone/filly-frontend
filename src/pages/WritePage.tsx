@@ -1,18 +1,21 @@
 import { Calendar } from "lucide-react";
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useLocation } from "react-router";
 import { usePhotoUpload } from "../hook/usePhotoUpload";
 import { useVoiceRecorder } from "../hook/useVoiceRecorder";
 import { PhotoUploadSection } from "../components/PhotoUploadSection";
 import { VoiceRecorderSection } from "../components/VoiceRecorderSection";
 import { TiptapEditor } from "../components/TiptapEditor";
 import { DatePickerModal } from "../components/DatePickerModal";
-import { createDraft, saveDiary } from "../api/diary";
+import { createDraft, saveDiary, updateDiary, type DiaryItem } from "../api/diary";
 
 export function WritePage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const editDiary = (location.state as { diary?: DiaryItem } | null)?.diary;
+
   const EMOJIS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
-  const [emoji, setEmoji] = useState<string | null>(EMOJIS[0]);
+  const [emoji, setEmoji] = useState<string | null>(editDiary?.emoji ?? EMOJIS[0]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isDraftGenerating, setIsDraftGenerating] = useState(false);
@@ -20,7 +23,7 @@ export function WritePage() {
   const [shortText, setShortText] = useState("");
   const [finalText, setFinalText] = useState("");
   const [draftContent, setDraftContent] = useState<string | undefined>(
-    undefined,
+    editDiary?.rawContent ?? undefined,
   );
 
   const aiPhotos = usePhotoUpload();
@@ -73,18 +76,25 @@ export function WritePage() {
   const handleSaveDiary = async () => {
     setIsSaving(true);
     try {
-      const plainText = finalText.trim();
-      const writtenAt = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
-      const mode = draftContent ? "AI" : "DEFAULT"; // Todo: 수정 필요 (mode 구분 방식 논의 후 결정)
+      if (editDiary) {
+        await updateDiary(editDiary.id, {
+          rawContent: finalText.trim() || undefined,
+          emoji: emoji || undefined,
+        });
+      } else {
+        const plainText = finalText.trim();
+        const writtenAt = `${selectedDate.getFullYear()}-${String(selectedDate.getMonth() + 1).padStart(2, "0")}-${String(selectedDate.getDate()).padStart(2, "0")}`;
+        const mode = draftContent ? "AI" : "DEFAULT"; // Todo: 수정 필요 (mode 구분 방식 논의 후 결정)
 
-      const form = new FormData();
-      if (plainText) form.append("rawContent", plainText);
-      form.append("writtenAt", writtenAt);
-      form.append("mode", mode);
-      if (emoji) form.append("emoji", emoji);
-      diaryPhotos.photos.forEach((p) => form.append("images", p.file));
+        const form = new FormData();
+        if (plainText) form.append("rawContent", plainText);
+        form.append("writtenAt", writtenAt);
+        form.append("mode", mode);
+        if (emoji) form.append("emoji", emoji);
+        diaryPhotos.photos.forEach((p) => form.append("images", p.file));
 
-      await saveDiary(form);
+        await saveDiary(form);
+      }
       navigate("/");
     } finally {
       setIsSaving(false);
@@ -98,16 +108,16 @@ export function WritePage() {
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-[rgba(250,246,237,0.92)] z-20 gap-3">
           <div className="w-6 h-6 border-2 border-[rgba(80,60,40,0.4)] border-t-[rgba(80,60,40,0.9)] rounded-full animate-spin" />
           <span className="text-sm text-[rgba(60,45,30,0.75)] tracking-wide">
-            일기 작성 중...
+            {editDiary ? "일기 수정 중..." : "일기 작성 중..."}
           </span>
         </div>
       )}
 
       {/* Left page - Draft Writing */}
-      <div className="flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto">
+      <div className={`flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto${editDiary ? " opacity-40 pointer-events-none select-none" : ""}`}>
         <div className="pb-3 border-b border-[rgba(160,140,120,0.15)]">
           <h2 className="text-base text-[rgba(60,45,30,0.85)] tracking-wide m-0 font-medium">
-            AI 작성 툴
+            {editDiary ? "수정 모드에서는 AI 기능 비활성" : "AI 작성 툴"}
           </h2>
         </div>
 
@@ -167,19 +177,21 @@ export function WritePage() {
         <div className="flex items-center justify-between pb-3 border-b border-[rgba(160,140,120,0.15)]">
           <div className="flex items-center gap-2">
             <span className="text-sm text-[rgba(80,60,40,0.75)] tracking-wide">
-              {currentDate}
+              {editDiary ? (() => { const [y,m,d] = editDiary.writtenAt.split("-").map(Number); return `${y}년 ${m}월 ${d}일`; })() : currentDate}
             </span>
             <span className="text-sm text-[rgba(120,100,80,0.5)]">
-              {currentDay}
+              {editDiary ? (() => { const [y,m,d] = editDiary.writtenAt.split("-").map(Number); return ["일","월","화","수","목","금","토"][new Date(y,m-1,d).getDay()]+"요일"; })() : currentDay}
             </span>
           </div>
-          <button
-            onClick={() => setShowDatePicker(true)}
-            className="w-7 h-7 flex items-center justify-center rounded-md border-none bg-transparent
-            cursor-pointer text-[rgba(80,60,40,0.5)] hover:bg-[rgba(160,140,120,0.08)] transition-all duration-150"
-          >
-            <Calendar className="w-4 h-4" />
-          </button>
+          {!editDiary && (
+            <button
+              onClick={() => setShowDatePicker(true)}
+              className="w-7 h-7 flex items-center justify-center rounded-md border-none bg-transparent
+              cursor-pointer text-[rgba(80,60,40,0.5)] hover:bg-[rgba(160,140,120,0.08)] transition-all duration-150"
+            >
+              <Calendar className="w-4 h-4" />
+            </button>
+          )}
         </div>
 
         {/* 오늘의 기분 이모지 */}
@@ -220,9 +232,23 @@ export function WritePage() {
         </div>
 
         {/* 사진 */}
-        <PhotoUploadSection title="사진" {...diaryPhotos} />
+        {editDiary ? (
+          editDiary.mediaUrls?.length > 0 && (
+            <div className="flex flex-col gap-2.5">
+              <h3 className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px] m-0 font-medium">사진</h3>
+              <div className={`grid gap-1.5 ${editDiary.mediaUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+                {editDiary.mediaUrls.slice(0, 4).map((url, i) => (
+                  <img key={i} src={url} alt="" className="w-full aspect-square object-cover rounded-lg shadow-sm" />
+                ))}
+              </div>
+              <p className="text-[11px] text-[rgba(120,100,80,0.45)] m-0">사진은 수정할 수 없습니다.</p>
+            </div>
+          )
+        ) : (
+          <PhotoUploadSection title="사진" {...diaryPhotos} />
+        )}
 
-        {/* 일기 작성 버튼 */}
+        {/* 일기 작성/수정 버튼 */}
         <div className="flex justify-end">
           <button
             onClick={handleSaveDiary}
@@ -232,7 +258,7 @@ export function WritePage() {
             hover:bg-[rgba(60,40,20,0.95)] shadow-[0_2px_6px_rgba(0,0,0,0.15)]
             disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            일기 작성
+            {editDiary ? "일기 수정" : "일기 작성"}
           </button>
         </div>
       </div>

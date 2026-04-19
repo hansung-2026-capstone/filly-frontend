@@ -46,3 +46,8 @@ export const saveDiary = async (form: FormData) => {
 export const deleteDiary = async (id: number) => {
   await api.delete(`/api/v1/diaries/${id}`);
 };
+
+export const updateDiary = async (id: number, body: { rawContent?: string; emoji?: string }) => {
+  const { data } = await api.put<{ data: DiaryItem }>(`/api/v1/diaries/${id}`, body);
+  return data.data;
+};

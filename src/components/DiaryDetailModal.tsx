@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { deleteDiary, type DiaryItem } from "../api/diary";
 import { Portal } from "./Portal";
 import { TiptapEditor } from "./TiptapEditor";
@@ -65,6 +66,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted }: DiaryDetailModal
   const { label, dow } = formatDate(diary.writtenAt);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const navigate = useNavigate();
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -156,9 +158,11 @@ export function DiaryDetailModal({ diary, onClose, onDeleted }: DiaryDetailModal
               </>
             ) : (
               <>
-                <button className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-[rgba(160,140,120,0.08)]
-                  border border-[rgba(160,140,120,0.2)] rounded-md cursor-pointer
-                  hover:bg-[rgba(160,140,120,0.15)] transition-all duration-150 font-['Nanum_Myeongjo']">
+                <button
+                  onClick={() => { onClose(); navigate('/write', { state: { diary } }); }}
+                  className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-[rgba(160,140,120,0.08)]
+                    border border-[rgba(160,140,120,0.2)] rounded-md cursor-pointer
+                    hover:bg-[rgba(160,140,120,0.15)] transition-all duration-150 font-['Nanum_Myeongjo']">
                   수정
                 </button>
                 <button
