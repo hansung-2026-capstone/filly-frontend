@@ -1,11 +1,14 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { getDiaries, type DiaryItem } from "../api/diary";
 
 export function useMonthlyDiaries(year: number, month: number) {
   const [diaries, setDiaries] = useState<Record<string, DiaryItem>>({});
   const [loading, setLoading] = useState(false);
+  const [tick, setTick] = useState(0);
   const location = useLocation();
+
+  const refetch = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
     let cancelled = false;
@@ -26,8 +29,8 @@ export function useMonthlyDiaries(year: number, month: number) {
         if (!cancelled) setLoading(false);
       });
     return () => { cancelled = true; };
-  // location.key: 같은 year/month라도 페이지 진입할 때마다 재요청
-  }, [year, month, location.key]);
+  // tick: 수동 refetch 트리거 / location.key: 페이지 진입마다 재요청
+  }, [year, month, location.key, tick]);
 
-  return { diaries, loading };
+  return { diaries, loading, refetch };
 }

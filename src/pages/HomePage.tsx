@@ -58,7 +58,7 @@ export function HomePage() {
   const weeks = getWeeksInMonth(currentYear, currentMonth);
   const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
 
-  const { diaries, loading } = useMonthlyDiaries(currentYear, currentMonth);
+  const { diaries, loading, refetch } = useMonthlyDiaries(currentYear, currentMonth);
 
   const handleMonthSelect = (month: number) => {
     setCurrentMonth(month);
@@ -247,6 +247,7 @@ export function HomePage() {
         <DiaryDetailModal
           diary={selectedDiary}
           onClose={() => setSelectedDiary(null)}
+          onDeleted={() => { setSelectedDiary(null); refetch(); }}
         />
       )}
     </div>
