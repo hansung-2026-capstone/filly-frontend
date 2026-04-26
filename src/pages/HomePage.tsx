@@ -3,6 +3,10 @@ import { Pencil, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Portal } from "../components/Portal"
 import { NicknameEditor } from "../components/NicknameEditor"
+import { useMonthlyDiaries } from "../hook/useMonthlyDiaries"
+import { CalendarCell } from "../components/CalendarCell"
+import { DiaryDetailModal } from "../components/DiaryDetailModal"
+import type { DiaryItem } from "../api/diary"
 
 const months = [
   { num: 1, name: 'JANUARY' },
@@ -19,7 +23,11 @@ const months = [
   { num: 12, name: 'DECEMBER' },
 ];
 
-// 날짜 계산 로직
+// day 숫자 → "YYYY-MM-DD" 키
+const toDateKey = (year: number, month: number, day: number) =>
+  `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+// 달력 주(週) 계산
 const getWeeksInMonth = (year: number, month: number) => {
   const firstDay = new Date(year, month - 1, 1).getDay();
   const days = new Date(year, month, 0).getDate();
@@ -43,11 +51,14 @@ export function HomePage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [showMonthModal, setShowMonthModal] = useState(false);
+  const [selectedDiary, setSelectedDiary] = useState<DiaryItem | null>(null);
 
   const navigate = useNavigate();
 
   const weeks = getWeeksInMonth(currentYear, currentMonth);
   const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
+
+  const { diaries, loading, refetch } = useMonthlyDiaries(currentYear, currentMonth);
 
   const handleMonthSelect = (month: number) => {
     setCurrentMonth(month);
@@ -112,12 +123,16 @@ export function HomePage() {
             ))}
           </div>
           <div className="flex-1 grid grid-cols-3 grid-rows-6 gap-1.5 h-full min-h-0">
-            {weeks.map((week, weekIdx) => 
+            {weeks.map((week, weekIdx) =>
               week.slice(0, 3).map((day, i) => (
-                <div key={`l-${weekIdx}-${i}`} className="border border-[rgba(160,140,120,0.1)] rounded bg-white/40 h-full p-1 min-h-0">
-                  <span className={`text-[11px] ${i === 0 ? 'text-[rgba(185,75,65,0.6)]' : 'text-[rgba(60,45,30,0.6)]'}`}>{day}</span>
-                  {/* TODO: 해당 날짜에 diaryData가 있는지 확인하여 이미지와 별점을 렌더링 */}
-                </div>
+                <CalendarCell
+                  key={`l-${weekIdx}-${i}`}
+                  day={day}
+                  diary={day ? diaries[toDateKey(currentYear, currentMonth, day)] : undefined}
+                  loading={loading}
+                  dayTextClass={i === 0 ? 'text-[rgba(185,75,65,0.6)]' : 'text-[rgba(60,45,30,0.6)]'}
+                  onClick={setSelectedDiary}
+                />
               ))
             )}
           </div>
@@ -134,11 +149,16 @@ export function HomePage() {
           ))}
         </div>
         <div className="flex-1 grid grid-cols-4 grid-rows-6 gap-1.5 h-full min-h-0">
-          {weeks.map((week, weekIdx) => 
+          {weeks.map((week, weekIdx) =>
             week.slice(3, 7).map((day, i) => (
-              <div key={`r-${weekIdx}-${i}`} className="border border-[rgba(160,140,120,0.1)] rounded bg-white/40 h-full p-1 min-h-0">
-                <span className={`text-[11px] ${i === 3 ? 'text-[rgba(65,95,165,0.55)]' : 'text-[rgba(60,45,30,0.6)]'}`}>{day}</span>
-              </div>
+              <CalendarCell
+                key={`r-${weekIdx}-${i}`}
+                day={day}
+                diary={day ? diaries[toDateKey(currentYear, currentMonth, day)] : undefined}
+                loading={loading}
+                dayTextClass={i === 3 ? 'text-[rgba(65,95,165,0.55)]' : 'text-[rgba(60,45,30,0.6)]'}
+                onClick={setSelectedDiary}
+              />
             ))
           )}
         </div>
@@ -222,6 +242,13 @@ export function HomePage() {
             </div>
           </div>
         </Portal>
+      )}
+      {selectedDiary && (
+        <DiaryDetailModal
+          diary={selectedDiary}
+          onClose={() => setSelectedDiary(null)}
+          onDeleted={() => { setSelectedDiary(null); refetch(); }}
+        />
       )}
     </div>
   );

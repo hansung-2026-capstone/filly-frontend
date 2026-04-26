@@ -5,7 +5,6 @@ export interface Diary {
   finalText: string
   emoji: string
   starRating: number
-  thumbnailUrl?: string
-  media: { type: 'IMAGE' | 'VIDEO'; url: string }[]
+  mediaUrls: string[]
   archiveId: number
 }

@@ -33,16 +33,16 @@ const mockArchives: Archive[] = [
 ]
  
 const mockDiaries: Diary[] = [
-  { id: 101, archiveId: 1, writtenAt: '2025-03-10', emoji: '☕', starRating: 4, mode: 'default', finalText: '', media: [] },
-  { id: 102, archiveId: 1, writtenAt: '2025-03-14', emoji: '🌙', starRating: 3, mode: 'default', finalText: '', media: [] },
-  { id: 103, archiveId: 1, writtenAt: '2025-03-20', emoji: '🌸', starRating: 5, mode: 'default', finalText: '', media: [] },
-  { id: 201, archiveId: 2, writtenAt: '2025-01-05', emoji: '🌊', starRating: 5, mode: 'default', finalText: '', media: [] },
-  { id: 202, archiveId: 2, writtenAt: '2025-01-08', emoji: '🏖️', starRating: 4, mode: 'default', finalText: '', media: [] },
-  { id: 301, archiveId: 3, writtenAt: '2025-02-15', emoji: '🎭', starRating: 4, mode: 'default', finalText: '', media: [] },
-  { id: 302, archiveId: 3, writtenAt: '2025-02-22', emoji: '🎞️', starRating: 5, mode: 'default', finalText: '', media: [] },
-  { id: 303, archiveId: 3, writtenAt: '2025-03-01', emoji: '🌅', starRating: 3, mode: 'default', finalText: '', media: [] },
-  { id: 401, archiveId: 4, writtenAt: '2025-03-05', emoji: '🌱', starRating: 4, mode: 'default', finalText: '', media: [] },
-  { id: 402, archiveId: 4, writtenAt: '2025-03-18', emoji: '📖', starRating: 3, mode: 'default', finalText: '', media: [] },
-  { id: 501, archiveId: 5, writtenAt: '2025-03-25', emoji: '✨', starRating: 5, mode: 'default', finalText: '', media: [] },
-  { id: 502, archiveId: 5, writtenAt: '2025-03-28', emoji: '🌿', starRating: 4, mode: 'default', finalText: '', media: [] },
+  { id: 101, archiveId: 1, writtenAt: '2025-03-10', emoji: '☕', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 102, archiveId: 1, writtenAt: '2025-03-14', emoji: '🌙', starRating: 3, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 103, archiveId: 1, writtenAt: '2025-03-20', emoji: '🌸', starRating: 5, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 201, archiveId: 2, writtenAt: '2025-01-05', emoji: '🌊', starRating: 5, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 202, archiveId: 2, writtenAt: '2025-01-08', emoji: '🏖️', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 301, archiveId: 3, writtenAt: '2025-02-15', emoji: '🎭', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 302, archiveId: 3, writtenAt: '2025-02-22', emoji: '🎞️', starRating: 5, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 303, archiveId: 3, writtenAt: '2025-03-01', emoji: '🌅', starRating: 3, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 401, archiveId: 4, writtenAt: '2025-03-05', emoji: '🌱', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 402, archiveId: 4, writtenAt: '2025-03-18', emoji: '📖', starRating: 3, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 501, archiveId: 5, writtenAt: '2025-03-25', emoji: '✨', starRating: 5, mode: 'default', finalText: '', mediaUrls: [] },
+  { id: 502, archiveId: 5, writtenAt: '2025-03-28', emoji: '🌿', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
 ]
