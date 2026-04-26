@@ -1,13 +1,12 @@
-// src/lib/api.ts
-import axios from 'axios';
+import axios from "axios";
 
 export const api = axios.create({
-  baseURL: 'https://filly-diary.com',
-  timeout: 5000,
+  baseURL: "https://filly-diary.com",
+  timeout: 50000, // Todo: 적절한 타임아웃 시간으로 조정 필요 (임시로 AI 응답 대기 시간 고려하여 넉넉하게 설정)
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem("accessToken");
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -73,5 +72,5 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );

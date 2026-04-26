@@ -40,5 +40,12 @@ export function usePhotoUpload(max = 4) {
     });
   };
 
-  return { photos, inputRef, handleButtonClick, handleFileChange, removePhoto, max };
+  const replacePhotos = (newPhotos: Photo[]) => {
+    setPhotos((prev) => {
+      prev.forEach((p) => URL.revokeObjectURL(p.url));
+      return newPhotos;
+    });
+  };
+
+  return { photos, inputRef, handleButtonClick, handleFileChange, removePhoto, replacePhotos, max };
 }
