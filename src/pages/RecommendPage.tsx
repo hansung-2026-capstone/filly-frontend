@@ -1,12 +1,15 @@
 import { useIdCard } from "../hook/useIdCard";
 import { useReceipt } from "../hook/useReceipt";
-import { IdCard, IdCardSkeleton } from "../components/share/IdCard";
-import { Receipt, ReceiptSkeleton } from "../components/share/Receipt";
+import { IdCard, IdCardSkeleton } from "../components/IdCard";
+import { Receipt, ReceiptSkeleton } from "../components/Receipt";
 
 export function RecommendPage() {
   const now = new Date();
   const { idCard, loading: idCardLoading } = useIdCard();
-  const { receipt, loading: receiptLoading } = useReceipt(now.getFullYear(), now.getMonth() + 1);
+  const { receipt, loading: receiptLoading } = useReceipt(
+    now.getFullYear(),
+    now.getMonth() + 1,
+  );
 
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">

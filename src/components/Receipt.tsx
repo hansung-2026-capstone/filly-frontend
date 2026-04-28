@@ -14,11 +14,10 @@ export function Receipt({ receipt, nickname, year, month }: ReceiptProps) {
   const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   return (
-    <div className="w-[160px] flex-shrink-0 flex flex-col bg-white border border-border-light shadow-medium font-mono text-[9px] text-text-primary">
+    <div className="w-[200px] flex-shrink-0 flex flex-col bg-white border border-border-light shadow-medium font-mono text-[9px] text-text-primary">
       {/* 로고 */}
-      <div className="flex flex-col items-center pt-4 pb-3 gap-1">
+      <div className="flex flex-col items-center pt-4 pb-3">
         <span className="text-[14px] font-black tracking-[3px] text-text-strong">✿ FILLY</span>
-        <span className="text-[7px] tracking-[1px] text-text-secondary">Emotion Diary</span>
       </div>
 
       <Dashed />
@@ -76,13 +75,6 @@ export function Receipt({ receipt, nickname, year, month }: ReceiptProps) {
         <Barcode value={receipt.orderNumber} />
       </div>
 
-      <Dashed />
-
-      {/* 하단 문구 */}
-      <div className="px-3 py-2.5 flex flex-col gap-1 text-text-muted">
-        <span>이번 달도 수고했어요 :)</span>
-        <span className="text-text-secondary">· 당신의 감정은 소중해요</span>
-      </div>
     </div>
   );
 }
@@ -129,9 +121,8 @@ const BARCODE_PATTERN = [2,1,3,1,1,2,1,3,2,1,1,3,1,2,1,1,3,2,1,2,3,1,1,2,1,3,1,2
 
 function Barcode({ value }: { value: string }) {
   return (
-    <div className="flex flex-col items-center gap-1.5 px-2 w-full">
-      <div className="flex h-10 w-full bg-white overflow-hidden">
-        <div className="w-2 bg-white flex-shrink-0" />
+    <div className="flex flex-col items-center gap-1.5 w-full">
+      <div className="flex justify-center h-10 w-full bg-white overflow-hidden">
         {BARCODE_PATTERN.map((w, i) => (
           <div
             key={i}
@@ -139,7 +130,6 @@ function Barcode({ value }: { value: string }) {
             style={{ width: `${w}px`, backgroundColor: i % 2 === 0 ? "#000" : "#fff" }}
           />
         ))}
-        <div className="flex-1 bg-white" />
       </div>
       <span className="text-[7px] tracking-widest text-text-secondary">{value}</span>
     </div>
