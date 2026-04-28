@@ -1,6 +1,9 @@
 import { Sparkles } from "lucide-react";
+import { usePersona } from "../hook/usePersona";
 
 export function StatsPage() {
+  const { current, history, loading } = usePersona();
+
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">
       {/* Left page - Persona */}
@@ -13,14 +16,21 @@ export function StatsPage() {
                 <Sparkles className="w-3.5 h-3.5 text-[rgba(255,255,255,0.7)]" />
                 <span>페르소나 리포트</span>
               </div>
-              <div className="text-[15px] text-white font-bold leading-[1.4]">
-                "금요일 저녁의 감정적인 탐험가"
-              </div>
-              <div className="text-[11px] text-[rgba(255,255,255,0.82)] leading-[1.7]">
-                당신은 주말을 앞둔 금요일 저녁 공상적인 탐험가입니다. 특히
-                급속철과 추억의 활용에서 기쁨이 최고조를 느끼며 저녁의 경험을
-                선호합니다.
-              </div>
+              {loading ? (
+                <>
+                  <div className="h-5 w-3/4 bg-[rgba(255,255,255,0.2)] rounded animate-pulse" />
+                  <div className="h-10 w-full bg-[rgba(255,255,255,0.15)] rounded animate-pulse" />
+                </>
+              ) : (
+                <>
+                  <div className="text-[15px] text-white font-bold leading-[1.4]">
+                    {current?.title}
+                  </div>
+                  <div className="text-[11px] text-[rgba(255,255,255,0.82)] leading-[1.7]">
+                    {current?.description}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
@@ -30,42 +40,41 @@ export function StatsPage() {
               파장 히스토리
             </div>
 
-            {[
-              {
-                name: '"몽정적인 여성가"',
-                date: "2026.04.01 - 2026.04.14",
-                color: "#7ab97a",
-              },
-              {
-                name: '"강수 능숙가"',
-                date: "2026.03.15 - 2026.03.31",
-                color: "#6b8ba8",
-              },
-              {
-                name: '"노시 달려가"',
-                date: "2026.02.28 - 2026.03.14",
-                color: "#a0947a",
-              },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-2.5 py-2 px-2.5 rounded-md bg-[rgba(160,140,120,0.04)] 
-                  border border-[rgba(160,140,120,0.08)]"
-              >
+            {loading ? (
+              Array.from({ length: 3 }).map((_, i) => (
                 <div
-                  className="w-2 h-9 rounded flex-shrink-0"
-                  style={{ background: item.color }}
-                />
-                <div className="flex flex-col gap-0.5">
-                  <div className="text-[11px] text-[rgba(60,45,30,0.6)]">
-                    {item.name}
-                  </div>
-                  <div className="text-[9px] text-[rgba(120,105,85,0.35)]">
-                    {item.date}
+                  key={i}
+                  className="flex items-center gap-2.5 py-2 px-2.5 rounded-md bg-[rgba(160,140,120,0.04)] border border-[rgba(160,140,120,0.08)]"
+                >
+                  <div className="w-2 h-9 rounded flex-shrink-0 bg-[rgba(160,140,120,0.15)] animate-pulse" />
+                  <div className="flex flex-col gap-0.5 flex-1">
+                    <div className="h-3 w-2/3 bg-[rgba(160,140,120,0.15)] rounded animate-pulse" />
+                    <div className="h-2 w-1/3 bg-[rgba(160,140,120,0.1)] rounded animate-pulse" />
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              history.map((item, i) => (
+                <div
+                  key={i}
+                  className="flex items-center gap-2.5 py-2 px-2.5 rounded-md bg-[rgba(160,140,120,0.04)]
+                    border border-[rgba(160,140,120,0.08)]"
+                >
+                  <div
+                    className="w-2 h-9 rounded flex-shrink-0"
+                    style={{ background: item.color }}
+                  />
+                  <div className="flex flex-col gap-0.5">
+                    <div className="text-[11px] text-[rgba(60,45,30,0.6)]">
+                      {item.name}
+                    </div>
+                    <div className="text-[9px] text-[rgba(120,105,85,0.35)]">
+                      {item.startDate} - {item.endDate}
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
