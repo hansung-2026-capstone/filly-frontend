@@ -2,11 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Pencil, Check, X } from "lucide-react";
 import { getMe } from "../api/user";
 
-interface NicknameEditorProps {
-  initialNickname: string;
-}
-
-export function NicknameEditor({ initialNickname }: NicknameEditorProps) {
+export function NicknameEditor() {
   const [nickname, setNickname] = useState("");
   const [draft, setDraft] = useState("");
   const [isEditing, setIsEditing] = useState(false);
@@ -25,7 +21,7 @@ export function NicknameEditor({ initialNickname }: NicknameEditorProps) {
       })
       .finally(() => setLoading(false));
   }, []);
-  
+
   useEffect(() => {
     if (isEditing) inputRef.current?.focus();
   }, [isEditing]);
