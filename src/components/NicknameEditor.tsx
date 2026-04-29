@@ -9,7 +9,7 @@ export function NicknameEditor() {
   const [loading, setLoading] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     getMe()
       .then((user) => {
         setNickname(user.nickname);
@@ -35,17 +35,6 @@ export function NicknameEditor() {
     const trimmed = draft.trim();
     if (!trimmed) return;
 
-    // TODO: 백엔드 연결 시 아래 주석 해제
-    // const token = localStorage.getItem('accessToken');
-    // await fetch('/api/user/nickname', {
-    //   method: 'PATCH',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: `Bearer ${token}`,
-    //   },
-    //   body: JSON.stringify({ nickname: trimmed }),
-    // });
-
     setNickname(trimmed);
     setIsEditing(false);
   };
@@ -65,7 +54,7 @@ export function NicknameEditor() {
       {/* [보기 모드] */}
       <div className="relative flex items-center justify-center w-full py-1 group">
         <span className="text-xs text-[rgba(80,60,40,0.7)] tracking-[0.5px] font-['Nanum_Myeongjo'] relative">
-          {nickname}
+          {loading ? "·  ·  ·" : nickname}
         </span>
         <button
           onClick={handleEdit}
