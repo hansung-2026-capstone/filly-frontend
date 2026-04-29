@@ -1,16 +1,31 @@
 import { useState, useRef, useEffect } from "react";
 import { Pencil, Check, X } from "lucide-react";
+import { getMe } from "../api/user";
 
 interface NicknameEditorProps {
   initialNickname: string;
 }
 
 export function NicknameEditor({ initialNickname }: NicknameEditorProps) {
-  const [nickname, setNickname] = useState(initialNickname);
-  const [draft, setDraft] = useState(initialNickname);
+  const [nickname, setNickname] = useState("");
+  const [draft, setDraft] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
 
+    useEffect(() => {
+    getMe()
+      .then((user) => {
+        setNickname(user.nickname);
+        setDraft(user.nickname);
+      })
+      .catch(() => {
+        setNickname("이름 없음");
+        setDraft("이름 없음");
+      })
+      .finally(() => setLoading(false));
+  }, []);
+  
   useEffect(() => {
     if (isEditing) inputRef.current?.focus();
   }, [isEditing]);
