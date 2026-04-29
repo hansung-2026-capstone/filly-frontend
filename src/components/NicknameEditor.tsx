@@ -1,15 +1,26 @@
 import { useState, useRef, useEffect } from "react";
 import { Pencil, Check, X } from "lucide-react";
+import { getMe } from "../api/user";
 
-interface NicknameEditorProps {
-  initialNickname: string;
-}
-
-export function NicknameEditor({ initialNickname }: NicknameEditorProps) {
-  const [nickname, setNickname] = useState(initialNickname);
-  const [draft, setDraft] = useState(initialNickname);
+export function NicknameEditor() {
+  const [nickname, setNickname] = useState("");
+  const [draft, setDraft] = useState("");
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    getMe()
+      .then((user) => {
+        setNickname(user.nickname);
+        setDraft(user.nickname);
+      })
+      .catch(() => {
+        setNickname("이름 없음");
+        setDraft("이름 없음");
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     if (isEditing) inputRef.current?.focus();
@@ -23,17 +34,6 @@ export function NicknameEditor({ initialNickname }: NicknameEditorProps) {
   const handleSave = async () => {
     const trimmed = draft.trim();
     if (!trimmed) return;
-
-    // TODO: 백엔드 연결 시 아래 주석 해제
-    // const token = localStorage.getItem('accessToken');
-    // await fetch('/api/user/nickname', {
-    //   method: 'PATCH',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: `Bearer ${token}`,
-    //   },
-    //   body: JSON.stringify({ nickname: trimmed }),
-    // });
 
     setNickname(trimmed);
     setIsEditing(false);
@@ -54,7 +54,7 @@ export function NicknameEditor({ initialNickname }: NicknameEditorProps) {
       {/* [보기 모드] */}
       <div className="relative flex items-center justify-center w-full py-1 group">
         <span className="text-xs text-[rgba(80,60,40,0.7)] tracking-[0.5px] font-['Nanum_Myeongjo'] relative">
-          {nickname}
+          {loading ? "·  ·  ·" : nickname}
         </span>
         <button
           onClick={handleEdit}
