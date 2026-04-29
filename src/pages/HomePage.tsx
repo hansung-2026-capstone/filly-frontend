@@ -97,7 +97,7 @@ export function HomePage() {
               alt="Profile"
               className="w-14 h-14 rounded-full object-cover border-2 border-[rgba(200,185,165,0.5)] shadow-sm"
             />
-            <NicknameEditor initialNickname="소소한 하루" />
+            <NicknameEditor />
           </div>
 
           {/* 하단 작성 버튼 */}
