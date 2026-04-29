@@ -9,12 +9,13 @@ export interface UserData {
   createdAt: string;
 }
 
-export const getMe = async (): Promise<UserMe> => {
-  const { data } = await api.get<{ data: UserMe }>("/api/v1/users/me");
 export interface UserResponse {
   success: boolean;
   data: UserData;
   message: string | null;
 }
+
+export const getMe = async (): Promise<UserData> => {
+  const { data } = await api.get<UserResponse>("/api/v1/users/me");
   return data.data;
 };
