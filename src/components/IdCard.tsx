@@ -6,7 +6,7 @@ interface IdCardProps {
 
 export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
   return (
-    <div className="w-[150px] flex-shrink-0 flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium">
+    <div className="w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium">
       {/* 상단 헤더 */}
       <div className="bg-tab-recommend px-4 py-2.5 flex items-center justify-between">
         <span className="text-[14px] font-black tracking-[3px] text-tab-recommend-text">FILLY</span>
@@ -68,7 +68,7 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
 
 export function IdCardSkeleton() {
   return (
-    <div className="w-[150px] flex-shrink-0 flex flex-col rounded-2xl overflow-hidden border border-border-medium">
+    <div className="w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium">
       <div className="bg-tab-recommend opacity-60 h-9" />
       <div className="bg-notebook-page flex flex-col items-center px-4 pt-4 pb-3 gap-3">
         <div className="w-[72px] h-[72px] rounded-full bg-bg-hover animate-pulse" />

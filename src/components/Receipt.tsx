@@ -14,7 +14,7 @@ export function Receipt({ receipt, nickname, year, month }: ReceiptProps) {
   const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 
   return (
-    <div className="w-[200px] flex-shrink-0 flex flex-col bg-white border border-border-light shadow-medium font-mono text-[9px] text-text-primary">
+    <div className="w-full flex flex-col bg-white border border-border-light shadow-medium font-mono text-[9px] text-text-primary">
       {/* 로고 */}
       <div className="flex flex-col items-center pt-4 pb-3">
         <span className="text-[14px] font-black tracking-[3px] text-text-strong">✿ FILLY</span>
@@ -81,7 +81,7 @@ export function Receipt({ receipt, nickname, year, month }: ReceiptProps) {
 
 export function ReceiptSkeleton() {
   return (
-    <div className="w-[160px] flex-shrink-0 flex flex-col bg-white border border-border-light shadow-medium gap-3 py-4 px-4">
+    <div className="w-full flex flex-col bg-white border border-border-light shadow-medium gap-3 py-4 px-4">
       <div className="flex flex-col items-center gap-1.5">
         <div className="h-4 w-20 rounded bg-bg-hover animate-pulse" />
         <div className="h-2 w-14 rounded bg-bg-hover animate-pulse" />
