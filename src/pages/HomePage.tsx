@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Pencil, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { Portal } from "../components/Portal"
 import { NicknameEditor } from "../components/NicknameEditor"
+
 import { useMonthlyDiaries } from "../hook/useMonthlyDiaries"
 import { CalendarCell } from "../components/CalendarCell"
 import { DiaryDetailModal } from "../components/DiaryDetailModal"
+import { MonthPickerModal } from "../components/MonthPickerModal"
 import type { DiaryItem } from "../api/diary"
 
 const months = [
@@ -60,9 +61,9 @@ export function HomePage() {
 
   const { diaries, loading, refetch } = useMonthlyDiaries(currentYear, currentMonth);
 
-  const handleMonthSelect = (month: number) => {
+  const handleMonthSelect = (year: number, month: number) => {
+    setCurrentYear(year);
     setCurrentMonth(month);
-    setShowMonthModal(false);
   };
 
   return (
@@ -163,86 +164,13 @@ export function HomePage() {
           )}
         </div>
       </div>
-      {/* Month selection modal */}
-      {showMonthModal && (
-        <Portal>
-          <div 
-            className="fixed inset-0 bg-[rgba(0,0,0,0.4)] z-[500] flex items-center justify-center backdrop-blur-[2px]"
-            onClick={() => setShowMonthModal(false)}
-          >
-            <div 
-              className="bg-[#faf6ed] rounded-xl w-[420px] shadow-[0_16px_48px_rgba(0,0,0,0.25),0_4px_12px_rgba(0,0,0,0.1)]
-                overflow-hidden font-['Nanum_Myeongjo']"
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                animation: 'modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)'
-              }}
-            >
-              {/* Header with year selector */}
-              <div className="flex items-center justify-between py-4 px-5 pb-3.5 border-b border-[rgba(160,140,120,0.12)]">
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setCurrentYear(currentYear - 1)}
-                    className="w-7 h-7 border-none bg-[rgba(160,140,120,0.08)] cursor-pointer rounded-md 
-                      flex items-center justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.15)]"
-                  >
-                    <svg className="w-4 h-4 text-[rgba(100,80,60,0.6)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="15 18 9 12 15 6" />
-                    </svg>
-                  </button>
-                  <div className="text-[15px] text-[rgba(60,45,30,0.75)] tracking-[0.5px] min-w-[60px] text-center">
-                    {currentYear}
-                  </div>
-                  <button
-                    onClick={() => setCurrentYear(currentYear + 1)}
-                    className="w-7 h-7 border-none bg-[rgba(160,140,120,0.08)] cursor-pointer rounded-md 
-                      flex items-center justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.15)]"
-                  >
-                    <svg className="w-4 h-4 text-[rgba(100,80,60,0.6)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <polyline points="9 18 15 12 9 6" />
-                    </svg>
-                  </button>
-                </div>
-                <button
-                  onClick={() => setShowMonthModal(false)}
-                  className="w-7 h-7 border-none bg-transparent cursor-pointer rounded-md flex items-center
-                    justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.1)]"
-                >
-                  <svg className="w-4 h-4 text-[rgba(100,80,60,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                  </svg>
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="py-5 px-5">
-                <div className="grid grid-cols-3 gap-2.5">
-                  {months.map((month) => (
-                    <button
-                      key={month.num}
-                      onClick={() => handleMonthSelect(month.num)}
-                      className={`py-3 px-3 border rounded-lg cursor-pointer font-['Nanum_Myeongjo']
-                        text-[11px] transition-all duration-200 flex flex-col items-center gap-1
-                        ${currentMonth === month.num 
-                          ? 'bg-[rgba(80,60,40,0.12)] border-[rgba(80,60,40,0.3)] text-[rgba(60,45,30,0.8)]' 
-                          : 'bg-transparent border-[rgba(160,140,120,0.2)] text-[rgba(80,60,40,0.6)] hover:bg-[rgba(160,140,120,0.08)]'
-                        }`}
-                    >
-                      <div className="text-[18px] leading-none">
-                        {String(month.num).padStart(2, '0')}
-                      </div>
-                      <div className="text-[9px] tracking-[0.5px] uppercase opacity-60">
-                        {month.name.slice(0, 3)}
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </Portal>
-      )}
+      <MonthPickerModal
+        isOpen={showMonthModal}
+        selectedYear={currentYear}
+        selectedMonth={currentMonth}
+        onSelect={handleMonthSelect}
+        onClose={() => setShowMonthModal(false)}
+      />
       {selectedDiary && (
         <DiaryDetailModal
           diary={selectedDiary}

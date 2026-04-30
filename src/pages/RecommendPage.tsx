@@ -5,13 +5,16 @@ import { useIdCard } from "../hook/useIdCard";
 import { useReceipt } from "../hook/useReceipt";
 import { IdCard, IdCardSkeleton } from "../components/IdCard";
 import { Receipt, ReceiptSkeleton } from "../components/Receipt";
+import { MonthPickerModal } from "../components/MonthPickerModal";
 
 export function RecommendPage() {
   const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1;
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+
   const { idCard, loading: idCardLoading } = useIdCard();
-  const { receipt, loading: receiptLoading } = useReceipt(year, month);
+  const { receipt, loading: receiptLoading } = useReceipt(selectedYear, selectedMonth);
   const [receiptAtBottom, setReceiptAtBottom] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
 
@@ -29,10 +32,17 @@ export function RecommendPage() {
       {/* Right page - 공유 컨텐츠 */}
       <div className="flex-1 flex flex-col py-3 px-3 gap-3 overflow-y-auto">
         {/* 헤더 */}
-        <div className="flex items-center gap-2 pb-2.5 border-b border-[rgba(160,140,120,0.12)] mb-1 flex-shrink-0">
+        <div className="flex items-center justify-between pb-2.5 border-b border-[rgba(160,140,120,0.12)] mb-1 flex-shrink-0">
           <div className="text-sm text-[rgba(70,55,35,0.65)] tracking-wide">
             공유용 컨텐츠 (Shared Content)
           </div>
+          <button
+            onClick={() => setShowMonthPicker(true)}
+            className="px-2 py-0.5 rounded border border-border-light
+              text-[10px] text-text-muted hover:bg-bg-hover transition-colors"
+          >
+            {selectedYear}년 {selectedMonth}월
+          </button>
         </div>
 
         {/* 사원증 + 영수증 */}
@@ -81,8 +91,8 @@ export function RecommendPage() {
                   <Receipt
                     receipt={receipt}
                     nickname={idCard?.nickname ?? ""}
-                    year={year}
-                    month={month}
+                    year={selectedYear}
+                    month={selectedMonth}
                   />
                 ) : null}
               </div>
@@ -103,10 +113,18 @@ export function RecommendPage() {
           <span className="text-[9px] tracking-[1.5px] text-text-secondary uppercase">
             키워드 클라우드 <span className="normal-case">(Keyword Cloud)</span>
           </span>
-          <div className="h-[100px] rounded-lg border border-dashed border-border-medium bg-bg-beige-subtle" />
+          <KeywordCloud />
         </div>
       </div>
     </div>
+
+    <MonthPickerModal
+      isOpen={showMonthPicker}
+      selectedYear={selectedYear}
+      selectedMonth={selectedMonth}
+      onSelect={(year, month) => { setSelectedYear(year); setSelectedMonth(month); }}
+      onClose={() => setShowMonthPicker(false)}
+    />
 
     {/* 영수증 전체보기 모달 */}
     {showReceiptModal && receipt && createPortal(
@@ -129,8 +147,8 @@ export function RecommendPage() {
             <Receipt
               receipt={receipt}
               nickname={idCard?.nickname ?? ""}
-              year={year}
-              month={month}
+              year={selectedYear}
+              month={selectedMonth}
             />
           </div>
         </div>
@@ -138,5 +156,41 @@ export function RecommendPage() {
       document.body,
     )}
     </>
+  );
+}
+
+const MOCK_KEYWORDS = [
+  { text: "일기", weight: 9 },
+  { text: "취향", weight: 8 },
+  { text: "통계", weight: 8 },
+  { text: "활동", weight: 7 },
+  { text: "페르소나", weight: 7 },
+  { text: "AI", weight: 6 },
+  { text: "사교", weight: 5 },
+  { text: "음식", weight: 5 },
+  { text: "학습", weight: 5 },
+  { text: "별점", weight: 4 },
+  { text: "패턴", weight: 4 },
+  { text: "밀라도", weight: 3 },
+  { text: "얼게", weight: 3 },
+];
+
+function KeywordCloud() {
+  return (
+    <div className="rounded-lg border border-border-medium bg-bg-beige-subtle px-3 py-3 flex flex-wrap gap-x-2 gap-y-1.5 items-center justify-center min-h-[100px]">
+      {MOCK_KEYWORDS.map(({ text, weight }) => {
+        const size = 9 + weight * 1.6;
+        const opacity = 0.4 + weight * 0.06;
+        return (
+          <span
+            key={text}
+            className="font-['Nanum_Myeongjo'] font-bold text-text-strong leading-tight cursor-default select-none"
+            style={{ fontSize: `${size}px`, opacity }}
+          >
+            {text}
+          </span>
+        );
+      })}
+    </div>
   );
 }
