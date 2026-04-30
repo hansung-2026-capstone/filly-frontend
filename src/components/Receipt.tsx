@@ -1,4 +1,4 @@
-import type { ReceiptResponse } from "../../api/share";
+import type { ReceiptResponse } from "../api/share";
 
 interface ReceiptProps {
   receipt: ReceiptResponse;
@@ -11,7 +11,19 @@ export function Receipt({ receipt, nickname, year, month }: ReceiptProps) {
   const emotions = Object.entries(receipt.emotionDistribution);
   const persona = receipt.personaTitle ?? "감정을 탐험하는 신입 사원";
   const now = new Date();
-  const dateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const nowYear = now.getFullYear();
+  const nowMonth = now.getMonth() + 1;
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  let day: number;
+  if (year > nowYear || (year === nowYear && month > nowMonth)) {
+    day = 1;
+  } else if (year === nowYear && month === nowMonth) {
+    day = now.getDate();
+  } else {
+    day = new Date(year, month, 0).getDate();
+  }
+  const dateStr = `${year}-${pad(month)}-${pad(day)}`;
 
   return (
     <div className="w-full flex flex-col bg-white border border-border-light shadow-medium font-mono text-[9px] text-text-primary">
