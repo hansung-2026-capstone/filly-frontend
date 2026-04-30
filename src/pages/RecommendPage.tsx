@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { X, Download } from "lucide-react";
+import { toPng } from "html-to-image";
 import { useIdCard } from "../hook/useIdCard";
 import { useReceipt } from "../hook/useReceipt";
 import { useMonthlyStat } from "../hook/useMonthlyStat";
@@ -23,6 +24,66 @@ export function RecommendPage() {
   const { stat } = useMonthlyStat(selectedYear, selectedMonth);
   const [receiptAtBottom, setReceiptAtBottom] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [capturing, setCapturing] = useState(false);
+  const idCardRef = useRef<HTMLDivElement>(null);
+  const receiptScrollRef = useRef<HTMLDivElement>(null);
+  const receiptWrapRef = useRef<HTMLDivElement>(null);
+  const keywordCloudRef = useRef<HTMLDivElement>(null);
+
+  function downloadPng(dataUrl: string, filename: string) {
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  async function handleCapture() {
+    setCapturing(true);
+    const prefix = `filly-${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
+
+    const receiptEl = receiptScrollRef.current;
+    const prevHeight = receiptEl?.style.height ?? "";
+    const prevOverflow = receiptEl?.style.overflowY ?? "";
+    if (receiptEl) {
+      receiptEl.style.height = "auto";
+      receiptEl.style.overflowY = "visible";
+    }
+
+    try {
+      // 사원증: 첫 번째 자식(IdCard div, rounded-2xl)을 직접 캡처 → 투명 배경으로 라운딩 살림
+      const idCardEl = idCardRef.current?.firstElementChild as HTMLElement | null;
+      if (idCardEl)
+        downloadPng(
+          await toPng(idCardEl, { pixelRatio: 2 }),
+          `${prefix}-사원증.png`,
+        );
+
+      // 영수증: 펼쳐진 스크롤 컨테이너 전체 캡처
+      if (receiptScrollRef.current)
+        downloadPng(
+          await toPng(receiptScrollRef.current, { backgroundColor: "#ffffff", pixelRatio: 2 }),
+          `${prefix}-영수증.png`,
+        );
+
+      // 키워드 클라우드: 라운딩 영역만 캡처 → 투명 배경
+      const cloudEl = keywordCloudRef.current?.firstElementChild as HTMLElement | null;
+      if (cloudEl)
+        downloadPng(
+          await toPng(cloudEl, { pixelRatio: 2 }),
+          `${prefix}-키워드클라우드.png`,
+        );
+    } catch (e) {
+      console.error("[capture] 실패", e);
+    } finally {
+      if (receiptEl) {
+        receiptEl.style.height = prevHeight;
+        receiptEl.style.overflowY = prevOverflow;
+      }
+      setCapturing(false);
+    }
+  }
 
   function handleReceiptScroll(e: React.UIEvent<HTMLDivElement>) {
     const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
@@ -58,7 +119,7 @@ export function RecommendPage() {
               <span className="text-[9px] tracking-[1.5px] text-text-secondary uppercase">
                 사원증 <span className="normal-case">(ID Card)</span>
               </span>
-              <div className="flex-1">
+              <div ref={idCardRef} className="flex-1">
                 {idCardLoading ? (
                   <IdCardSkeleton />
                 ) : idCard ? (
@@ -86,8 +147,9 @@ export function RecommendPage() {
                   </button>
                 )}
               </div>
-              <div className="relative h-[280px]">
+              <div ref={receiptWrapRef} className="relative h-[280px]">
                 <div
+                  ref={receiptScrollRef}
                   className="h-full overflow-y-auto"
                   onScroll={handleReceiptScroll}
                 >
@@ -121,7 +183,22 @@ export function RecommendPage() {
               키워드 클라우드{" "}
               <span className="normal-case">(Keyword Cloud)</span>
             </span>
-            <KeywordCloud keywords={stat?.keywordCloud ?? null} />
+            <div ref={keywordCloudRef}>
+              <KeywordCloud keywords={stat?.keywordCloud ?? null} />
+            </div>
+          </div>
+
+          {/* 캡처 버튼 */}
+          <div className="flex justify-center flex-shrink-0">
+            <button
+              onClick={handleCapture}
+              disabled={capturing}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-border-medium
+                text-[10px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
+            >
+              <Download className="w-3 h-3" />
+              {capturing ? "캡처 중..." : "이미지 저장"}
+            </button>
           </div>
         </div>
       </div>
