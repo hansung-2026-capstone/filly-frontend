@@ -5,7 +5,7 @@ import { type Photo } from "../hook/usePhotoUpload";
 interface PhotoUploadSectionProps {
   title: string;
   photos: Photo[];
-  inputRef: RefObject<HTMLInputElement | null>;
+  inputRef: RefObject<HTMLInputElement>;
   handleButtonClick: () => void;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   removePhoto: (id: number) => void;
