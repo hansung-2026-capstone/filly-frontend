@@ -68,12 +68,12 @@ export function Root() {
 
               {/* Paper texture */}
               <div
-                className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-l-md"
+                className="absolute inset-0 pointer-events-none rounded-l-md"
                 style={{
-                  backgroundImage: `
-                    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(120,100,80,0.15) 2px, rgba(120,100,80,0.15) 3px),
-                    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(100,80,60,0.1) 3px, rgba(100,80,60,0.1) 4px)
-                  `,
+                  backgroundImage: `url("https://www.transparenttextures.com/patterns/exclusive-paper.png")`,
+                  filter: "contrast(100%) brightness(100%)",
+                  backgroundSize: "400px",
+                  mixBlendMode: "multiply",
                 }}
               />
             </div>
@@ -101,12 +101,12 @@ export function Root() {
 
               {/* Paper texture */}
               <div
-                className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-r-md"
+                className="absolute inset-0 pointer-events-none rounded-l-md"
                 style={{
-                  backgroundImage: `
-                    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(120,100,80,0.15) 2px, rgba(120,100,80,0.15) 3px),
-                    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(100,80,60,0.1) 3px, rgba(100,80,60,0.1) 4px)
-                  `,
+                  backgroundImage: `url("https://www.transparenttextures.com/patterns/exclusive-paper.png")`,
+                  filter: "contrast(100%) brightness(100%)",
+                  backgroundSize: "400px",
+                  mixBlendMode: "multiply",
                 }}
               />
             </div>
