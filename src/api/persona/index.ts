@@ -1,23 +1,20 @@
 import { api } from "../instance";
 
 export interface PersonaCurrent {
+  id: number;
   title: string;
-  description: string;
+  summary: string;
+  generatedAt: string;
 }
 
-export interface PersonaHistoryItem {
-  name: string;
-  startDate: string;
-  endDate: string;
-  color: string;
+export interface PersonaResponse {
+  id: number;
+  title: string;
+  summary: string;
+  generatedAt: string;
 }
 
-export const getPersonaCurrent = async () => {
-  const { data } = await api.get<{ data: PersonaCurrent }>("/api/v1/persona/current");
-  return data.data;
-};
-
-export const getPersonaHistory = async () => {
-  const { data } = await api.get<{ data: PersonaHistoryItem[] }>("/api/v1/persona/history");
+export const getPersonas = async () => {
+  const { data } = await api.get<{ data: PersonaResponse[] }>("/api/v1/personas");
   return data.data ?? [];
 };

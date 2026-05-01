@@ -2,7 +2,7 @@ import { Sparkles } from "lucide-react";
 import { usePersona } from "../hook/usePersona";
 
 export function StatsPage() {
-  const { current, history, loading } = usePersona();
+  const { current, history, loading, error } = usePersona();
 
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">
@@ -24,10 +24,11 @@ export function StatsPage() {
               ) : (
                 <>
                   <div className="text-[15px] text-white font-bold leading-[1.4]">
-                    {current?.title}
+                    {current?.title ?? "아직 생성된 페르소나가 없어요"}
                   </div>
                   <div className="text-[11px] text-[rgba(255,255,255,0.82)] leading-[1.7]">
-                    {current?.description}
+                    {current?.summary ??
+                      "최근 30일 일기 5개 이상 작성 후 7일이 지나면 자동으로 페르소나가 생성됩니다."}
                   </div>
                 </>
               )}
@@ -37,7 +38,7 @@ export function StatsPage() {
           {/* History */}
           <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto">
             <div className="text-[9px] tracking-[2px] text-[rgba(120,105,85,0.4)] uppercase mb-0.5">
-              파장 히스토리
+              페르소나 히스토리
             </div>
 
             {loading ? (
@@ -53,10 +54,18 @@ export function StatsPage() {
                   </div>
                 </div>
               ))
+            ) : error ? (
+              <div className="py-6 px-3 text-center text-[11px] leading-[1.6] text-text-muted bg-bg-beige-subtle border border-border-light rounded-md">
+                페르소나 기록을 불러오지 못했어요.
+              </div>
+            ) : history.length === 0 ? (
+              <div className="py-6 px-3 text-center text-[11px] leading-[1.6] text-text-muted bg-bg-beige-subtle border border-border-light rounded-md">
+                아직 생성된 페르소나 기록이 없어요.
+              </div>
             ) : (
-              history.map((item, i) => (
+              history.map((item) => (
                 <div
-                  key={i}
+                  key={item.id}
                   className="flex items-center gap-2.5 py-2 px-2.5 rounded-md bg-[rgba(160,140,120,0.04)]
                     border border-[rgba(160,140,120,0.08)]"
                 >
@@ -66,10 +75,13 @@ export function StatsPage() {
                   />
                   <div className="flex flex-col gap-0.5">
                     <div className="text-[11px] text-[rgba(60,45,30,0.6)]">
-                      {item.name}
+                      {item.title}
                     </div>
                     <div className="text-[9px] text-[rgba(120,105,85,0.35)]">
-                      {item.startDate} - {item.endDate}
+                      {item.generatedAtLabel}
+                    </div>
+                    <div className="text-[9px] leading-[1.45] text-[rgba(80,60,40,0.48)] max-h-[40px] overflow-hidden">
+                      {item.summary}
                     </div>
                   </div>
                 </div>
