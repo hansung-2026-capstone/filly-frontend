@@ -73,16 +73,31 @@ export function HomePage() {
           {/* 월 버튼 영역 */}
           <button 
             onClick={() => setShowMonthModal(true)}
-            className="h-[25%] w-full flex flex-col items-center justify-center gap-0.5 border-b border-[rgba(160,140,120,0.15)]
-              bg-transparent border-none cursor-pointer transition-all duration-200 hover:bg-[rgba(160,140,120,0.04)] group"
+            className="h-[30%] w-full flex flex-col items-center justify-center gap-1 border-b border-[rgba(160,140,120,0.15)]
+              bg-transparent cursor-pointer transition-all duration-300 hover:bg-[rgba(160,140,120,0.08)] group relative"
           >
-            <div className="text-[10px] tracking-[3px] text-[rgba(120,105,85,0.45)] uppercase">{currentYear}</div>
-            <div className="text-[42px] font-normal text-[rgba(80,60,40,0.65)] leading-none">
+            <div className="text-[11px] font-medium tracking-[3px] pl-[3px] text-[rgba(120,105,85,0.6)] uppercase">
+              {currentYear}
+            </div>
+
+            <div className="text-[46px] font-light tracking-tighter text-[rgba(60,45,30,0.95)] leading-none my-1">
               {String(currentMonth).padStart(2, '0')}
             </div>
-            <div className="text-[11px] tracking-[2px] text-[rgba(120,105,85,0.5)] uppercase flex items-center gap-1">
-              {months[currentMonth - 1].name}
-              <ChevronDown className="w-3 h-3 opacity-50 group-hover:opacity-100 transition-opacity" />
+
+            <div className="flex flex-col items-center gap-1 mt-1">
+              <div className="text-[12px] font-bold tracking-[2px] text-[rgba(80,65,50,0.9)] uppercase transition-colors group-hover:text-[rgba(40,30,20,1)]">
+                {months[currentMonth - 1].name}
+              </div>
+              <div className="bg-[rgba(160,140,120,0.15)] rounded-full p-1 group-hover:bg-[rgba(160,140,120,0.25)] transition-all duration-300">
+                <ChevronDown 
+                  className="w-5 h-5 text-[rgba(80,65,50,0.8)] transition-all duration-300 
+                    group-hover:text-[rgba(40,30,20,1)] group-hover:translate-y-0.5" 
+                />
+              </div>
+            </div>
+
+            <div className="absolute bottom-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <span className="text-[10px] text-[rgba(160,140,120,0.8)] font-bold tracking-widest">월 선택</span>
             </div>
           </button>
 
