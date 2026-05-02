@@ -50,53 +50,49 @@ export function NicknameEditor() {
   };
 
   return (
-    <div className="relative flex flex-col items-center">
-      {/* [보기 모드] */}
-      <div className="relative flex items-center justify-center w-full py-1 group">
-        <span className="text-xs text-[rgba(80,60,40,0.7)] tracking-[0.5px] font-['Nanum_Myeongjo'] relative">
-          {loading ? "·  ·  ·" : nickname}
-        </span>
-        <button
+    <div className="relative flex flex-col items-center w-full px-2">
+      {/* 보기 모드 */}
+      {!isEditing ? (
+        <div
           onClick={handleEdit}
-          className="absolute left-[calc(100%+6px)] top-1/2 -translate-y-1/2 w-4 h-4 
-            flex items-center justify-center rounded opacity-0 group-hover:opacity-100
-            transition-opacity hover:bg-[rgba(160,140,120,0.15)] shrink-0"
+          className="group relative flex items-center justify-center cursor-pointer py-2 w-full rounded-lg transition-all"
         >
-          <Pencil className="w-3 h-3 text-[rgba(120,100,75,0.6)]" />
-        </button> 
-      </div>
+          {/* 닉네임 */}
+          <span className="text-[15px] font-bold tracking-[1px] text-[rgba(60,45,30,0.95)] font-['Nanum_Myeongjo'] transition-colors group-hover:text-[rgba(40,30,20,1)]">
+            {loading ? "···" : nickname}
+          </span>
 
-      {/* [수정 모드 - 팝오버] */}
-      {isEditing && (
-        <div 
-          className="absolute top-3 -translate-y-1/2 left-0 z-[100] 
-            flex items-center gap-2 p-1.5 px-2
-            bg-[#fafaf8] border border-[rgba(160,140,120,0.3)] rounded-lg shadow-xl"
-          style={{ width: '200px' }} 
-        >
+          {/* 연필 아이콘  */}
+          <div className="ml-2 opacity-40 group-hover:opacity-100 transition-opacity">
+            <Pencil className="w-3.5 h-3.5 text-[rgba(60,45,30,0.95)]" />
+          </div>
+        </div>
+      ) : (
+        /* 수정 모드 */
+        <div className="flex flex-col items-center w-full gap-2.5 py-1 animate-in fade-in duration-200">
           <input
             ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={handleKeyDown}
             maxLength={10}
-            className="flex-1 min-w-0 text-[11px] text-[rgba(60,45,30,0.8)] bg-white border border-[rgba(160,140,120,0.2)]
-              rounded px-2 py-1 outline-none focus:border-[rgba(120,95,65,0.5)] tracking-[0.5px]
-              font-['Nanum_Myeongjo']"
+            placeholder="이름 입력"
+            className="w-full text-center text-[14px] font-medium text-[rgba(40,30,20,1)] bg-white/70 border-b-2 border-[rgba(120,95,65,0.5)] py-1.5 outline-none focus:border-[rgba(100,75,50,0.9)] tracking-[0.5px] font-['Nanum_Myeongjo'] placeholder:text-[rgba(160,140,120,0.5)]"
           />
-          
-          <div className="flex items-center gap-1 shrink-0">
+
+          <div className="flex items-center justify-center gap-4 mt-1">
             <button
               onClick={handleSave}
-              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-50 text-green-700 transition-colors"
+              disabled={!draft.trim() || draft.trim() === nickname}
+              className="flex items-center gap-1 text-[11px] font-bold text-[rgba(80,65,50,0.8)] hover:text-[rgba(60,45,30,1)] transition-colors whitespace-nowrap"
             >
-              <Check className="w-3.5 h-3.5" />
+              <Check className="w-3.5 h-3.5" /> 저장
             </button>
             <button
               onClick={handleCancel}
-              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-50 text-red-700 transition-colors"
+              className="flex items-center gap-1 text-[11px] font-bold text-[rgba(80,65,50,0.8)] hover:text-[rgba(60,45,30,1)] transition-colors whitespace-nowrap opacity-50"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-3.5 h-3.5" /> 취소
             </button>
           </div>
         </div>
