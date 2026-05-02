@@ -37,7 +37,7 @@ export function Root() {
       <div className="relative z-[2]">
         {/* Desk shadow */}
         <div
-          className="absolute w-[920px] h-[640px] rounded-xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] pointer-events-none"
+          className="absolute w-[1040px] h-[720px] rounded-xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] pointer-events-none"
           style={{
             boxShadow:
               "0 40px 80px rgba(0,0,0,0.45), 0 15px 35px rgba(0,0,0,0.3)",
@@ -45,9 +45,9 @@ export function Root() {
         />
 
         {/* Notebook */}
-        <div className="relative flex w-[880px] h-[600px] z-[2]">
+        <div className="relative flex w-[1000px] h-[680px] z-[2]">
           {/* Left page */}
-          <div className="w-[440px] h-[600px] relative overflow-hidden">
+          <div className="w-[500px] h-[680px] relative overflow-hidden">
             <div
               className="w-full h-full relative rounded-l-md"
               style={{
@@ -68,19 +68,19 @@ export function Root() {
 
               {/* Paper texture */}
               <div
-                className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-l-md"
+                className="absolute inset-0 pointer-events-none rounded-l-md"
                 style={{
-                  backgroundImage: `
-                    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(120,100,80,0.15) 2px, rgba(120,100,80,0.15) 3px),
-                    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(100,80,60,0.1) 3px, rgba(100,80,60,0.1) 4px)
-                  `,
+                  backgroundImage: `url("https://www.transparenttextures.com/patterns/exclusive-paper.png")`,
+                  filter: "contrast(100%) brightness(100%)",
+                  backgroundSize: "400px",
+                  mixBlendMode: "multiply",
                 }}
               />
             </div>
           </div>
 
           {/* Right page */}
-          <div className="w-[440px] h-[600px] relative overflow-hidden">
+          <div className="w-[500px] h-[680px] relative overflow-hidden">
             <div
               className="w-full h-full relative rounded-r-md"
               style={{
@@ -101,12 +101,12 @@ export function Root() {
 
               {/* Paper texture */}
               <div
-                className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-r-md"
+                className="absolute inset-0 pointer-events-none rounded-l-md"
                 style={{
-                  backgroundImage: `
-                    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(120,100,80,0.15) 2px, rgba(120,100,80,0.15) 3px),
-                    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(100,80,60,0.1) 3px, rgba(100,80,60,0.1) 4px)
-                  `,
+                  backgroundImage: `url("https://www.transparenttextures.com/patterns/exclusive-paper.png")`,
+                  filter: "contrast(100%) brightness(100%)",
+                  backgroundSize: "400px",
+                  mixBlendMode: "multiply",
                 }}
               />
             </div>
@@ -148,7 +148,7 @@ export function Root() {
           />
 
           {/* Content overlay */}
-          <div className="absolute top-0 left-0 w-[880px] h-[600px] z-[9] flex pointer-events-none">
+          <div className="absolute top-0 left-0 w-[1000px] h-[680px] z-[9] flex pointer-events-none">
             <div className="pointer-events-auto w-full h-full">
               <Outlet />
             </div>
