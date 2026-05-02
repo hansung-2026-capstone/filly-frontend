@@ -1,97 +1,151 @@
-import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
+import { useCallback, useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
-  // getArchives,
-  // getAllDiaries,
-  // getArchiveDiaries,
-  // createArchive,
+  createArchive,
+  deleteArchive,
+  getAllDiaries,
+  getArchiveDiaries,
+  getArchives,
+  updateArchive,
   type CreateArchiveInput,
-} from '../api/archive'
-import type { Archive } from '../types/archive'
-import type { Diary } from '../types/diary'
-
-const mockArchives: Archive[] = [
-  { id: 1, name: '일상',  icon: '☀️', color: '#ffb3c1', entryCount: 12 },
-  { id: 2, name: '여행',  icon: '✈️', color: '#b3d9ff', entryCount: 5  },
-  { id: 3, name: '영화',  icon: '🎬', color: '#e6b3ff', entryCount: 8  },
-  { id: 4, name: '독서',  icon: '📚', color: '#ffe599', entryCount: 3  },
-  { id: 5, name: '감사',  icon: '🌿', color: '#b3e5d4', entryCount: 7  },
-]
-
-const mockAllDiaries: Diary[] = [
-  { id: 101, archiveId: 1, writtenAt: '2025-03-10', emoji: '☕', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 102, archiveId: 1, writtenAt: '2025-03-14', emoji: '🌙', starRating: 3, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 103, archiveId: 1, writtenAt: '2025-03-20', emoji: '🌸', starRating: 5, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 201, archiveId: 2, writtenAt: '2025-01-05', emoji: '🌊', starRating: 5, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 202, archiveId: 2, writtenAt: '2025-01-08', emoji: '🏖️', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 301, archiveId: 3, writtenAt: '2025-02-15', emoji: '🎭', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 302, archiveId: 3, writtenAt: '2025-02-22', emoji: '🎞️', starRating: 5, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 303, archiveId: 3, writtenAt: '2025-03-01', emoji: '🌅', starRating: 3, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 401, archiveId: 4, writtenAt: '2025-03-05', emoji: '🌱', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 402, archiveId: 4, writtenAt: '2025-03-18', emoji: '📖', starRating: 3, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 501, archiveId: 5, writtenAt: '2025-03-25', emoji: '✨', starRating: 5, mode: 'default', finalText: '', mediaUrls: [] },
-  { id: 502, archiveId: 5, writtenAt: '2025-03-28', emoji: '🌿', starRating: 4, mode: 'default', finalText: '', mediaUrls: [] },
-]
-
-const mockArchiveDiaries: Record<number, Diary[]> = {
-  1: mockAllDiaries.filter(d => d.archiveId === 1),
-  2: mockAllDiaries.filter(d => d.archiveId === 2),
-  3: mockAllDiaries.filter(d => d.archiveId === 3),
-  4: mockAllDiaries.filter(d => d.archiveId === 4),
-  5: mockAllDiaries.filter(d => d.archiveId === 5),
-}
+  type UpdateArchiveInput,
+} from "../api/archive";
+import type { Archive } from "../types/archive";
+import type { Diary } from "../types/diary";
 
 export function useArchive() {
-  const [archives, setArchives] = useState<Archive[]>([])
-  const [diaries, setDiaries] = useState<Diary[]>([])
-  const [selectedArchiveId, setSelectedArchiveId] = useState<number | null>(null)
-  const [loading, setLoading] = useState(false)
-  const location = useLocation()
+  const [archives, setArchives] = useState<Archive[]>([]);
+  const [diaries, setDiaries] = useState<Diary[]>([]);
+  const [selectedArchiveId, setSelectedArchiveId] = useState<number | null>(null);
+  const [loadingArchives, setLoadingArchives] = useState(false);
+  const [loadingDiaries, setLoadingDiaries] = useState(false);
+  const [mutating, setMutating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [archiveTick, setArchiveTick] = useState(0);
+  const [diaryTick, setDiaryTick] = useState(0);
+  const location = useLocation();
+
+  const refetchArchives = useCallback(() => setArchiveTick((tick) => tick + 1), []);
+  const refetchDiaries = useCallback(() => setDiaryTick((tick) => tick + 1), []);
 
   useEffect(() => {
-    let cancelled = false
-    setLoading(true)
+    let cancelled = false;
+    setLoadingArchives(true);
+    setError(null);
 
-    // TODO: API 연동 후 아래 mock 데이터 제거하고 주석 해제
-    // getArchives()
-    //   .then(data => { if (!cancelled) setArchives(data) })
-    //   .catch(() => { if (!cancelled) setArchives([]) })
-    //   .finally(() => { if (!cancelled) setLoading(false) })
+    getArchives()
+      .then((data) => {
+        if (!cancelled) setArchives(data);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setArchives([]);
+          setError("아카이브 목록을 불러오지 못했습니다.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingArchives(false);
+      });
 
-    if (!cancelled) {
-      setArchives(mockArchives)
-      setLoading(false)
-    }
-
-    return () => { cancelled = true }
-  }, [location.key])
+    return () => {
+      cancelled = true;
+    };
+  }, [location.key, archiveTick]);
 
   useEffect(() => {
-    let cancelled = false
-    setLoading(true)
+    let cancelled = false;
+    setLoadingDiaries(true);
+    setError(null);
 
-    // TODO: API 연동 후 아래 mock 데이터 제거하고 주석 해제
-    // const fetcher = selectedArchiveId === null
-    //   ? getAllDiaries()
-    //   : getArchiveDiaries(selectedArchiveId)
-    // fetcher
-    //   .then(data => { if (!cancelled) setDiaries(data) })
-    //   .catch(() => { if (!cancelled) setDiaries([]) })
-    //   .finally(() => { if (!cancelled) setLoading(false) })
+    const fetcher =
+      selectedArchiveId === null ? getAllDiaries() : getArchiveDiaries(selectedArchiveId);
 
-    if (!cancelled) {
-      setDiaries(selectedArchiveId === null ? mockAllDiaries : (mockArchiveDiaries[selectedArchiveId] ?? []))
-      setLoading(false)
+    fetcher
+      .then((data) => {
+        if (!cancelled) setDiaries(data);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDiaries([]);
+          setError("일기 목록을 불러오지 못했습니다.");
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingDiaries(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedArchiveId, location.key, diaryTick]);
+
+  const addArchive = useCallback(async (input: CreateArchiveInput) => {
+    setMutating(true);
+    setError(null);
+
+    try {
+      const newArchive = await createArchive(input);
+      setArchives((prev) => [newArchive, ...prev]);
+      setSelectedArchiveId(newArchive.id);
+      refetchDiaries();
+      return newArchive;
+    } catch {
+      setError("아카이브를 생성하지 못했습니다.");
+      throw new Error("Failed to create archive");
+    } finally {
+      setMutating(false);
     }
+  }, [refetchDiaries]);
 
-    return () => { cancelled = true }
-  }, [selectedArchiveId, location.key])
+  const editArchive = useCallback(async (archiveId: number, input: UpdateArchiveInput) => {
+    setMutating(true);
+    setError(null);
 
-  const addArchive = (input: CreateArchiveInput) => {
-    // TODO: API 연동 후 아래 주석 해제 및 mock 로직 제거
-    // createArchive(input).then(newArchive => setArchives(prev => [...prev, newArchive]))
-    setArchives(prev => [...prev, { id: Date.now(), ...input, entryCount: 0 }])
-  }
+    try {
+      const nextArchive = await updateArchive(archiveId, input);
+      setArchives((prev) =>
+        prev.map((archive) => (archive.id === archiveId ? nextArchive : archive)),
+      );
+      return nextArchive;
+    } catch {
+      setError("아카이브를 수정하지 못했습니다.");
+      throw new Error("Failed to update archive");
+    } finally {
+      setMutating(false);
+    }
+  }, []);
 
-  return { archives, selectedArchiveId, setSelectedArchiveId, diaries, loading, addArchive }
+  const removeArchive = useCallback(async (archiveId: number) => {
+    setMutating(true);
+    setError(null);
+
+    try {
+      await deleteArchive(archiveId);
+      setArchives((prev) => prev.filter((archive) => archive.id !== archiveId));
+      setSelectedArchiveId((current) => (current === archiveId ? null : current));
+      refetchDiaries();
+    } catch {
+      setError("아카이브를 삭제하지 못했습니다.");
+      throw new Error("Failed to delete archive");
+    } finally {
+      setMutating(false);
+    }
+  }, [refetchDiaries]);
+
+  return {
+    archives,
+    selectedArchiveId,
+    setSelectedArchiveId,
+    diaries,
+    loading: loadingArchives || loadingDiaries,
+    loadingArchives,
+    loadingDiaries,
+    mutating,
+    error,
+    addArchive,
+    editArchive,
+    removeArchive,
+    refetchArchives,
+    refetchDiaries,
+  };
 }
