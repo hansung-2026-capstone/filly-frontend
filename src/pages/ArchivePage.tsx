@@ -297,6 +297,10 @@ export function ArchivePage() {
         <DiaryDetailModal
           diary={toDiaryItem(selectedDiary)}
           onClose={() => setSelectedDiary(null)}
+          onArchived={() => {
+            refetchArchives();
+            refetchDiaries();
+          }}
           onDeleted={() => {
             setSelectedDiary(null);
             refetchArchives();

@@ -1,7 +1,15 @@
-import { X } from "lucide-react";
-import { useState } from "react";
+import { Bookmark, Check, Plus, X } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import {
+  addDiaryToArchive,
+  createArchive,
+  getArchiveDiaries,
+  getArchives,
+  removeDiaryFromArchive,
+} from "../api/archive";
 import { deleteDiary, type DiaryItem } from "../api/diary";
+import type { Archive } from "../types/archive";
 import { Portal } from "./Portal";
 import { TiptapEditor } from "./TiptapEditor";
 
@@ -9,6 +17,7 @@ interface DiaryDetailModalProps {
   diary: DiaryItem;
   onClose: () => void;
   onDeleted?: () => void;
+  onArchived?: () => void;
 }
 
 const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
@@ -62,11 +71,20 @@ function PhotoGrid({ urls }: { urls: string[] }) {
   );
 }
 
-export function DiaryDetailModal({ diary, onClose, onDeleted }: DiaryDetailModalProps) {
+export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: DiaryDetailModalProps) {
   const { label, dow } = formatDate(diary.writtenAt);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showArchiveModal, setShowArchiveModal] = useState(false);
+  const [archives, setArchives] = useState<Archive[]>([]);
+  const [archivedArchiveIds, setArchivedArchiveIds] = useState<Set<number>>(new Set());
+  const [loadingArchives, setLoadingArchives] = useState(false);
+  const [archiving, setArchiving] = useState(false);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
+  const [isAddingArchive, setIsAddingArchive] = useState(false);
+  const [newArchiveName, setNewArchiveName] = useState("");
   const navigate = useNavigate();
+  const isArchived = archivedArchiveIds.size > 0;
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -77,6 +95,94 @@ export function DiaryDetailModal({ diary, onClose, onDeleted }: DiaryDetailModal
     } finally {
       setIsDeleting(false);
     }
+  };
+
+  const loadArchiveStatus = useCallback(async () => {
+    setArchiveError(null);
+    setLoadingArchives(true);
+
+    try {
+      const folders = await getArchives();
+      const folderDiaries = await Promise.all(
+        folders.map(async (archive) => ({
+          archiveId: archive.id,
+          diaries: await getArchiveDiaries(archive.id),
+        })),
+      );
+      const nextArchivedArchiveIds = new Set(
+        folderDiaries
+          .filter(({ diaries }) => diaries.some((item) => item.id === diary.id))
+          .map(({ archiveId }) => archiveId),
+      );
+
+      setArchives(folders);
+      setArchivedArchiveIds(nextArchivedArchiveIds);
+    } catch {
+      setArchives([]);
+      setArchiveError("아카이브 목록을 불러오지 못했습니다.");
+    } finally {
+      setLoadingArchives(false);
+    }
+  }, [diary.id]);
+
+  useEffect(() => {
+    void loadArchiveStatus();
+  }, [loadArchiveStatus]);
+
+  const openArchiveModal = () => {
+    setShowArchiveModal(true);
+    void loadArchiveStatus();
+  };
+
+  const handleArchiveToggle = async (archive: Archive) => {
+    setArchiving(true);
+    setArchiveError(null);
+
+    try {
+      const nextArchivedArchiveIds = new Set(archivedArchiveIds);
+
+      if (nextArchivedArchiveIds.has(archive.id)) {
+        await removeDiaryFromArchive(archive.id, diary.id);
+        nextArchivedArchiveIds.delete(archive.id);
+      } else {
+        await addDiaryToArchive(archive.id, diary.id);
+        nextArchivedArchiveIds.add(archive.id);
+      }
+
+      setArchivedArchiveIds(nextArchivedArchiveIds);
+      onArchived?.();
+    } catch {
+      setArchiveError("아카이브 상태를 변경하지 못했습니다.");
+    } finally {
+      setArchiving(false);
+    }
+  };
+
+  const handleAddArchive = async () => {
+    const trimmedName = newArchiveName.trim();
+    if (!trimmedName) return;
+
+    setArchiving(true);
+    setArchiveError(null);
+
+    try {
+      const archive = await createArchive({ name: trimmedName, color: "pink" });
+      await addDiaryToArchive(archive.id, diary.id);
+      setArchives((prev) => [archive, ...prev]);
+      setArchivedArchiveIds((prev) => new Set(prev).add(archive.id));
+      setNewArchiveName("");
+      setIsAddingArchive(false);
+      onArchived?.();
+    } catch {
+      setArchiveError("새 아카이브를 만들거나 일기를 추가하지 못했습니다.");
+    } finally {
+      setArchiving(false);
+    }
+  };
+
+  const handleCancelAdd = () => {
+    setNewArchiveName("");
+    setIsAddingArchive(false);
   };
 
   return (
@@ -133,50 +239,203 @@ export function DiaryDetailModal({ diary, onClose, onDeleted }: DiaryDetailModal
           </div>
 
           {/* 하단 버튼 */}
-          <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-[rgba(160,140,120,0.12)] min-h-[52px]">
+          <div className="flex items-center justify-between gap-2 px-5 py-3 border-t border-[rgba(160,140,120,0.12)] min-h-[52px]">
             {confirmDelete ? (
               <>
-                <span className="text-[12px] text-[rgba(80,60,40,0.6)] mr-1">정말 삭제하시겠어요?</span>
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-[rgba(160,140,120,0.08)]
-                    border border-[rgba(160,140,120,0.2)] rounded-md cursor-pointer
-                    hover:bg-[rgba(160,140,120,0.15)] transition-all duration-150 font-['Nanum_Myeongjo']"
-                >
-                  취소
-                </button>
-                <button
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className="px-4 py-1.5 text-[12px] text-white bg-[rgba(180,60,40,0.8)]
-                    border border-transparent rounded-md cursor-pointer
-                    hover:bg-[rgba(160,40,20,0.9)] transition-all duration-150 font-['Nanum_Myeongjo']
-                    disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {isDeleting ? "삭제 중..." : "삭제"}
-                </button>
+                <div />
+                <div className="flex items-center justify-end gap-2">
+                  <span className="text-[12px] text-[rgba(80,60,40,0.6)] mr-1">정말 삭제하시겠어요?</span>
+                  <button
+                    onClick={() => setConfirmDelete(false)}
+                    className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-[rgba(160,140,120,0.08)]
+                      border border-[rgba(160,140,120,0.2)] rounded-md cursor-pointer
+                      hover:bg-[rgba(160,140,120,0.15)] transition-all duration-150 font-['Nanum_Myeongjo']"
+                  >
+                    취소
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="px-4 py-1.5 text-[12px] text-white bg-[rgba(180,60,40,0.8)]
+                      border border-transparent rounded-md cursor-pointer
+                      hover:bg-[rgba(160,40,20,0.9)] transition-all duration-150 font-['Nanum_Myeongjo']
+                      disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {isDeleting ? "삭제 중..." : "삭제"}
+                  </button>
+                </div>
               </>
             ) : (
               <>
                 <button
-                  onClick={() => { onClose(); navigate('/write', { state: { diary } }); }}
-                  className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-[rgba(160,140,120,0.08)]
-                    border border-[rgba(160,140,120,0.2)] rounded-md cursor-pointer
-                    hover:bg-[rgba(160,140,120,0.15)] transition-all duration-150 font-['Nanum_Myeongjo']">
-                  수정
+                  onClick={openArchiveModal}
+                  disabled={archiving}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer
+                    transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
+                      isArchived
+                        ? "bg-[rgba(80,60,40,0.12)] hover:bg-[rgba(80,60,40,0.18)]"
+                        : "bg-[rgba(160,140,120,0.08)] hover:bg-[rgba(160,140,120,0.15)]"
+                    }`}
+                  title="아카이브에 추가"
+                >
+                  <Bookmark
+                    className={`w-5 h-5 transition-all duration-200 ${
+                      isArchived
+                        ? "fill-[rgba(80,60,40,0.6)] stroke-[rgba(80,60,40,0.6)]"
+                        : "fill-none stroke-[rgba(100,80,60,0.5)]"
+                    }`}
+                    strokeWidth={1.8}
+                  />
                 </button>
-                <button
-                  onClick={() => setConfirmDelete(true)}
-                  className="px-4 py-1.5 text-[12px] text-[rgba(180,60,40,0.7)] bg-[rgba(180,60,40,0.05)]
-                    border border-[rgba(180,60,40,0.2)] rounded-md cursor-pointer
-                    hover:bg-[rgba(180,60,40,0.1)] transition-all duration-150 font-['Nanum_Myeongjo']">
-                  삭제
-                </button>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => { onClose(); navigate('/write', { state: { diary } }); }}
+                    className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-[rgba(160,140,120,0.08)]
+                      border border-[rgba(160,140,120,0.2)] rounded-md cursor-pointer
+                      hover:bg-[rgba(160,140,120,0.15)] transition-all duration-150 font-['Nanum_Myeongjo']">
+                    수정
+                  </button>
+                  <button
+                    onClick={() => setConfirmDelete(true)}
+                    className="px-4 py-1.5 text-[12px] text-[rgba(180,60,40,0.7)] bg-[rgba(180,60,40,0.05)]
+                      border border-[rgba(180,60,40,0.2)] rounded-md cursor-pointer
+                      hover:bg-[rgba(180,60,40,0.1)] transition-all duration-150 font-['Nanum_Myeongjo']">
+                    삭제
+                  </button>
+                </div>
               </>
             )}
           </div>
         </div>
       </div>
+
+      {showArchiveModal && (
+        <div
+          className="fixed inset-0 bg-[rgba(0,0,0,0.4)] z-[600] flex items-center justify-center backdrop-blur-[2px]"
+          onClick={() => setShowArchiveModal(false)}
+        >
+          <div
+            className="bg-[#faf6ed] rounded-xl w-[360px] shadow-[0_16px_48px_rgba(0,0,0,0.25),0_4px_12px_rgba(0,0,0,0.1)]
+              overflow-hidden font-['Nanum_Myeongjo']"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)",
+            }}
+          >
+            <div className="flex items-center justify-between py-4 px-5 pb-3.5 border-b border-[rgba(160,140,120,0.12)]">
+              <div className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px]">아카이브 선택</div>
+              <button
+                onClick={() => setShowArchiveModal(false)}
+                className="w-7 h-7 border-none bg-transparent cursor-pointer rounded-md flex items-center
+                  justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.1)]"
+              >
+                <X className="w-4 h-4 text-[rgba(100,80,60,0.5)]" />
+              </button>
+            </div>
+
+            <div className="py-4 px-5 flex flex-col gap-2">
+              {archiveError && (
+                <div className="px-3 py-2 rounded-md bg-[rgba(200,70,60,0.08)] text-[11px] text-[rgba(150,50,40,0.78)]">
+                  {archiveError}
+                </div>
+              )}
+
+              {isAddingArchive ? (
+                <div className="w-full py-3 px-4 border rounded-lg
+                  font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
+                  flex items-center gap-2.5 bg-[rgba(160,140,120,0.08)] border-[rgba(160,140,120,0.2)] text-[rgba(60,45,30,0.7)]">
+                  <input
+                    type="text"
+                    value={newArchiveName}
+                    onChange={(e) => setNewArchiveName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") void handleAddArchive();
+                      if (e.key === "Escape") handleCancelAdd();
+                    }}
+                    className="flex-1 bg-transparent outline-none font-['Nanum_Myeongjo'] text-[12px]"
+                    placeholder="새 아카이브 이름"
+                    autoFocus
+                  />
+                  <div className="flex gap-1 flex-shrink-0">
+                    <button
+                      onClick={() => void handleAddArchive()}
+                      disabled={archiving || !newArchiveName.trim()}
+                      className="w-6 h-6 border-none bg-transparent cursor-pointer rounded
+                        transition-all duration-150 hover:bg-[rgba(160,140,120,0.15)] flex items-center justify-center
+                        disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Check className="w-4 h-4 text-[rgba(80,60,40,0.6)]" />
+                    </button>
+                    <button
+                      onClick={handleCancelAdd}
+                      disabled={archiving}
+                      className="w-6 h-6 border-none bg-transparent cursor-pointer rounded
+                        transition-all duration-150 hover:bg-[rgba(160,140,120,0.15)] flex items-center justify-center
+                        disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <X className="w-4 h-4 text-[rgba(100,80,60,0.5)]" />
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setIsAddingArchive(true)}
+                  disabled={archiving}
+                  className="w-full py-3 px-4 border rounded-lg cursor-pointer
+                    font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
+                    flex items-center gap-2.5 bg-transparent border-[rgba(160,140,120,0.2)] text-[rgba(60,45,30,0.7)]
+                    hover:bg-[rgba(160,140,120,0.08)] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <Plus className="w-4 h-4 text-[rgba(80,60,40,0.6)]" />
+                  새 아카이브 추가
+                </button>
+              )}
+
+              {loadingArchives && (
+                <div className="py-4 text-center text-[12px] text-[rgba(120,105,85,0.45)]">
+                  불러오는 중
+                </div>
+              )}
+
+              {!loadingArchives &&
+                archives.map((archive) => {
+                  const archiveHasDiary = archivedArchiveIds.has(archive.id);
+
+                  return (
+                    <button
+                      key={archive.id}
+                      onClick={() => void handleArchiveToggle(archive)}
+                      disabled={archiving}
+                      className={`w-full py-3 px-4 border rounded-lg cursor-pointer
+                        font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
+                        flex items-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed ${
+                          archiveHasDiary
+                            ? "bg-[rgba(80,60,40,0.12)] border-[rgba(80,60,40,0.3)] text-[rgba(60,45,30,0.8)]"
+                            : "bg-transparent border-[rgba(160,140,120,0.2)] text-[rgba(60,45,30,0.7)] hover:bg-[rgba(160,140,120,0.08)]"
+                        }`}
+                    >
+                      <div
+                        className="w-4 h-4 rounded-full flex-shrink-0"
+                        style={{ background: archive.colorValue }}
+                      />
+                      <span className="flex-1 text-left">{archive.name}</span>
+                      {archiveHasDiary && (
+                        <Bookmark className="w-3.5 h-3.5 fill-[rgba(80,60,40,0.55)] stroke-[rgba(80,60,40,0.55)]" />
+                      )}
+                    </button>
+                  );
+                })}
+
+              {!loadingArchives && archives.length === 0 && !archiveError && (
+                <div className="py-4 text-center text-[12px] text-[rgba(120,105,85,0.45)]">
+                  아카이브가 없습니다.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </Portal>
   );
 }
