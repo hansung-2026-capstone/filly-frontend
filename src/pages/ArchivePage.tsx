@@ -1,7 +1,9 @@
 import { type FormEvent, useEffect, useState } from "react";
 import { ArrowLeft, MoreVertical, Plus, X } from "lucide-react";
 import { Portal } from "../components/Portal";
+import { DiaryDetailModal } from "../components/DiaryDetailModal";
 import { useArchive } from "../hook/useArchive";
+import type { DiaryItem } from "../api/diary";
 import type { Archive } from "../types/archive";
 import type { Diary } from "../types/diary";
 
@@ -21,8 +23,18 @@ interface ArchiveModalState {
   archive: Archive | null;
 }
 
+const toDiaryItem = (diary: Diary): DiaryItem => ({
+  id: diary.id,
+  writtenAt: diary.writtenAt,
+  mode: diary.mode,
+  emoji: diary.emoji,
+  rawContent: diary.rawContent ?? "",
+  starRating: diary.starRating,
+  mediaUrls: diary.mediaUrls ?? [],
+});
+
 function getDiaryPreview(entry: Diary) {
-  const source = entry.finalText || entry.rawContent || "";
+  const source = entry.rawContent || "";
   if (!source.trim()) return entry.writtenAt;
 
   const parsed = new DOMParser().parseFromString(source, "text/html");
@@ -44,9 +56,12 @@ export function ArchivePage() {
     addArchive,
     editArchive,
     removeArchive,
+    refetchArchives,
+    refetchDiaries,
   } = useArchive();
   const [modalState, setModalState] = useState<ArchiveModalState | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
+  const [selectedDiary, setSelectedDiary] = useState<Diary | null>(null);
 
   useEffect(() => {
     if (openMenuId === null) return;
@@ -60,8 +75,8 @@ export function ArchivePage() {
     return archives.find((archive) => archive.id === selectedArchiveId)?.name ?? "전체";
   }
 
-  function handleDiaryClick(_entry: Diary) {
-    // TODO: navigate to diary detail
+  function handleDiaryClick(entry: Diary) {
+    setSelectedDiary(entry);
   }
 
   function openCreateModal() {
@@ -276,6 +291,18 @@ export function ArchivePage() {
             }}
           />
         </Portal>
+      )}
+
+      {selectedDiary && (
+        <DiaryDetailModal
+          diary={toDiaryItem(selectedDiary)}
+          onClose={() => setSelectedDiary(null)}
+          onDeleted={() => {
+            setSelectedDiary(null);
+            refetchArchives();
+            refetchDiaries();
+          }}
+        />
       )}
     </div>
   );

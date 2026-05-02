@@ -21,11 +21,6 @@ interface ArchiveFolderResponse {
   createdAt: string;
 }
 
-type DiaryResponse = Diary & {
-  rawContent?: string;
-  finalText?: string;
-};
-
 const ARCHIVE_COLOR_META: Record<string, Pick<Archive, "colorValue" | "shadowValue">> = {
   pink: {
     colorValue: "var(--archive-pink)",
@@ -66,9 +61,8 @@ const toArchive = (folder: ArchiveFolderResponse): Archive => ({
   entryCount: folder.diaryCount,
 });
 
-const toDiary = (diary: DiaryResponse): Diary => ({
+const toDiary = (diary: Diary): Diary => ({
   ...diary,
-  finalText: diary.finalText ?? diary.rawContent ?? "",
   mediaUrls: diary.mediaUrls ?? [],
 });
 
@@ -78,12 +72,12 @@ export const getArchives = async () => {
 };
 
 export const getAllDiaries = async () => {
-  const { data } = await api.get<{ data: DiaryResponse[] }>("/api/v1/diaries/all-diaries");
+  const { data } = await api.get<{ data: Diary[] }>("/api/v1/diaries/all-diaries");
   return (data.data ?? []).map(toDiary);
 };
 
 export const getArchiveDiaries = async (archiveId: number) => {
-  const { data } = await api.get<{ data: DiaryResponse[] }>(
+  const { data } = await api.get<{ data: Diary[] }>(
     `/api/v1/archives/${archiveId}/diaries`,
   );
   return (data.data ?? []).map(toDiary);
