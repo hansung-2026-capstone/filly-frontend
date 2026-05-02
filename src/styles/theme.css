@@ -58,6 +58,8 @@
   --archive-blue-shadow: rgba(179, 217, 255, 0.35);
   --archive-purple: #e6b3ff;
   --archive-purple-shadow: rgba(230, 179, 255, 0.35);
+  --archive-gray: rgba(210, 204, 194, 0.95);
+  --archive-gray-shadow: rgba(160, 150, 138, 0.35);
   --archive-peach: #ffd4b3;
   --archive-peach-shadow: rgba(255, 212, 179, 0.35);
   --archive-lavender: #d4b3ff;
