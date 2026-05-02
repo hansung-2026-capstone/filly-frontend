@@ -13,6 +13,11 @@ import {
 import type { Archive } from "../types/archive";
 import type { Diary } from "../types/diary";
 
+const sortDiariesByLatest = (diaries: Diary[]) =>
+  [...diaries].sort(
+    (a, b) => new Date(b.writtenAt).getTime() - new Date(a.writtenAt).getTime(),
+  );
+
 export function useArchive() {
   const [archives, setArchives] = useState<Archive[]>([]);
   const [diaries, setDiaries] = useState<Diary[]>([]);
@@ -62,7 +67,7 @@ export function useArchive() {
 
     fetcher
       .then((data) => {
-        if (!cancelled) setDiaries(data);
+        if (!cancelled) setDiaries(sortDiariesByLatest(data));
       })
       .catch(() => {
         if (!cancelled) {
