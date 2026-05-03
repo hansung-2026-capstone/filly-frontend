@@ -2,6 +2,31 @@ import { Sparkles } from "lucide-react";
 import { usePersona } from "../hook/usePersona";
 import { useMonthlyStat } from "../hook/useMonthlyStat";
 
+const EMOTION_COLORS = [
+  "rgba(100,140,80,0.7)",
+  "rgba(190,145,80,0.7)",
+  "rgba(105,140,170,0.7)",
+  "rgba(175,105,95,0.7)",
+  "rgba(140,115,165,0.7)",
+  "rgba(120,105,85,0.55)",
+];
+
+function buildEmotionGradient(entries: [string, number][]) {
+  const total = entries.reduce((sum, [, value]) => sum + value, 0);
+  if (total <= 0) return "rgba(70,95,45,0.12)";
+
+  let cursor = 0;
+  const stops = entries.map(([, value], index) => {
+    const start = cursor;
+    const end = cursor + (value / total) * 100;
+    cursor = end;
+    const color = EMOTION_COLORS[index % EMOTION_COLORS.length];
+    return `${color} ${start}% ${end}%`;
+  });
+
+  return `conic-gradient(${stops.join(", ")})`;
+}
+
 export function StatsPage() {
   const { current, history, loading: personaLoading, error } = usePersona();
   const now = new Date();
@@ -9,6 +34,9 @@ export function StatsPage() {
     now.getFullYear(),
     now.getMonth() + 1,
   );
+  const emotionEntries = Object.entries(stat?.emotionDistribution ?? {})
+    .filter(([, value]) => value > 0)
+    .sort(([, a], [, b]) => b - a);
   const keywordEntries = Object.entries(stat?.keywordCloud ?? {})
     .sort(([, a], [, b]) => b - a)
     .slice(0, 8);
@@ -142,13 +170,55 @@ export function StatsPage() {
           </div>
 
           <div className="flex-1 h-[292px] border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)] p-5">
-            <div className="text-[18px] text-[rgba(60,45,30,0.72)] mb-9">
-              감정 - 그래프
+            <div className="text-[18px] text-[rgba(60,45,30,0.72)] mb-8">
+              감정 분포
             </div>
 
-            <div className="flex items-center justify-center gap-9">
-              <div className="w-[125px] h-[125px] rounded-full border-[14px] border-[rgba(70,95,45,0.25)]" />
-            </div>
+            {statLoading ? (
+              <div className="flex items-center justify-center gap-9">
+                <div className="w-[125px] h-[125px] rounded-full bg-[rgba(120,105,85,0.12)] animate-pulse" />
+                <div className="w-[110px] flex flex-col gap-2">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="h-3 rounded bg-[rgba(120,105,85,0.12)] animate-pulse" />
+                  ))}
+                </div>
+              </div>
+            ) : emotionEntries.length > 0 ? (
+              <div className="flex items-center justify-center gap-9">
+                <div
+                  className="w-[125px] h-[125px] rounded-full relative flex-shrink-0"
+                  style={{ background: buildEmotionGradient(emotionEntries) }}
+                >
+                  <div className="absolute inset-[18px] rounded-full bg-[#faf6ed]" />
+                </div>
+                <div className="w-[110px] flex flex-col gap-2">
+                  {emotionEntries.slice(0, 5).map(([emotion, value], index) => (
+                    <div key={emotion} className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <span
+                          className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                          style={{
+                            background: EMOTION_COLORS[index % EMOTION_COLORS.length],
+                          }}
+                        />
+                        <span className="text-[10px] text-[rgba(80,60,40,0.58)] truncate">
+                          {emotion}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-[rgba(60,45,30,0.7)]">
+                        {value}%
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="h-[180px] flex items-center justify-center text-center">
+                <span className="text-[12px] leading-[1.7] text-[rgba(120,105,85,0.5)]">
+                  아직 감정 기록이 없어요.
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
