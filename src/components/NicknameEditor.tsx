@@ -7,6 +7,8 @@ export function NicknameEditor() {
   const [draft, setDraft] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -28,21 +30,32 @@ export function NicknameEditor() {
 
   const handleEdit = () => {
     setDraft(nickname);
+    setError(null);
     setIsEditing(true);
   };
 
   const handleSave = async () => {
     const trimmed = draft.trim();
-    if (!trimmed || trimmed === nickname) return;
+    if (!trimmed || trimmed === nickname || saving) return;
 
-    const user = await updateNickname(trimmed);
-    setNickname(user.nickname);
-    setDraft(user.nickname);
-    setIsEditing(false);
+    setSaving(true);
+    setError(null);
+
+    try {
+      const user = await updateNickname(trimmed);
+      setNickname(user.nickname);
+      setDraft(user.nickname);
+      setIsEditing(false);
+    } catch {
+      setError("닉네임을 저장하지 못했습니다.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleCancel = () => {
     setDraft(nickname);
+    setError(null);
     setIsEditing(false);
   };
 
@@ -77,22 +90,30 @@ export function NicknameEditor() {
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={saving}
             maxLength={10}
             placeholder="이름 입력"
             className="w-full text-center text-[14px] font-medium text-[rgba(40,30,20,1)] bg-white/70 border-b-2 border-[rgba(120,95,65,0.5)] py-1.5 outline-none focus:border-[rgba(100,75,50,0.9)] tracking-[0.5px] font-['Nanum_Myeongjo'] placeholder:text-[rgba(160,140,120,0.5)]"
           />
 
+          {error && (
+            <p className="text-[10px] font-bold text-red-500 leading-none">
+              {error}
+            </p>
+          )}
+
           <div className="flex items-center justify-center gap-4 mt-1">
             <button
               onClick={handleSave}
-              disabled={!draft.trim() || draft.trim() === nickname}
-              className="flex items-center gap-1 text-[11px] font-bold text-[rgba(80,65,50,0.8)] hover:text-[rgba(60,45,30,1)] transition-colors whitespace-nowrap"
+              disabled={!draft.trim() || draft.trim() === nickname || saving}
+              className="flex items-center gap-1 text-[11px] font-bold text-[rgba(80,65,50,0.8)] hover:text-[rgba(60,45,30,1)] transition-colors whitespace-nowrap disabled:opacity-35 disabled:cursor-not-allowed"
             >
-              <Check className="w-3.5 h-3.5" /> 저장
+              <Check className="w-3.5 h-3.5" /> {saving ? "저장 중" : "저장"}
             </button>
             <button
               onClick={handleCancel}
-              className="flex items-center gap-1 text-[11px] font-bold text-[rgba(80,65,50,0.8)] hover:text-[rgba(60,45,30,1)] transition-colors whitespace-nowrap opacity-50"
+              disabled={saving}
+              className="flex items-center gap-1 text-[11px] font-bold text-[rgba(80,65,50,0.8)] hover:text-[rgba(60,45,30,1)] transition-colors whitespace-nowrap opacity-50 disabled:cursor-not-allowed"
             >
               <X className="w-3.5 h-3.5" /> 취소
             </button>
