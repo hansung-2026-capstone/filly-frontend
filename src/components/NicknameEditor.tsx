@@ -42,9 +42,9 @@ export function NicknameEditor() {
     setError(null);
 
     try {
-      const user = await updateNickname(trimmed);
-      setNickname(user.nickname);
-      setDraft(user.nickname);
+      await updateNickname(trimmed);
+      setNickname(trimmed);
+      setDraft(trimmed);
       setIsEditing(false);
     } catch {
       setError("닉네임을 저장하지 못했습니다.");
