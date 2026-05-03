@@ -92,7 +92,40 @@ export function StatsPage() {
       </div>
 
       {/* Right page - Stats */}
-      <div className="flex-1 flex flex-col py-3.5 px-5 pl-6 gap-2.5 overflow-y-auto"></div>
+      <div className="flex-1 h-full max-h-[680px] flex flex-col py-4 px-5 gap-3.5 overflow-hidden">
+        <div className="flex gap-5 flex-shrink-0">
+          <div className="w-[110px] flex flex-col gap-3.5">
+            <div className="h-[88px] border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)] flex items-center justify-center">
+              <span className="text-[21px] text-[rgba(60,45,30,0.65)]">개수</span>
+            </div>
+
+            <div className="h-[88px] border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)] flex items-center justify-center">
+              <span className="text-[21px] text-[rgba(60,45,30,0.65)]">글자수</span>
+            </div>
+
+            <div className="h-[88px] border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)] flex items-center justify-center">
+              <span className="text-[21px] text-[rgba(60,45,30,0.65)]">사람</span>
+            </div>
+          </div>
+
+          <div className="flex-1 h-[292px] border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)] p-5">
+            <div className="text-[18px] text-[rgba(60,45,30,0.72)] mb-9">
+              감정 - 그래프
+            </div>
+
+            <div className="flex items-center justify-center gap-9">
+              <div className="w-[125px] h-[125px] rounded-full border-[14px] border-[rgba(70,95,45,0.25)]" />
+            </div>
+          </div>
+        </div>
+
+        <div className="h-[154px] flex-shrink-0 border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)]">
+          <span className="text-[21px] text-[rgba(60,45,30,0.65)]">클라우드 키워드</span>
+        </div>
+        <div className="h-[154px] flex-shrink-0 border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)]">
+          <span className="text-[21px] text-[rgba(60,45,30,0.65)]">일상 패턴</span>
+        </div>
+      </div>
     </div>
   );
 }
