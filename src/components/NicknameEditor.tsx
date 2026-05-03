@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Pencil, Check, X } from "lucide-react";
-import { getMe } from "../api/user";
+import { getMe, updateNickname } from "../api/user";
 
 export function NicknameEditor() {
   const [nickname, setNickname] = useState("");
@@ -33,9 +33,11 @@ export function NicknameEditor() {
 
   const handleSave = async () => {
     const trimmed = draft.trim();
-    if (!trimmed) return;
+    if (!trimmed || trimmed === nickname) return;
 
-    setNickname(trimmed);
+    const user = await updateNickname(trimmed);
+    setNickname(user.nickname);
+    setDraft(user.nickname);
     setIsEditing(false);
   };
 
