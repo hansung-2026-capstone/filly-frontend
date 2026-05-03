@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Pencil, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { NicknameEditor } from "../components/NicknameEditor"
@@ -8,6 +8,7 @@ import { CalendarCell } from "../components/CalendarCell"
 import { DiaryDetailModal } from "../components/DiaryDetailModal"
 import { MonthPickerModal } from "../components/MonthPickerModal"
 import type { DiaryItem } from "../api/diary"
+import { getMe } from "../api/user";
 
 const months = [
   { num: 1, name: 'JANUARY' },
@@ -53,6 +54,7 @@ export function HomePage() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [showMonthModal, setShowMonthModal] = useState(false);
   const [selectedDiary, setSelectedDiary] = useState<DiaryItem | null>(null);
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
 
   const navigate = useNavigate();
 
@@ -60,6 +62,12 @@ export function HomePage() {
   const daysOfWeek = ['일', '월', '화', '수', '목', '금', '토'];
 
   const { diaries, loading, refetch } = useMonthlyDiaries(currentYear, currentMonth);
+
+  useEffect(() => {
+    getMe()
+      .then((user) => setProfileImageUrl(user.currentAvatarUrl))
+      .catch(() => setProfileImageUrl(null));
+  }, []);
 
   const handleMonthSelect = (year: number, month: number) => {
     setCurrentYear(year);
@@ -103,12 +111,18 @@ export function HomePage() {
 
           {/* 프로필 섹션 */}
           <div className="flex flex-col items-center justify-center py-5 px-2 gap-2 border-b border-[rgba(160,140,120,0.12)]">
-            {/* TODO: 이미지, 닉네임 교체 */}
-            <img 
-              src="https://images.unsplash.com/photo-1650965294702-9b73f118bb69?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&w=200" 
-              alt="Profile"
-              className="w-14 h-14 rounded-full object-cover border-2 border-[rgba(200,185,165,0.5)] shadow-sm"
-            />
+            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[rgba(200,185,165,0.5)] shadow-sm bg-[rgba(160,140,120,0.08)] flex items-center justify-center">
+              {profileImageUrl ? (
+                <img 
+                  src={profileImageUrl}
+                  alt="프로필 이미지"
+                  className="w-full h-full object-cover"
+                  onError={() => setProfileImageUrl(null)}
+                />
+              ) : (
+                <span className="text-[22px] text-[rgba(120,105,85,0.55)]">👤</span>
+              )}
+            </div>
             <NicknameEditor />
           </div>
 

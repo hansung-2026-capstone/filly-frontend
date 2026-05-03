@@ -19,3 +19,9 @@ export const getMe = async (): Promise<UserData> => {
   const { data } = await api.get<UserResponse>("/api/v1/users/me");
   return data.data;
 };
+
+export const updateNickname = async (nickname: string): Promise<UserData> => {
+  const body = { nickname };
+  const { data } = await api.patch<UserResponse>("/api/v1/users/me", body);
+  return data.data;
+};
