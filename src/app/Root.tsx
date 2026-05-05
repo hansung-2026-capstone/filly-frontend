@@ -52,7 +52,7 @@ export function Root() {
               className="w-full h-full relative rounded-l-md"
               style={{
                 background:
-                  "linear-gradient(135deg, #f5f0e6 0%, #faf6ed 40%, #f2ecdf 100%)",
+                  "var(--notebook-page-gradient-left)",
                 boxShadow:
                   "inset -6px 0 14px -6px rgba(0,0,0,0.03), inset 0 0 60px rgba(0,0,0,0.03)",
               }}
@@ -85,7 +85,7 @@ export function Root() {
               className="w-full h-full relative rounded-r-md"
               style={{
                 background:
-                  "linear-gradient(225deg, #f5f0e6 0%, #faf6ed 40%, #f2ecdf 100%)",
+                  "var(--notebook-page-gradient-right)",
                 boxShadow:
                   "inset 6px 0 14px -6px rgba(0,0,0,0.03), inset 0 0 60px rgba(0,0,0,0.03)",
               }}
@@ -134,7 +134,7 @@ export function Root() {
             className="absolute left-2 right-2 h-[5px] top-[-4px] z-[3] rounded-t-sm"
             style={{
               background:
-                "repeating-linear-gradient(to right, #ede8dc, #ede8dc 1px, #e5dfd2 1px, #e5dfd2 2px)",
+                "repeating-linear-gradient(to right, var(--border-page-edge-left), var(--border-page-edge-left) 1px, var(--border-page-edge-right) 1px, var(--border-page-edge-right) 2px)",
               boxShadow: "0 -1px 2px rgba(0,0,0,0.08)",
             }}
           />
@@ -142,7 +142,7 @@ export function Root() {
             className="absolute left-2 right-2 h-[5px] bottom-[-4px] z-[3] rounded-b-sm"
             style={{
               background:
-                "repeating-linear-gradient(to right, #ede8dc, #ede8dc 1px, #e5dfd2 1px, #e5dfd2 2px)",
+                "repeating-linear-gradient(to right, var(--border-page-edge-left), var(--border-page-edge-left) 1px, var(--border-page-edge-right) 1px, var(--border-page-edge-right) 2px)",
               boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
             }}
           />
@@ -161,10 +161,10 @@ export function Root() {
               data-page="home"
               className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                 font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
+                shadow-[var(--shadow-tab)] py-4 px-3.5
                 bg-[var(--tab-home)] text-[var(--tab-home-text)]
-                hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
-                ${getActivePage() === "home" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
+                hover:translate-x-1 hover:shadow-[var(--shadow-tab-hover)]
+                ${getActivePage() === "home" ? "active -translate-x-1.5 shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
               style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
             >
               <div
@@ -179,10 +179,10 @@ export function Root() {
               data-page="stats"
               className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                 font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
+                shadow-[var(--shadow-tab)] py-4 px-3.5
                 bg-[var(--tab-stats)] text-[var(--tab-stats-text)]
-                hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
-                ${getActivePage() === "stats" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
+                hover:translate-x-1 hover:shadow-[var(--shadow-tab-hover)]
+                ${getActivePage() === "stats" ? "active -translate-x-1.5 shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
               style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
             >
               <div
@@ -197,10 +197,10 @@ export function Root() {
               data-page="recommend"
               className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                 font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
+                shadow-[var(--shadow-tab)] py-4 px-3.5
                 bg-[var(--tab-recommend)] text-[var(--tab-recommend-text)]
-                hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
-                ${getActivePage() === "recommend" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
+                hover:translate-x-1 hover:shadow-[var(--shadow-tab-hover)]
+                ${getActivePage() === "recommend" ? "active -translate-x-1.5 shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
               style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
             >
               <div
@@ -215,10 +215,10 @@ export function Root() {
               data-page="archive"
               className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                 font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
+                shadow-[var(--shadow-tab)] py-4 px-3.5
                 bg-[var(--tab-archive)] text-[var(--tab-archive-text)]
-                hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
-                ${getActivePage() === "archive" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
+                hover:translate-x-1 hover:shadow-[var(--shadow-tab-hover)]
+                ${getActivePage() === "archive" ? "active -translate-x-1.5 shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
               style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
             >
               <div

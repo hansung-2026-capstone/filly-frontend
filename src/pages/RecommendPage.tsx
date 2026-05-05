@@ -99,7 +99,7 @@ export function RecommendPage() {
         {/* Right page - 공유 컨텐츠 */}
         <div className="flex-1 flex flex-col py-3 px-3 gap-3 overflow-y-auto">
           {/* 헤더 */}
-          <div className="flex items-center justify-between pb-2.5 border-b border-[rgba(160,140,120,0.12)] mb-1 flex-shrink-0">
+          <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
             <div className="text-sm text-[rgba(70,55,35,0.65)] tracking-wide">
               공유용 컨텐츠 (Shared Content)
             </div>
@@ -219,7 +219,7 @@ export function RecommendPage() {
         receipt &&
         createPortal(
           <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-[rgba(0,0,0,0.4)]"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-bg-overlay"
             onClick={() => setShowReceiptModal(false)}
           >
             <div

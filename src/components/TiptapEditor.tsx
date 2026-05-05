@@ -125,18 +125,17 @@ export function TiptapEditor({
     }
   }, [content, editor]);
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(
     () => () => {
       editor?.destroy();
     },
-    [],
+    [editor],
   );
 
   return (
     <div className={`flex flex-col gap-2.5 ${className}`}>
       {showToolbar && (
-        <div className="flex items-center gap-1 py-1.5 px-2.5 bg-[rgba(240,235,225,0.5)] rounded-md border border-[rgba(160,140,120,0.15)]">
+        <div className="flex items-center gap-1 py-1.5 px-2.5 bg-bg-surface-muted rounded-md border border-[rgba(160,140,120,0.15)]">
           <EditorToolbarButton
             icon={Bold}
             strokeWidth={2.5}
@@ -184,10 +183,10 @@ export function TiptapEditor({
         </div>
       )}
 
-      <div className="bg-[rgba(255,253,247,0.8)] rounded-lg border border-[rgba(160,140,120,0.2)] p-3.5 flex-1 flex flex-col">
+      <div className="bg-bg-editor-panel rounded-lg border border-border-medium p-3.5 flex-1 flex flex-col">
         <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
         {maxLength !== undefined && (
-          <div className="text-[9px] text-[rgba(120,100,80,0.4)] mt-1.5 text-right">
+          <div className="text-[9px] text-text-subtle mt-1.5 text-right">
             {editorState?.charCount ?? 0}/{maxLength}글자
           </div>
         )}

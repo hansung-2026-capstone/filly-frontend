@@ -1,5 +1,5 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createPortal } from "react-dom";
 
 interface DatePickerModalProps {
@@ -69,21 +69,15 @@ export function DatePickerModal({
   const calendarDays = generateCalendarDays();
   const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!isOpen || !mounted) return null;
+  if (!isOpen) return null;
 
   return createPortal(
     <div
-      className="fixed inset-0 bg-[rgba(0,0,0,0.2)] flex items-center justify-center z-[9999]"
+      className="fixed inset-0 bg-bg-overlay-light flex items-center justify-center z-[9999]"
       onClick={onClose}
     >
       <div
-        className="relative z-[91] bg-[#faf6ed] rounded-lg p-6 shadow-lg w-80"
+        className="relative z-[91] bg-notebook-page rounded-lg p-6 shadow-lg w-80"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -92,16 +86,16 @@ export function DatePickerModal({
             onClick={handlePrevMonth}
             className="p-1 hover:bg-[rgba(160,140,120,0.1)] rounded transition-all"
           >
-            <ChevronLeft className="w-5 h-5 text-[rgba(80,60,40,0.6)]" />
+            <ChevronLeft className="w-5 h-5 text-text-muted" />
           </button>
-          <h3 className="text-base font-medium text-[rgba(60,45,30,0.85)]">
+          <h3 className="text-base font-medium text-text-heading">
             {pickerMonth.getFullYear()}년 {pickerMonth.getMonth() + 1}월
           </h3>
           <button
             onClick={handleNextMonth}
             className="p-1 hover:bg-[rgba(160,140,120,0.1)] rounded transition-all"
           >
-            <ChevronRight className="w-5 h-5 text-[rgba(80,60,40,0.6)]" />
+            <ChevronRight className="w-5 h-5 text-text-muted" />
           </button>
         </div>
 
@@ -110,7 +104,7 @@ export function DatePickerModal({
           {weekDays.map((day) => (
             <div
               key={day}
-              className="text-center text-[11px] font-medium text-[rgba(120,100,80,0.6)] py-1"
+              className="text-center text-[11px] font-medium text-text-soft py-1"
             >
               {day}
             </div>
@@ -132,8 +126,8 @@ export function DatePickerModal({
                     : selectedDate.getDate() === day &&
                         selectedDate.getMonth() === pickerMonth.getMonth() &&
                         selectedDate.getFullYear() === pickerMonth.getFullYear()
-                      ? "bg-[rgba(80,60,40,0.85)] text-[#faf6ed]"
-                      : "text-[rgba(60,45,30,0.8)] hover:bg-[rgba(160,140,120,0.15)]"
+                      ? "bg-bg-strong-control text-notebook-page"
+                      : "text-text-heading hover:bg-bg-selected-hover"
                 }
               `}
             >
@@ -146,8 +140,8 @@ export function DatePickerModal({
         <div className="flex justify-end gap-2 mt-6">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm border border-[rgba(160,140,120,0.2)] rounded-md
-              text-[rgba(80,60,40,0.75)] hover:bg-[rgba(160,140,120,0.08)]
+            className="px-4 py-2 text-sm border border-border-medium rounded-md
+              text-text-primary hover:bg-bg-hover
               transition-all duration-150 font-['Nanum_Myeongjo']"
           >
             닫기

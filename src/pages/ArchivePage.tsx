@@ -113,16 +113,16 @@ export function ArchivePage() {
             onClick={openCreateModal}
             disabled={mutating}
             className="relative border-none cursor-pointer font-['Nanum_Pen_Script'] aspect-square
-              border-2 border-dashed border-[rgba(160,140,120,0.25)] rounded-sm flex flex-col items-center
-              justify-center bg-[rgba(240,235,225,0.6)] transition-all duration-200 disabled:cursor-not-allowed
-              disabled:opacity-60 hover:bg-[rgba(240,235,225,0.9)] hover:border-[rgba(140,120,90,0.35)]
+              border-2 border-dashed border-border-dashed rounded-sm flex flex-col items-center
+              justify-center bg-bg-surface-muted transition-all duration-200 disabled:cursor-not-allowed
+              disabled:opacity-60 hover:bg-bg-surface-muted-hover hover:border-border-dashed-hover
               hover:shadow-[1px_2px_6px_rgba(0,0,0,0.06)] hover:-translate-y-0.5"
           >
             <Plus className="w-7 h-7 text-[rgba(140,120,90,0.35)]" />
           </button>
 
           {loadingArchives && (
-            <div className="col-span-2 flex items-center justify-center text-xs text-[rgba(120,105,85,0.45)]">
+            <div className="col-span-2 flex items-center justify-center text-xs text-text-secondary">
               불러오는 중
             </div>
           )}
@@ -179,15 +179,15 @@ export function ArchivePage() {
 
                 {openMenuId === archive.id && (
                   <div
-                    className="absolute top-6 right-1 z-10 bg-[#fffdf7] rounded shadow-md
+                    className="absolute top-6 right-1 z-10 bg-bg-dropdown rounded shadow-md
                       border border-[rgba(160,140,120,0.15)] py-1 min-w-[80px]"
                     onClick={(event) => event.stopPropagation()}
                   >
                     <button
                       type="button"
                       onClick={() => openEditModal(archive)}
-                      className="w-full text-left px-3 py-1.5 text-xs text-[rgba(60,45,30,0.7)]
-                        hover:bg-[rgba(160,140,120,0.08)] font-['Nanum_Myeongjo']"
+                      className="w-full text-left px-3 py-1.5 text-xs text-text-primary
+                        hover:bg-bg-hover font-['Nanum_Myeongjo']"
                     >
                       수정
                     </button>
@@ -196,7 +196,7 @@ export function ArchivePage() {
                       onClick={() => void handleDeleteArchive(archive)}
                       disabled={mutating}
                       className="w-full text-left px-3 py-1.5 text-xs text-[rgba(180,60,40,0.7)]
-                        hover:bg-[rgba(160,140,120,0.08)] font-['Nanum_Myeongjo'] disabled:opacity-50"
+                        hover:bg-bg-hover font-['Nanum_Myeongjo'] disabled:opacity-50"
                     >
                       삭제
                     </button>
@@ -208,13 +208,13 @@ export function ArchivePage() {
       </div>
 
       <div className="flex-1 flex flex-col py-3.5 px-6 pl-7 gap-0 overflow-hidden">
-        <div className="flex items-center gap-2 pb-2.5 border-b border-[rgba(160,140,120,0.12)] mb-1 flex-shrink-0">
+        <div className="flex items-center gap-2 pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
           {selectedArchiveId !== null && (
             <button
               type="button"
               onClick={() => setSelectedArchiveId(null)}
               className="w-6 h-6 flex items-center justify-center rounded-md border-none bg-transparent
-                cursor-pointer text-[rgba(80,60,40,0.6)] hover:bg-[rgba(160,140,120,0.08)]
+                cursor-pointer text-text-muted hover:bg-bg-hover
                 transition-all duration-150"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -227,13 +227,13 @@ export function ArchivePage() {
 
         <div className="flex-1 overflow-y-auto">
           {loadingDiaries && (
-            <div className="py-8 text-center text-xs text-[rgba(120,105,85,0.45)]">
+            <div className="py-8 text-center text-xs text-text-secondary">
               일기를 불러오는 중
             </div>
           )}
 
           {!loadingDiaries && diaries.length === 0 && (
-            <div className="py-8 text-center text-xs text-[rgba(120,105,85,0.45)]">
+            <div className="py-8 text-center text-xs text-text-secondary">
               표시할 일기가 없습니다.
             </div>
           )}
@@ -251,22 +251,22 @@ export function ArchivePage() {
                     src={entry.mediaUrls[0]}
                     alt={entry.writtenAt}
                     className="w-11 h-11 rounded-lg object-cover flex-shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.1)]
-                      border border-[rgba(220,210,195,0.5)]"
+                      border border-border-card"
                   />
                 ) : (
                   <div
                     className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0
                       bg-[rgba(240,235,225,0.8)] shadow-[0_1px_3px_rgba(0,0,0,0.1)]
-                      border border-[rgba(220,210,195,0.5)] text-xl"
+                      border border-border-card text-xl"
                   >
                     {entry.emoji}
                   </div>
                 )}
                 <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                  <div className="text-[10px] text-[rgba(120,105,85,0.45)] tracking-[0.5px]">
+                  <div className="text-[10px] text-text-secondary tracking-[0.5px]">
                     {entry.writtenAt}
                   </div>
-                  <div className="text-xs text-[rgba(60,45,30,0.7)] leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis">
+                  <div className="text-xs text-text-primary leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis">
                     {getDiaryPreview(entry)}
                   </div>
                 </div>
@@ -338,12 +338,12 @@ function ArchiveFormModal({
 
   return (
     <div
-      className="fixed inset-0 bg-[rgba(0,0,0,0.4)] z-[500] flex items-center justify-center backdrop-blur-[2px]"
+      className="fixed inset-0 bg-bg-overlay z-[500] flex items-center justify-center backdrop-blur-[2px]"
       onClick={onClose}
     >
       <form
-        className="bg-[#faf6ed] rounded-xl w-[380px] max-w-[calc(100vw-32px)]
-          shadow-[0_16px_48px_rgba(0,0,0,0.25),0_4px_12px_rgba(0,0,0,0.1)]
+        className="bg-notebook-page rounded-xl w-[380px] max-w-[calc(100vw-32px)]
+          shadow-[var(--shadow-modal)]
           overflow-hidden font-['Nanum_Myeongjo']"
         onClick={(event) => event.stopPropagation()}
         onSubmit={(event) => void handleSubmit(event)}
@@ -351,8 +351,8 @@ function ArchiveFormModal({
           animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)",
         }}
       >
-        <div className="flex items-center justify-between py-4 px-5 pb-3.5 border-b border-[rgba(160,140,120,0.12)]">
-          <div className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px]">
+        <div className="flex items-center justify-between py-4 px-5 pb-3.5 border-b border-border-light">
+          <div className="text-sm text-text-primary tracking-[0.5px]">
             {isEdit ? "아카이브 수정" : "아카이브 추가"}
           </div>
           <button
@@ -377,8 +377,8 @@ function ArchiveFormModal({
               maxLength={50}
               autoFocus
               placeholder="행복했던 날"
-              className="w-full py-2.5 px-3 border border-[rgba(160,140,120,0.2)] rounded-md
-                bg-[rgba(255,253,247,0.8)] font-['Nanum_Myeongjo'] text-[13px] text-[rgba(55,40,25,0.8)]
+              className="w-full py-2.5 px-3 border border-border-medium rounded-md
+                bg-bg-editor-panel font-['Nanum_Myeongjo'] text-[13px] text-[rgba(55,40,25,0.8)]
                 outline-none focus:border-[rgba(140,120,90,0.4)]"
             />
           </div>
@@ -410,16 +410,16 @@ function ArchiveFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="py-2 px-4 border border-[rgba(160,140,120,0.2)] bg-transparent rounded-md
-                cursor-pointer font-['Nanum_Myeongjo'] text-[11px] text-[rgba(80,60,40,0.6)]
-                transition-all duration-150 hover:bg-[rgba(160,140,120,0.08)]"
+              className="py-2 px-4 border border-border-medium bg-transparent rounded-md
+                cursor-pointer font-['Nanum_Myeongjo'] text-[11px] text-text-muted
+                transition-all duration-150 hover:bg-bg-hover"
             >
               취소
             </button>
             <button
               type="submit"
               disabled={mutating || !name.trim()}
-              className="py-2 px-4 bg-[rgba(80,60,40,0.7)] text-[#faf6ed] border-none rounded-md
+              className="py-2 px-4 bg-[rgba(80,60,40,0.7)] text-notebook-page border-none rounded-md
                 cursor-pointer font-['Nanum_Myeongjo'] text-[11px] transition-all duration-150
                 hover:bg-[rgba(60,40,20,0.8)] disabled:opacity-50 disabled:cursor-not-allowed"
             >

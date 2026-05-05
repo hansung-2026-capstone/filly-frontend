@@ -188,12 +188,12 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
   return (
     <Portal>
       <div
-        className="fixed inset-0 bg-[rgba(0,0,0,0.4)] z-[500] flex items-center justify-center backdrop-blur-[2px]"
+        className="fixed inset-0 bg-bg-overlay z-[500] flex items-center justify-center backdrop-blur-[2px]"
         onClick={onClose}
       >
         <div
-          className="bg-[#faf6ed] rounded-xl w-[400px] max-h-[78vh] flex flex-col
-            shadow-[0_16px_48px_rgba(0,0,0,0.25),0_4px_12px_rgba(0,0,0,0.1)]
+          className="bg-notebook-page rounded-xl w-[400px] max-h-[78vh] flex flex-col
+            shadow-[var(--shadow-modal)]
             overflow-hidden font-['Nanum_Myeongjo']"
           style={{ animation: 'modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)' }}
           onClick={(e) => e.stopPropagation()}
@@ -201,7 +201,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           {/* 날짜 헤더 */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-[15px] text-[rgba(60,45,30,0.8)] tracking-wide">{label}</span>
+              <span className="text-[15px] text-text-heading tracking-wide">{label}</span>
               <span className="text-[12px] text-[rgba(120,100,80,0.5)]">{dow}요일</span>
               <span className="text-lg leading-none select-none">{diary.emoji}</span>
             </div>
@@ -215,7 +215,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           </div>
 
           {/* 구분선 */}
-          <div className="mx-5 border-b border-[rgba(160,140,120,0.12)]" />
+          <div className="mx-5 border-b border-border-light" />
 
           {/* 스크롤 바디 */}
           <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
@@ -239,17 +239,17 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           </div>
 
           {/* 하단 버튼 */}
-          <div className="flex items-center justify-between gap-2 px-5 py-3 border-t border-[rgba(160,140,120,0.12)] min-h-[52px]">
+          <div className="flex items-center justify-between gap-2 px-5 py-3 border-t border-border-light min-h-[52px]">
             {confirmDelete ? (
               <>
                 <div />
                 <div className="flex items-center justify-end gap-2">
-                  <span className="text-[12px] text-[rgba(80,60,40,0.6)] mr-1">정말 삭제하시겠어요?</span>
+                  <span className="text-[12px] text-text-muted mr-1">정말 삭제하시겠어요?</span>
                   <button
                     onClick={() => setConfirmDelete(false)}
-                    className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-[rgba(160,140,120,0.08)]
-                      border border-[rgba(160,140,120,0.2)] rounded-md cursor-pointer
-                      hover:bg-[rgba(160,140,120,0.15)] transition-all duration-150 font-['Nanum_Myeongjo']"
+                    className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-bg-hover
+                      border border-border-medium rounded-md cursor-pointer
+                      hover:bg-bg-selected-hover transition-all duration-150 font-['Nanum_Myeongjo']"
                   >
                     취소
                   </button>
@@ -273,8 +273,8 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                   className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer
                     transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
                       isArchived
-                        ? "bg-[rgba(80,60,40,0.12)] hover:bg-[rgba(80,60,40,0.18)]"
-                        : "bg-[rgba(160,140,120,0.08)] hover:bg-[rgba(160,140,120,0.15)]"
+                        ? "bg-bg-active hover:bg-bg-active-hover"
+                        : "bg-bg-hover hover:bg-bg-selected-hover"
                     }`}
                   title="아카이브에 추가"
                 >
@@ -291,9 +291,9 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                 <div className="flex gap-2">
                   <button
                     onClick={() => { onClose(); navigate('/write', { state: { diary } }); }}
-                    className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-[rgba(160,140,120,0.08)]
-                      border border-[rgba(160,140,120,0.2)] rounded-md cursor-pointer
-                      hover:bg-[rgba(160,140,120,0.15)] transition-all duration-150 font-['Nanum_Myeongjo']">
+                    className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-bg-hover
+                      border border-border-medium rounded-md cursor-pointer
+                      hover:bg-bg-selected-hover transition-all duration-150 font-['Nanum_Myeongjo']">
                     수정
                   </button>
                   <button
@@ -312,19 +312,19 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
 
       {showArchiveModal && (
         <div
-          className="fixed inset-0 bg-[rgba(0,0,0,0.4)] z-[600] flex items-center justify-center backdrop-blur-[2px]"
+          className="fixed inset-0 bg-bg-overlay z-[600] flex items-center justify-center backdrop-blur-[2px]"
           onClick={() => setShowArchiveModal(false)}
         >
           <div
-            className="bg-[#faf6ed] rounded-xl w-[360px] shadow-[0_16px_48px_rgba(0,0,0,0.25),0_4px_12px_rgba(0,0,0,0.1)]
+            className="bg-notebook-page rounded-xl w-[360px] shadow-[var(--shadow-modal)]
               overflow-hidden font-['Nanum_Myeongjo']"
             onClick={(e) => e.stopPropagation()}
             style={{
               animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)",
             }}
           >
-            <div className="flex items-center justify-between py-4 px-5 pb-3.5 border-b border-[rgba(160,140,120,0.12)]">
-              <div className="text-sm text-[rgba(60,45,30,0.75)] tracking-[0.5px]">아카이브 선택</div>
+            <div className="flex items-center justify-between py-4 px-5 pb-3.5 border-b border-border-light">
+              <div className="text-sm text-text-primary tracking-[0.5px]">아카이브 선택</div>
               <button
                 onClick={() => setShowArchiveModal(false)}
                 className="w-7 h-7 border-none bg-transparent cursor-pointer rounded-md flex items-center
@@ -344,7 +344,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
               {isAddingArchive ? (
                 <div className="w-full py-3 px-4 border rounded-lg
                   font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
-                  flex items-center gap-2.5 bg-[rgba(160,140,120,0.08)] border-[rgba(160,140,120,0.2)] text-[rgba(60,45,30,0.7)]">
+                  flex items-center gap-2.5 bg-bg-hover border-border-medium text-text-primary">
                   <input
                     type="text"
                     value={newArchiveName}
@@ -362,16 +362,16 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                       onClick={() => void handleAddArchive()}
                       disabled={archiving || !newArchiveName.trim()}
                       className="w-6 h-6 border-none bg-transparent cursor-pointer rounded
-                        transition-all duration-150 hover:bg-[rgba(160,140,120,0.15)] flex items-center justify-center
+                        transition-all duration-150 hover:bg-bg-selected-hover flex items-center justify-center
                         disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <Check className="w-4 h-4 text-[rgba(80,60,40,0.6)]" />
+                      <Check className="w-4 h-4 text-text-muted" />
                     </button>
                     <button
                       onClick={handleCancelAdd}
                       disabled={archiving}
                       className="w-6 h-6 border-none bg-transparent cursor-pointer rounded
-                        transition-all duration-150 hover:bg-[rgba(160,140,120,0.15)] flex items-center justify-center
+                        transition-all duration-150 hover:bg-bg-selected-hover flex items-center justify-center
                         disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <X className="w-4 h-4 text-[rgba(100,80,60,0.5)]" />
@@ -384,16 +384,16 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                   disabled={archiving}
                   className="w-full py-3 px-4 border rounded-lg cursor-pointer
                     font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
-                    flex items-center gap-2.5 bg-transparent border-[rgba(160,140,120,0.2)] text-[rgba(60,45,30,0.7)]
-                    hover:bg-[rgba(160,140,120,0.08)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    flex items-center gap-2.5 bg-transparent border-border-medium text-text-primary
+                    hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Plus className="w-4 h-4 text-[rgba(80,60,40,0.6)]" />
+                  <Plus className="w-4 h-4 text-text-muted" />
                   새 아카이브 추가
                 </button>
               )}
 
               {loadingArchives && (
-                <div className="py-4 text-center text-[12px] text-[rgba(120,105,85,0.45)]">
+                <div className="py-4 text-center text-[12px] text-text-secondary">
                   불러오는 중
                 </div>
               )}
@@ -411,8 +411,8 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                         font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
                         flex items-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed ${
                           archiveHasDiary
-                            ? "bg-[rgba(80,60,40,0.12)] border-[rgba(80,60,40,0.3)] text-[rgba(60,45,30,0.8)]"
-                            : "bg-transparent border-[rgba(160,140,120,0.2)] text-[rgba(60,45,30,0.7)] hover:bg-[rgba(160,140,120,0.08)]"
+                            ? "bg-bg-active border-[rgba(80,60,40,0.3)] text-text-heading"
+                            : "bg-transparent border-border-medium text-text-primary hover:bg-bg-hover"
                         }`}
                     >
                       <div
@@ -428,7 +428,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                 })}
 
               {!loadingArchives && archives.length === 0 && !archiveError && (
-                <div className="py-4 text-center text-[12px] text-[rgba(120,105,85,0.45)]">
+                <div className="py-4 text-center text-[12px] text-text-secondary">
                   아카이브가 없습니다.
                 </div>
               )}

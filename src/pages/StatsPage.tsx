@@ -142,7 +142,7 @@ export function StatsPage() {
         <div className="flex gap-5 flex-shrink-0">
           <div className="w-[110px] flex flex-col gap-3.5">
             <div className="h-[88px] border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)] flex flex-col items-center justify-center gap-1">
-              <span className="text-[9px] tracking-[1.5px] text-[rgba(120,105,85,0.45)]">
+              <span className="text-[9px] tracking-[1.5px] text-text-secondary">
                 일기 개수
               </span>
               <span className="text-[22px] text-[rgba(60,45,30,0.72)]">
@@ -151,7 +151,7 @@ export function StatsPage() {
             </div>
 
             <div className="h-[88px] border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)] flex flex-col items-center justify-center gap-1">
-              <span className="text-[9px] tracking-[1.5px] text-[rgba(120,105,85,0.45)]">
+              <span className="text-[9px] tracking-[1.5px] text-text-secondary">
                 글자 수
               </span>
               <span className="text-[22px] text-[rgba(60,45,30,0.72)]">
@@ -160,7 +160,7 @@ export function StatsPage() {
             </div>
 
             <div className="h-[88px] border border-[rgba(70,95,45,0.35)] rounded-md bg-[rgba(255,255,255,0.2)] flex flex-col items-center justify-center gap-1 px-2">
-              <span className="text-[9px] tracking-[1.5px] text-[rgba(120,105,85,0.45)]">
+              <span className="text-[9px] tracking-[1.5px] text-text-secondary">
                 자주 나온 사람
               </span>
               <span className="text-[18px] text-[rgba(60,45,30,0.72)] text-center truncate max-w-full">
@@ -189,7 +189,7 @@ export function StatsPage() {
                   className="w-[125px] h-[125px] rounded-full relative flex-shrink-0"
                   style={{ background: buildEmotionGradient(emotionEntries) }}
                 >
-                  <div className="absolute inset-[18px] rounded-full bg-[#faf6ed]" />
+                  <div className="absolute inset-[18px] rounded-full bg-notebook-page" />
                 </div>
                 <div className="w-[110px] flex flex-col gap-2">
                   {emotionEntries.slice(0, 5).map(([emotion, value], index) => (
@@ -205,7 +205,7 @@ export function StatsPage() {
                           {emotion}
                         </span>
                       </div>
-                      <span className="text-[10px] text-[rgba(60,45,30,0.7)]">
+                      <span className="text-[10px] text-text-primary">
                         {value}%
                       </span>
                     </div>

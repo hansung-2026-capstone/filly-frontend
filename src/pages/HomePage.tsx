@@ -79,10 +79,10 @@ export function HomePage() {
         {/* 사이드바 */}
         <div className="w-[129px] h-full flex flex-col border-r border-[rgba(160,140,120,0.15)]">
           {/* 월 버튼 영역 */}
-          <button 
+          <button
             onClick={() => setShowMonthModal(true)}
             className="h-[30%] w-full flex flex-col items-center justify-center gap-1 border-b border-[rgba(160,140,120,0.15)]
-              bg-transparent cursor-pointer transition-all duration-300 hover:bg-[rgba(160,140,120,0.08)] group relative"
+              bg-transparent cursor-pointer transition-all duration-300 hover:bg-bg-hover group relative"
           >
             <div className="text-[11px] font-medium tracking-[3px] pl-[3px] text-[rgba(120,105,85,0.6)] uppercase">
               {currentYear}
@@ -97,9 +97,9 @@ export function HomePage() {
                 {months[currentMonth - 1].name}
               </div>
               <div className="bg-[rgba(160,140,120,0.15)] rounded-full p-1 group-hover:bg-[rgba(160,140,120,0.25)] transition-all duration-300">
-                <ChevronDown 
-                  className="w-5 h-5 text-[rgba(80,65,50,0.8)] transition-all duration-300 
-                    group-hover:text-[rgba(40,30,20,1)] group-hover:translate-y-0.5" 
+                <ChevronDown
+                  className="w-5 h-5 text-[rgba(80,65,50,0.8)] transition-all duration-300
+                    group-hover:text-[rgba(40,30,20,1)] group-hover:translate-y-0.5"
                 />
               </div>
             </div>
@@ -110,10 +110,10 @@ export function HomePage() {
           </button>
 
           {/* 프로필 섹션 */}
-          <div className="flex flex-col items-center justify-center py-5 px-2 gap-2 border-b border-[rgba(160,140,120,0.12)]">
-            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[rgba(200,185,165,0.5)] shadow-sm bg-[rgba(160,140,120,0.08)] flex items-center justify-center">
+          <div className="flex flex-col items-center justify-center py-5 px-2 gap-2 border-b border-border-light">
+            <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[rgba(200,185,165,0.5)] shadow-sm bg-bg-hover flex items-center justify-center">
               {profileImageUrl ? (
-                <img 
+                <img
                   src={profileImageUrl}
                   alt="프로필 이미지"
                   className="w-full h-full object-cover"
@@ -128,9 +128,9 @@ export function HomePage() {
 
           {/* 하단 작성 버튼 */}
           <div className="flex-1 flex flex-col items-stretch py-3.5 px-2.5">
-            <button 
+            <button
               onClick={() => navigate('/write')}
-              className="mt-auto flex items-center justify-center gap-1.5 py-2 px-2.5 border-none bg-[rgba(160,140,120,0.08)] rounded-lg
+              className="mt-auto flex items-center justify-center gap-1.5 py-2 px-2.5 border-none bg-bg-hover rounded-lg
                 cursor-pointer text-[11px] text-[rgba(80,60,40,0.65)] hover:bg-[rgba(160,140,120,0.16)] transition-all"
             >
               <Pencil className="w-[15px] h-[15px] text-[rgba(140,120,90,0.5)]" />
