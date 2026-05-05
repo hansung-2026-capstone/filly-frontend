@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 interface IdCardProps {
   avatarUrl: string;
   nickname: string;
@@ -5,20 +7,33 @@ interface IdCardProps {
 }
 
 export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
+  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(
+    avatarUrl,
+  );
+
   return (
     <div className="w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium">
       {/* 상단 헤더 */}
       <div className="bg-tab-recommend px-4 py-2.5 flex items-center justify-between">
-        <span className="text-[14px] font-black tracking-[3px] text-tab-recommend-text">FILLY</span>
-        <span className="text-[7px] font-bold tracking-[1.5px] text-tab-recommend-text opacity-60 uppercase">ID Card</span>
+        <span className="text-[14px] font-black tracking-[3px] text-tab-recommend-text">
+          FILLY
+        </span>
+        <span className="text-[7px] font-bold tracking-[1.5px] text-tab-recommend-text opacity-60 uppercase">
+          ID Card
+        </span>
       </div>
 
       {/* 본문 */}
       <div className="bg-notebook-page flex flex-col items-center px-4 pt-4 pb-3 gap-3">
         {/* 아바타 */}
         <div className="w-[72px] h-[72px] rounded-full overflow-hidden border-[3px] border-border-medium bg-bg-hover flex items-center justify-center flex-shrink-0 shadow-small">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt="avatar" className="w-full h-full object-cover" />
+          {profileImageUrl ? (
+            <img
+              src={profileImageUrl}
+              alt="avatar"
+              className="w-full h-full object-cover"
+              onError={() => setProfileImageUrl(null)}
+            />
           ) : (
             <span className="text-3xl">👤</span>
           )}
@@ -26,8 +41,12 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
 
         {/* 닉네임 */}
         <div className="text-center">
-          <div className="text-[13px] font-bold text-text-strong leading-tight">{nickname}</div>
-          <div className="text-[7px] tracking-[2px] text-text-secondary uppercase mt-1">Member</div>
+          <div className="text-[13px] font-bold text-text-strong leading-tight">
+            {nickname}
+          </div>
+          <div className="text-[7px] tracking-[2px] text-text-secondary uppercase mt-1">
+            Member
+          </div>
         </div>
 
         {/* 구분선 */}
@@ -36,7 +55,9 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
         {/* 취향 키워드 */}
         {keywords.length > 0 ? (
           <div className="w-full flex flex-col gap-1.5">
-            <span className="text-[7px] tracking-[2px] text-text-secondary uppercase">취향 키워드</span>
+            <span className="text-[7px] tracking-[2px] text-text-secondary uppercase">
+              취향 키워드
+            </span>
             <div className="flex flex-wrap gap-1">
               {keywords.map((kw, i) => (
                 <span
@@ -49,18 +70,29 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
             </div>
           </div>
         ) : (
-          <span className="text-[10px] text-text-secondary italic">신입 사원</span>
+          <span className="text-[10px] text-text-secondary italic">
+            신입 사원
+          </span>
         )}
       </div>
 
       {/* 하단 바코드 */}
       <div className="bg-bg-beige-subtle px-4 py-2.5 flex flex-col items-center gap-1.5">
         <div className="flex items-end gap-[2px] h-4">
-          {[3,1,2,1,3,2,1,2,1,3,1,2,3,1,2,1,3,2,1,2,1,3,1,2].map((h, i) => (
-            <div key={i} className="w-[2px] bg-text-primary opacity-25" style={{ height: `${h * 20}%` }} />
+          {[
+            3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1,
+            2,
+          ].map((h, i) => (
+            <div
+              key={i}
+              className="w-[2px] bg-text-primary opacity-25"
+              style={{ height: `${h * 20}%` }}
+            />
           ))}
         </div>
-        <span className="text-[7px] tracking-[2px] text-text-secondary">FL-2026-FILLY</span>
+        <span className="text-[7px] tracking-[2px] text-text-secondary">
+          FL-2026-FILLY
+        </span>
       </div>
     </div>
   );
@@ -79,7 +111,10 @@ export function IdCardSkeleton() {
         <div className="w-full border-t border-border-light" />
         <div className="w-full flex flex-wrap gap-1">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="h-4 w-12 rounded-full bg-bg-hover animate-pulse" />
+            <div
+              key={i}
+              className="h-4 w-12 rounded-full bg-bg-hover animate-pulse"
+            />
           ))}
         </div>
       </div>
