@@ -1,36 +1,34 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getDiaries, type DiaryItem } from "../api/diary";
+import { useAsyncResource } from "./useAsyncResource";
+
+const EMPTY_DIARY_MAP: Record<string, DiaryItem> = {};
+
+function toDiaryMap(list: DiaryItem[]) {
+  return list.reduce<Record<string, DiaryItem>>((map, diary) => {
+    map[diary.writtenAt] = diary;
+    return map;
+  }, {});
+}
 
 export function useMonthlyDiaries(year: number, month: number) {
-  const [diaries, setDiaries] = useState<Record<string, DiaryItem>>({});
-  const [loading, setLoading] = useState(false);
   const [tick, setTick] = useState(0);
   const location = useLocation();
 
-  const refetch = useCallback(() => setTick((t) => t + 1), []);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    getDiaries(year, month)
-      .then((list) => {
-        if (cancelled) return;
-        const map: Record<string, DiaryItem> = {};
-        for (const d of list) {
-          map[d.writtenAt] = d;
-        }
-        setDiaries(map);
-      })
-      .catch(() => {
-        if (!cancelled) setDiaries({});
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => { cancelled = true; };
-  // tick: 수동 refetch 트리거 / location.key: 페이지 진입마다 재요청
-  }, [year, month, location.key, tick]);
+  const refetch = useCallback(() => setTick((currentTick) => currentTick + 1), []);
+  const loadMonthlyDiaries = useCallback(
+    async () => {
+      void location.key;
+      void tick;
+      return toDiaryMap(await getDiaries(year, month));
+    },
+    [location.key, month, tick, year],
+  );
+  const { data: diaries, loading } = useAsyncResource(
+    loadMonthlyDiaries,
+    EMPTY_DIARY_MAP,
+  );
 
   return { diaries, loading, refetch };
 }
