@@ -106,7 +106,7 @@ export function WritePage() {
       {/* 전체 화면 일기 저장 로딩 오버레이 */}
       {isSaving && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-page-loading z-20 gap-3">
-          <div className="w-6 h-6 border-2 border-[rgba(80,60,40,0.4)] border-t-[rgba(80,60,40,0.9)] rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[var(--border-spinner)] border-t-[var(--border-spinner-active)] rounded-full animate-spin" />
           <span className="text-sm text-text-primary tracking-wide">
             {editDiary ? "일기 수정 중..." : "일기 작성 중..."}
           </span>
@@ -115,7 +115,7 @@ export function WritePage() {
 
       {/* Left page - Draft Writing */}
       <div className={`flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto${editDiary ? " opacity-40 pointer-events-none select-none" : ""}`}>
-        <div className="pb-3 border-b border-[rgba(160,140,120,0.15)]">
+        <div className="pb-3 border-b border-[var(--border-subtle)]">
           <h2 className="text-base text-text-heading tracking-wide m-0 font-medium">
             {editDiary ? "수정 모드에서는 AI 기능 비활성" : "AI 작성 툴"}
           </h2>
@@ -165,8 +165,8 @@ export function WritePage() {
       <div className="flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto relative">
         {/* Loading overlay */}
         {isDraftGenerating && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[rgba(250,246,237,0.88)] z-10 gap-3">
-            <div className="w-6 h-6 border-2 border-[rgba(80,60,40,0.4)] border-t-[rgba(80,60,40,0.9)] rounded-full animate-spin" />
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-page-loading-soft)] z-10 gap-3">
+            <div className="w-6 h-6 border-2 border-[var(--border-spinner)] border-t-[var(--border-spinner-active)] rounded-full animate-spin" />
             <span className="text-sm text-text-primary tracking-wide">
               AI 초안 만드는 중...
             </span>
@@ -174,12 +174,12 @@ export function WritePage() {
         )}
 
         {/* Date Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-[rgba(160,140,120,0.15)]">
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
           <div className="flex items-center gap-2">
             <span className="text-sm text-text-primary tracking-wide">
               {editDiary ? (() => { const [y,m,d] = editDiary.writtenAt.split("-").map(Number); return `${y}년 ${m}월 ${d}일`; })() : currentDate}
             </span>
-            <span className="text-sm text-[rgba(120,100,80,0.5)]">
+            <span className="text-sm text-[var(--text-soft-label)]">
               {editDiary ? (() => { const [y,m,d] = editDiary.writtenAt.split("-").map(Number); return ["일","월","화","수","목","금","토"][new Date(y,m-1,d).getDay()]+"요일"; })() : currentDay}
             </span>
           </div>
@@ -187,7 +187,7 @@ export function WritePage() {
             <button
               onClick={() => setShowDatePicker(true)}
               className="w-7 h-7 flex items-center justify-center rounded-md border-none bg-transparent
-              cursor-pointer text-[rgba(80,60,40,0.5)] hover:bg-bg-hover transition-all duration-150"
+              cursor-pointer text-[var(--text-icon-muted)] hover:bg-bg-hover transition-all duration-150"
             >
               <Calendar className="w-4 h-4" />
             </button>
@@ -206,8 +206,8 @@ export function WritePage() {
                 onClick={() => setEmoji(emoji === e ? null : e)}
                 className={`w-10 h-10 text-xl rounded-lg border transition-all duration-150 cursor-pointer
                   ${emoji === e
-                    ? "bg-[rgba(160,140,120,0.2)] border-[rgba(160,140,120,0.4)] scale-110"
-                    : "bg-bg-surface-muted border-[rgba(160,140,120,0.15)] hover:bg-bg-upload-hover hover:scale-105"
+                    ? "bg-[var(--bg-muted-dot)] border-[var(--border-emotion-selected)] scale-110"
+                    : "bg-bg-surface-muted border-[var(--border-subtle)] hover:bg-bg-upload-hover hover:scale-105"
                   }`}
               >
                 {e}
@@ -241,7 +241,7 @@ export function WritePage() {
                   <img key={i} src={url} alt="" className="w-full aspect-square object-cover rounded-lg shadow-sm" />
                 ))}
               </div>
-              <p className="text-[11px] text-[rgba(120,100,80,0.45)] m-0">사진은 수정할 수 없습니다.</p>
+              <p className="text-[11px] text-text-secondary m-0">사진은 수정할 수 없습니다.</p>
             </div>
           )
         ) : (

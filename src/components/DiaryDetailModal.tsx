@@ -202,15 +202,15 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           <div className="flex items-center justify-between px-5 pt-5 pb-3">
             <div className="flex items-center gap-2">
               <span className="text-[15px] text-text-heading tracking-wide">{label}</span>
-              <span className="text-[12px] text-[rgba(120,100,80,0.5)]">{dow}요일</span>
+              <span className="text-[12px] text-[var(--text-soft-label)]">{dow}요일</span>
               <span className="text-lg leading-none select-none">{diary.emoji}</span>
             </div>
             <button
               onClick={onClose}
               className="w-7 h-7 border-none bg-transparent cursor-pointer rounded-md flex items-center
-                justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.1)]"
+                justify-center transition-all duration-150 hover:bg-[var(--bg-hover-soft)]"
             >
-              <X className="w-4 h-4 text-[rgba(100,80,60,0.45)]" />
+              <X className="w-4 h-4 text-[var(--text-icon-muted)]" />
             </button>
           </div>
 
@@ -232,7 +232,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                 className="flex-1 min-h-[80px]"
               />
             ) : (
-              <p className="text-[12px] text-[rgba(120,100,80,0.35)] italic text-center py-2">
+              <p className="text-[12px] text-text-secondary italic text-center py-2">
                 작성된 내용이 없습니다.
               </p>
             )}
@@ -247,7 +247,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                   <span className="text-[12px] text-text-muted mr-1">정말 삭제하시겠어요?</span>
                   <button
                     onClick={() => setConfirmDelete(false)}
-                    className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-bg-hover
+                    className="px-4 py-1.5 text-[12px] text-text-muted bg-bg-hover
                       border border-border-medium rounded-md cursor-pointer
                       hover:bg-bg-selected-hover transition-all duration-150 font-['Nanum_Myeongjo']"
                   >
@@ -256,9 +256,9 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="px-4 py-1.5 text-[12px] text-white bg-[rgba(180,60,40,0.8)]
+                    className="px-4 py-1.5 text-[12px] text-white bg-[var(--bg-danger-confirm)]
                       border border-transparent rounded-md cursor-pointer
-                      hover:bg-[rgba(160,40,20,0.9)] transition-all duration-150 font-['Nanum_Myeongjo']
+                      hover:bg-[var(--bg-danger-confirm-hover)] transition-all duration-150 font-['Nanum_Myeongjo']
                       disabled:opacity-60 disabled:cursor-not-allowed"
                   >
                     {isDeleting ? "삭제 중..." : "삭제"}
@@ -281,8 +281,8 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                   <Bookmark
                     className={`w-5 h-5 transition-all duration-200 ${
                       isArchived
-                        ? "fill-[rgba(80,60,40,0.6)] stroke-[rgba(80,60,40,0.6)]"
-                        : "fill-none stroke-[rgba(100,80,60,0.5)]"
+                        ? "fill-text-muted stroke-text-muted"
+                        : "fill-none stroke-text-dark-muted"
                     }`}
                     strokeWidth={1.8}
                   />
@@ -291,16 +291,16 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                 <div className="flex gap-2">
                   <button
                     onClick={() => { onClose(); navigate('/write', { state: { diary } }); }}
-                    className="px-4 py-1.5 text-[12px] text-[rgba(80,60,40,0.65)] bg-bg-hover
+                    className="px-4 py-1.5 text-[12px] text-text-muted bg-bg-hover
                       border border-border-medium rounded-md cursor-pointer
                       hover:bg-bg-selected-hover transition-all duration-150 font-['Nanum_Myeongjo']">
                     수정
                   </button>
                   <button
                     onClick={() => setConfirmDelete(true)}
-                    className="px-4 py-1.5 text-[12px] text-[rgba(180,60,40,0.7)] bg-[rgba(180,60,40,0.05)]
-                      border border-[rgba(180,60,40,0.2)] rounded-md cursor-pointer
-                      hover:bg-[rgba(180,60,40,0.1)] transition-all duration-150 font-['Nanum_Myeongjo']">
+                    className="px-4 py-1.5 text-[12px] text-[var(--text-danger-dark)] bg-[var(--bg-danger-weak)]
+                      border border-[var(--border-danger-muted)] rounded-md cursor-pointer
+                      hover:bg-[var(--bg-danger-weak-hover)] transition-all duration-150 font-['Nanum_Myeongjo']">
                     삭제
                   </button>
                 </div>
@@ -328,15 +328,15 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
               <button
                 onClick={() => setShowArchiveModal(false)}
                 className="w-7 h-7 border-none bg-transparent cursor-pointer rounded-md flex items-center
-                  justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.1)]"
+                  justify-center transition-all duration-150 hover:bg-[var(--bg-hover-soft)]"
               >
-                <X className="w-4 h-4 text-[rgba(100,80,60,0.5)]" />
+                <X className="w-4 h-4 text-[var(--text-icon-muted)]" />
               </button>
             </div>
 
             <div className="py-4 px-5 flex flex-col gap-2">
               {archiveError && (
-                <div className="px-3 py-2 rounded-md bg-[rgba(200,70,60,0.08)] text-[11px] text-[rgba(150,50,40,0.78)]">
+                <div className="px-3 py-2 rounded-md bg-[var(--bg-error)] text-[11px] text-[var(--text-error)]">
                   {archiveError}
                 </div>
               )}
@@ -374,7 +374,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                         transition-all duration-150 hover:bg-bg-selected-hover flex items-center justify-center
                         disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      <X className="w-4 h-4 text-[rgba(100,80,60,0.5)]" />
+                      <X className="w-4 h-4 text-[var(--text-icon-muted)]" />
                     </button>
                   </div>
                 </div>
@@ -411,7 +411,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                         font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
                         flex items-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed ${
                           archiveHasDiary
-                            ? "bg-bg-active border-[rgba(80,60,40,0.3)] text-text-heading"
+                            ? "bg-bg-active border-border-strong text-text-heading"
                             : "bg-transparent border-border-medium text-text-primary hover:bg-bg-hover"
                         }`}
                     >
@@ -421,7 +421,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                       />
                       <span className="flex-1 text-left">{archive.name}</span>
                       {archiveHasDiary && (
-                        <Bookmark className="w-3.5 h-3.5 fill-[rgba(80,60,40,0.55)] stroke-[rgba(80,60,40,0.55)]" />
+                        <Bookmark className="w-3.5 h-3.5 fill-text-muted stroke-text-muted" />
                       )}
                     </button>
                   );

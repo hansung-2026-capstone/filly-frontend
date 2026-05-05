@@ -97,12 +97,12 @@ export function ArchivePage() {
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">
       <div className="flex-1 flex flex-col py-3 px-4 pl-5 overflow-y-auto">
-        <div className="text-[11px] tracking-[2px] text-[rgba(120,105,85,0.4)] uppercase text-center py-1 pb-2.5 flex-shrink-0">
+        <div className="text-[11px] tracking-[2px] text-[var(--text-page-label)] uppercase text-center py-1 pb-2.5 flex-shrink-0">
           아카이브
         </div>
 
         {error && (
-          <div className="mb-2 px-3 py-2 rounded-md bg-[rgba(200,70,60,0.08)] text-[11px] text-[rgba(150,50,40,0.78)]">
+          <div className="mb-2 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[11px] text-[var(--text-error)]">
             {error}
           </div>
         )}
@@ -116,9 +116,9 @@ export function ArchivePage() {
               border-2 border-dashed border-border-dashed rounded-sm flex flex-col items-center
               justify-center bg-bg-surface-muted transition-all duration-200 disabled:cursor-not-allowed
               disabled:opacity-60 hover:bg-bg-surface-muted-hover hover:border-border-dashed-hover
-              hover:shadow-[1px_2px_6px_rgba(0,0,0,0.06)] hover:-translate-y-0.5"
+              hover:shadow-[var(--shadow-subtle)] hover:-translate-y-0.5"
           >
-            <Plus className="w-7 h-7 text-[rgba(140,120,90,0.35)]" />
+            <Plus className="w-7 h-7 text-[var(--text-upload-plus-soft)]" />
           </button>
 
           {loadingArchives && (
@@ -151,15 +151,15 @@ export function ArchivePage() {
                   }}
                 >
                   <div
-                    className="absolute top-[-3px] left-1/2 -translate-x-1/2 w-[30px] h-2 bg-[rgba(255,255,255,0.45)]
-                      rounded-[1px] shadow-[0_0.5px_1px_rgba(0,0,0,0.06)]"
+                    className="absolute top-[-3px] left-1/2 -translate-x-1/2 w-[30px] h-2 bg-[var(--bg-paper-tape)]
+                      rounded-[1px] shadow-[var(--shadow-tape)]"
                     style={{ transform: "translateX(-50%) rotate(-1deg)" }}
                   />
 
-                  <div className="text-[22px] text-[rgba(0,0,0,0.55)] leading-none">
+                  <div className="text-[22px] text-[var(--text-black-title)] leading-none">
                     {archive.name}
                   </div>
-                  <div className="text-[20px] text-[rgba(0,0,0,0.28)] tracking-wide">
+                  <div className="text-[20px] text-[var(--text-black-subtitle)] tracking-wide">
                     {archive.entryCount}개
                   </div>
                 </button>
@@ -172,15 +172,15 @@ export function ArchivePage() {
                   }}
                   className="absolute top-1 right-1 z-[3] w-5 h-5 flex items-center justify-center
                     rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150
-                    bg-[rgba(0,0,0,0.08)] hover:bg-[rgba(0,0,0,0.15)]"
+                    bg-[var(--bg-black-subtle)] hover:bg-[var(--bg-black-subtle-hover)]"
                 >
-                  <MoreVertical className="w-3 h-3 text-[rgba(0,0,0,0.45)]" />
+                  <MoreVertical className="w-3 h-3 text-[var(--text-black-icon)]" />
                 </button>
 
                 {openMenuId === archive.id && (
                   <div
                     className="absolute top-6 right-1 z-10 bg-bg-dropdown rounded shadow-md
-                      border border-[rgba(160,140,120,0.15)] py-1 min-w-[80px]"
+                      border border-[var(--border-subtle)] py-1 min-w-[80px]"
                     onClick={(event) => event.stopPropagation()}
                   >
                     <button
@@ -195,7 +195,7 @@ export function ArchivePage() {
                       type="button"
                       onClick={() => void handleDeleteArchive(archive)}
                       disabled={mutating}
-                      className="w-full text-left px-3 py-1.5 text-xs text-[rgba(180,60,40,0.7)]
+                      className="w-full text-left px-3 py-1.5 text-xs text-[var(--text-danger-dark)]
                         hover:bg-bg-hover font-['Nanum_Myeongjo'] disabled:opacity-50"
                     >
                       삭제
@@ -220,7 +220,7 @@ export function ArchivePage() {
               <ArrowLeft className="w-4 h-4" />
             </button>
           )}
-          <div className="text-sm text-[rgba(70,55,35,0.65)] tracking-wide">
+          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
             {getArchiveName()}
           </div>
         </div>
@@ -242,21 +242,21 @@ export function ArchivePage() {
             diaries.map((entry) => (
               <div
                 key={entry.id}
-                className="flex items-center gap-3 py-2.5 px-3 border-b border-[rgba(160,140,120,0.08)]
-                  cursor-pointer rounded-md transition-all duration-200 hover:bg-[rgba(160,140,120,0.06)]"
+                className="flex items-center gap-3 py-2.5 px-3 border-b border-[var(--border-faint)]
+                  cursor-pointer rounded-md transition-all duration-200 hover:bg-[var(--bg-hover-faint)]"
                 onClick={() => handleDiaryClick(entry)}
               >
                 {entry.mediaUrls?.[0] ? (
                   <img
                     src={entry.mediaUrls[0]}
                     alt={entry.writtenAt}
-                    className="w-11 h-11 rounded-lg object-cover flex-shrink-0 shadow-[0_1px_3px_rgba(0,0,0,0.1)]
+                    className="w-11 h-11 rounded-lg object-cover flex-shrink-0 shadow-[var(--shadow-thumbnail)]
                       border border-border-card"
                   />
                 ) : (
                   <div
                     className="w-11 h-11 rounded-lg flex items-center justify-center flex-shrink-0
-                      bg-[rgba(240,235,225,0.8)] shadow-[0_1px_3px_rgba(0,0,0,0.1)]
+                      bg-[var(--bg-paper-thumbnail)] shadow-[var(--shadow-thumbnail)]
                       border border-border-card text-xl"
                   >
                     {entry.emoji}
@@ -359,15 +359,15 @@ function ArchiveFormModal({
             type="button"
             onClick={onClose}
             className="w-7 h-7 border-none bg-transparent cursor-pointer rounded-md flex items-center
-              justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.1)]"
+              justify-center transition-all duration-150 hover:bg-[var(--bg-hover-soft)]"
           >
-            <X className="w-4 h-4 text-[rgba(100,80,60,0.5)]" />
+            <X className="w-4 h-4 text-[var(--text-icon-muted)]" />
           </button>
         </div>
 
         <div className="py-4 px-5 flex flex-col gap-3">
           <div>
-            <div className="text-[11px] text-[rgba(120,105,85,0.5)] tracking-wide mb-1.5">
+            <div className="text-[11px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
               아카이브 이름
             </div>
             <input
@@ -378,13 +378,13 @@ function ArchiveFormModal({
               autoFocus
               placeholder="행복했던 날"
               className="w-full py-2.5 px-3 border border-border-medium rounded-md
-                bg-bg-editor-panel font-['Nanum_Myeongjo'] text-[13px] text-[rgba(55,40,25,0.8)]
-                outline-none focus:border-[rgba(140,120,90,0.4)]"
+                bg-bg-editor-panel font-['Nanum_Myeongjo'] text-[13px] text-[var(--text-input)]
+                outline-none focus:border-[var(--border-input-focus)]"
             />
           </div>
 
           <div>
-            <div className="text-[11px] text-[rgba(120,105,85,0.5)] tracking-wide mb-1.5">
+            <div className="text-[11px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
               색상
             </div>
             <div className="flex gap-2">
@@ -397,7 +397,7 @@ function ArchiveFormModal({
                   className={`w-9 h-9 rounded-full border-2 cursor-pointer transition-all duration-150
                     ${
                       color === option.key
-                        ? "border-[rgba(80,60,40,0.5)] scale-110"
+                        ? "border-[var(--border-input-strong)] scale-110"
                         : "border-transparent hover:scale-105"
                     }`}
                   style={{ background: option.value }}
@@ -419,9 +419,9 @@ function ArchiveFormModal({
             <button
               type="submit"
               disabled={mutating || !name.trim()}
-              className="py-2 px-4 bg-[rgba(80,60,40,0.7)] text-notebook-page border-none rounded-md
+              className="py-2 px-4 bg-[var(--bg-save-button)] text-notebook-page border-none rounded-md
                 cursor-pointer font-['Nanum_Myeongjo'] text-[11px] transition-all duration-150
-                hover:bg-[rgba(60,40,20,0.8)] disabled:opacity-50 disabled:cursor-not-allowed"
+                hover:bg-[var(--bg-save-button-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {mutating ? "저장 중" : "저장"}
             </button>

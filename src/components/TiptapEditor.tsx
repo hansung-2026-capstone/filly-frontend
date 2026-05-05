@@ -57,13 +57,13 @@ function EditorToolbarButton({
   return (
     <button
       onClick={onClick}
-      className={`w-6 h-6 flex items-center justify-center hover:bg-[rgba(160,140,120,0.12)]
+      className={`w-6 h-6 flex items-center justify-center hover:bg-[var(--bg-hover-soft)]
         rounded transition-all duration-150 border-none cursor-pointer
-        ${isActive ? "bg-[rgba(120,100,75,0.25)] ring-1 ring-[rgba(120,100,75,0.3)]" : "bg-transparent"} ${className ?? ""}`}
+        ${isActive ? "bg-[var(--bg-toolbar-active)] ring-1 ring-border-strong" : "bg-transparent"} ${className ?? ""}`}
     >
       <Icon
         className={`w-3.5 h-3.5 transition-colors duration-150 ${
-          isActive ? "text-[rgba(60,45,30,0.9)]" : "text-[rgba(60,45,30,0.4)]"
+          isActive ? "text-text-heading" : "text-[var(--text-editor-inactive)]"
         }`}
         strokeWidth={isActive ? (strokeWidth ?? 2.5) : (strokeWidth ?? 1.5)}
       />
@@ -97,7 +97,7 @@ export function TiptapEditor({
         class: [
           "outline-none h-full",
           "font-['Nanum_Myeongjo'] text-[13px]",
-          "text-[rgba(55,40,25,0.8)] leading-[1.7]",
+          "text-[var(--text-input)] leading-[1.7]",
         ].join(" "),
       },
     },
@@ -135,7 +135,7 @@ export function TiptapEditor({
   return (
     <div className={`flex flex-col gap-2.5 ${className}`}>
       {showToolbar && (
-        <div className="flex items-center gap-1 py-1.5 px-2.5 bg-bg-surface-muted rounded-md border border-[rgba(160,140,120,0.15)]">
+        <div className="flex items-center gap-1 py-1.5 px-2.5 bg-bg-surface-muted rounded-md border border-[var(--border-subtle)]">
           <EditorToolbarButton
             icon={Bold}
             strokeWidth={2.5}
@@ -161,7 +161,7 @@ export function TiptapEditor({
                 .setMark("textStyle", { fontSize: e.target.value })
                 .run();
             }}
-            className="bg-transparent border-none outline-none text-[rgba(55,40,25,0.8)] text-xs ml-1"
+            className="bg-transparent border-none outline-none text-[var(--text-input)] text-xs ml-1"
           >
             <option value="12px">12px</option>
             <option value="16px">16px</option>
@@ -169,7 +169,7 @@ export function TiptapEditor({
             <option value="24px">24px</option>
             <option value="30px">30px</option>
           </select>
-          <div className="w-px h-4 bg-[rgba(160,140,120,0.2)] mx-0.5" />
+          <div className="w-px h-4 bg-[var(--bg-muted-dot)] mx-0.5" />
           <EditorToolbarButton
             icon={List}
             isActive={editorState?.isBulletList ?? false}

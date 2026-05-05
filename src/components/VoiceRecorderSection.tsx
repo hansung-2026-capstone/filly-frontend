@@ -155,7 +155,7 @@ export function VoiceRecorderSection({
             className={`w-7 h-7 transition-colors duration-150 ${
               isRecording
                 ? "text-text-recording"
-                : "text-[rgba(100,80,60,0.6)]"
+                : "text-[var(--text-icon-soft)]"
             }`}
             strokeWidth={2}
           />

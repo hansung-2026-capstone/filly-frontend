@@ -55,7 +55,7 @@ export function MonthPickerModal({
                 className="w-7 h-7 border-none bg-bg-hover cursor-pointer rounded-md
                   flex items-center justify-center transition-all duration-150 hover:bg-bg-selected-hover"
               >
-                <svg className="w-4 h-4 text-[rgba(100,80,60,0.6)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4 text-[var(--text-icon-soft)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
@@ -67,7 +67,7 @@ export function MonthPickerModal({
                 className="w-7 h-7 border-none bg-bg-hover cursor-pointer rounded-md
                   flex items-center justify-center transition-all duration-150 hover:bg-bg-selected-hover"
               >
-                <svg className="w-4 h-4 text-[rgba(100,80,60,0.6)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="w-4 h-4 text-[var(--text-icon-soft)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
               </button>
@@ -75,9 +75,9 @@ export function MonthPickerModal({
             <button
               onClick={onClose}
               className="w-7 h-7 border-none bg-transparent cursor-pointer rounded-md flex items-center
-                justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.1)]"
+                justify-center transition-all duration-150 hover:bg-[var(--bg-hover-soft)]"
             >
-              <svg className="w-4 h-4 text-[rgba(100,80,60,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <svg className="w-4 h-4 text-[var(--text-icon-muted)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="18" y1="6" x2="6" y2="18"/>
                 <line x1="6" y1="6" x2="18" y2="18"/>
               </svg>
@@ -94,7 +94,7 @@ export function MonthPickerModal({
                   className={`py-3 px-3 border rounded-lg cursor-pointer font-['Nanum_Myeongjo']
                     text-[11px] transition-all duration-200 flex flex-col items-center gap-1
                     ${selectedYear === pickerYear && selectedMonth === month.num
-                      ? 'bg-bg-active border-[rgba(80,60,40,0.3)] text-text-heading'
+                      ? 'bg-bg-active border-border-strong text-text-heading'
                       : 'bg-transparent border-border-medium text-text-muted hover:bg-bg-hover'
                     }`}
                 >

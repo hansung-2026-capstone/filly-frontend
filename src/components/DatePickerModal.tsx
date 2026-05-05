@@ -84,7 +84,7 @@ export function DatePickerModal({
         <div className="flex items-center justify-between mb-4">
           <button
             onClick={handlePrevMonth}
-            className="p-1 hover:bg-[rgba(160,140,120,0.1)] rounded transition-all"
+            className="p-1 hover:bg-[var(--bg-hover-soft)] rounded transition-all"
           >
             <ChevronLeft className="w-5 h-5 text-text-muted" />
           </button>
@@ -93,7 +93,7 @@ export function DatePickerModal({
           </h3>
           <button
             onClick={handleNextMonth}
-            className="p-1 hover:bg-[rgba(160,140,120,0.1)] rounded transition-all"
+            className="p-1 hover:bg-[var(--bg-hover-soft)] rounded transition-all"
           >
             <ChevronRight className="w-5 h-5 text-text-muted" />
           </button>

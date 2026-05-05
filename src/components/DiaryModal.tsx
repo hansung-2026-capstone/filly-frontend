@@ -108,9 +108,9 @@ export function DiaryModal({ isOpen, onClose, diary }: DiaryModalProps) {
             <button
               onClick={onClose}
               className="w-7 h-7 border-none bg-transparent cursor-pointer rounded-md flex items-center
-                justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.1)]"
+                justify-center transition-all duration-150 hover:bg-[var(--bg-hover-soft)]"
             >
-              <X className="w-4 h-4 text-[rgba(100,80,60,0.5)]" />
+              <X className="w-4 h-4 text-[var(--text-icon-muted)]" />
             </button>
           </div>
 
@@ -142,7 +142,7 @@ export function DiaryModal({ isOpen, onClose, diary }: DiaryModalProps) {
             )}
 
             {/* Content */}
-            <div className="py-3.5 px-4 bg-[rgba(200,140,130,0.1)] rounded-lg
+            <div className="py-3.5 px-4 bg-bg-beige-light rounded-lg
               text-xs text-text-strong leading-[1.8] min-h-[120px]"
             >
               {diary.content}
@@ -151,7 +151,7 @@ export function DiaryModal({ isOpen, onClose, diary }: DiaryModalProps) {
             {/* Archive info if selected */}
             {selectedArchive && (
               <div className="flex items-center gap-2 py-2 px-3 bg-bg-hover rounded-lg">
-                <Bookmark className="w-3.5 h-3.5 text-[rgba(80,60,40,0.5)]" />
+                <Bookmark className="w-3.5 h-3.5 text-[var(--text-icon-muted)]" />
                 <span className="text-[11px] text-text-primary">
                   아카이브: {selectedArchiveName}
                 </span>
@@ -174,8 +174,8 @@ export function DiaryModal({ isOpen, onClose, diary }: DiaryModalProps) {
               <Bookmark
                 className={`w-5 h-5 transition-all duration-200 ${
                   selectedArchive
-                    ? 'fill-[rgba(80,60,40,0.6)] stroke-[rgba(80,60,40,0.6)]'
-                    : 'fill-none stroke-[rgba(100,80,60,0.5)]'
+                    ? 'fill-text-muted stroke-text-muted'
+                    : 'fill-none stroke-text-dark-muted'
                 }`}
                 strokeWidth={1.8}
               />
@@ -190,7 +190,7 @@ export function DiaryModal({ isOpen, onClose, diary }: DiaryModalProps) {
                 수정
               </button>
               <button
-                className="py-2 px-4 border border-[rgba(200,70,60,0.2)] bg-transparent rounded-md
+                className="py-2 px-4 border border-border-danger bg-transparent rounded-md
                   cursor-pointer font-['Nanum_Myeongjo'] text-[11px] text-text-danger
                   transition-all duration-150 hover:bg-bg-danger-hover"
               >
@@ -221,9 +221,9 @@ export function DiaryModal({ isOpen, onClose, diary }: DiaryModalProps) {
               <button
                 onClick={() => setShowArchiveModal(false)}
                 className="w-7 h-7 border-none bg-transparent cursor-pointer rounded-md flex items-center
-                  justify-center transition-all duration-150 hover:bg-[rgba(160,140,120,0.1)]"
+                  justify-center transition-all duration-150 hover:bg-[var(--bg-hover-soft)]"
               >
-                <X className="w-4 h-4 text-[rgba(100,80,60,0.5)]" />
+                <X className="w-4 h-4 text-[var(--text-icon-muted)]" />
               </button>
             </div>
 
@@ -259,7 +259,7 @@ export function DiaryModal({ isOpen, onClose, diary }: DiaryModalProps) {
                       className="w-6 h-6 border-none bg-transparent cursor-pointer rounded
                         transition-all duration-150 hover:bg-bg-selected-hover flex items-center justify-center"
                     >
-                      <X className="w-4 h-4 text-[rgba(100,80,60,0.5)]" />
+                      <X className="w-4 h-4 text-[var(--text-icon-muted)]" />
                     </button>
                   </div>
                 </div>
@@ -284,7 +284,7 @@ export function DiaryModal({ isOpen, onClose, diary }: DiaryModalProps) {
                     font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
                     flex items-center gap-2.5 ${
                       selectedArchive === archive.id
-                        ? 'bg-bg-active border-[rgba(80,60,40,0.3)] text-text-heading'
+                        ? 'bg-bg-active border-border-strong text-text-heading'
                         : 'bg-transparent border-border-medium text-text-primary hover:bg-bg-hover'
                     }`}
                 >

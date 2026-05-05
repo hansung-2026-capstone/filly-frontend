@@ -46,7 +46,7 @@ export function PhotoUploadSection({
           onClick={handleButtonClick}
           className="w-[67px] h-[67px] bg-bg-upload rounded-lg border-2 border-dashed
             border-border-dashed cursor-pointer flex items-center justify-center
-            text-2xl text-[rgba(140,120,90,0.4)] hover:bg-bg-upload-hover
+            text-2xl text-[var(--text-upload-plus)] hover:bg-bg-upload-hover
             hover:border-border-dashed-hover transition-all duration-150"
         >
           +

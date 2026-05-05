@@ -33,6 +33,37 @@
   --text-soft: rgba(120, 100, 80, 0.6);
   --text-danger: rgba(200, 70, 60, 0.7);
   --text-recording: rgba(200, 60, 60, 0.8);
+  --text-icon-muted: rgba(100, 80, 60, 0.5);
+  --text-icon-soft: rgba(100, 80, 60, 0.6);
+  --text-control-muted: rgba(80, 65, 50, 0.8);
+  --text-control-strong: rgba(60, 45, 30, 1);
+  --text-dark: rgba(40, 30, 20, 1);
+  --text-soft-label: rgba(120, 105, 85, 0.5);
+  --text-page-label: rgba(120, 105, 85, 0.4);
+  --text-input: rgba(55, 40, 25, 0.8);
+  --text-placeholder: rgba(160, 140, 120, 0.5);
+  --text-upload-plus: rgba(140, 120, 90, 0.4);
+  --text-upload-plus-soft: rgba(140, 120, 90, 0.35);
+  --text-danger-dark: rgba(180, 60, 40, 0.7);
+  --text-error: rgba(150, 50, 40, 0.78);
+  --text-black-title: rgba(0, 0, 0, 0.55);
+  --text-black-subtitle: rgba(0, 0, 0, 0.28);
+  --text-black-icon: rgba(0, 0, 0, 0.45);
+  --text-stats-heading: rgba(70, 55, 35, 0.65);
+  --text-stats-primary: rgba(60, 45, 30, 0.72);
+  --text-stats-secondary: rgba(120, 105, 85, 0.5);
+  --text-stats-muted: rgba(80, 60, 40, 0.58);
+  --text-stats-green: rgba(70, 95, 45, 0.72);
+  --text-white-muted: rgba(255, 255, 255, 0.75);
+  --text-white-soft: rgba(255, 255, 255, 0.7);
+  --text-white-strong: rgba(255, 255, 255, 0.82);
+  --text-weekend-sun: rgba(185, 75, 65, 0.6);
+  --text-weekend-sun-soft: rgba(185, 75, 65, 0.5);
+  --text-weekend-sat: rgba(65, 95, 165, 0.55);
+  --text-weekend-sat-soft: rgba(65, 95, 165, 0.45);
+  --text-muted-light: rgba(120, 105, 85, 0.55);
+  --text-pencil-muted: rgba(140, 120, 90, 0.5);
+  --text-editor-inactive: rgba(60, 45, 30, 0.4);
 
   /* Background Colors */
   --bg-white: #ffffff;
@@ -60,6 +91,31 @@
   --bg-overlay-light: rgba(0, 0, 0, 0.2);
   --bg-page-loading: rgba(250, 246, 237, 0.92);
   --bg-editor-panel: rgba(255, 253, 247, 0.8);
+  --bg-hover-soft: rgba(160, 140, 120, 0.1);
+  --bg-hover-faint: rgba(160, 140, 120, 0.06);
+  --bg-hover-medium: rgba(160, 140, 120, 0.16);
+  --bg-muted-dot: rgba(160, 140, 120, 0.2);
+  --bg-toolbar-active: rgba(120, 100, 75, 0.25);
+  --bg-black-subtle: rgba(0, 0, 0, 0.08);
+  --bg-black-subtle-hover: rgba(0, 0, 0, 0.15);
+  --bg-paper-tape: rgba(255, 255, 255, 0.45);
+  --bg-paper-thumbnail: rgba(240, 235, 225, 0.8);
+  --bg-page-loading-soft: rgba(250, 246, 237, 0.88);
+  --bg-emotion-selected: rgba(160, 140, 120, 0.2);
+  --bg-stats-persona: rgba(100, 140, 80, 0.65);
+  --bg-stats-panel: rgba(255, 255, 255, 0.2);
+  --bg-stats-row: rgba(160, 140, 120, 0.04);
+  --bg-stats-tag: rgba(100, 140, 80, 0.12);
+  --bg-stats-skeleton: rgba(120, 105, 85, 0.12);
+  --bg-white-skeleton-strong: rgba(255, 255, 255, 0.2);
+  --bg-white-skeleton-soft: rgba(255, 255, 255, 0.15);
+  --bg-danger-confirm: rgba(180, 60, 40, 0.8);
+  --bg-danger-confirm-hover: rgba(160, 40, 20, 0.9);
+  --bg-danger-weak: rgba(180, 60, 40, 0.05);
+  --bg-danger-weak-hover: rgba(180, 60, 40, 0.1);
+  --bg-error: rgba(200, 70, 60, 0.08);
+  --bg-save-button: rgba(80, 60, 40, 0.7);
+  --bg-save-button-hover: rgba(60, 40, 20, 0.8);
 
   /* Border Colors */
   --border-light: rgba(160, 140, 120, 0.12);
@@ -72,6 +128,20 @@
   --border-dashed: rgba(160, 140, 120, 0.25);
   --border-dashed-hover: rgba(140, 120, 90, 0.35);
   --border-danger-strong: rgba(200, 60, 60, 0.4);
+  --border-subtle: rgba(160, 140, 120, 0.15);
+  --border-faint: rgba(160, 140, 120, 0.08);
+  --border-calendar: rgba(160, 140, 120, 0.1);
+  --border-calendar-hover: rgba(160, 140, 120, 0.3);
+  --border-input-focus: rgba(140, 120, 90, 0.4);
+  --border-input-strong: rgba(120, 95, 65, 0.5);
+  --border-input-focus-strong: rgba(100, 75, 50, 0.9);
+  --border-avatar: rgba(200, 185, 165, 0.5);
+  --border-stats-panel: rgba(70, 95, 45, 0.35);
+  --border-stats-row: rgba(160, 140, 120, 0.08);
+  --border-emotion-selected: rgba(160, 140, 120, 0.4);
+  --border-danger-muted: rgba(180, 60, 40, 0.2);
+  --border-spinner: rgba(80, 60, 40, 0.4);
+  --border-spinner-active: rgba(80, 60, 40, 0.9);
 
   /* Archive Colors */
   --archive-pink: #ffb3c1;
@@ -111,6 +181,9 @@
   --shadow-tab-active: 1px 2px 4px rgba(0, 0, 0, 0.12);
   --shadow-remove-button: 0 2px 4px rgba(0, 0, 0, 0.15);
   --shadow-photo: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-subtle: 1px 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-thumbnail: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-tape: 0 0.5px 1px rgba(0, 0, 0, 0.06);
   --shadow-binding: inset 5px 0 15px rgba(0, 0, 0, 0.08);
 
   /* Original theme variables */
