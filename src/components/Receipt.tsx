@@ -139,7 +139,7 @@ function Barcode({ value }: { value: string }) {
           <div
             key={i}
             className="flex-shrink-0 h-full"
-            style={{ width: `${w}px`, backgroundColor: i % 2 === 0 ? "#000" : "#fff" }}
+            style={{ width: `${w}px`, backgroundColor: i % 2 === 0 ? "var(--receipt-barcode-dark)" : "var(--receipt-barcode-light)" }}
           />
         ))}
       </div>

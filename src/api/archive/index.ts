@@ -1,6 +1,8 @@
-import { api } from "../instance";
 import type { Archive } from "../../types/archive";
 import type { Diary } from "../../types/diary";
+import { normalizeDiaryMedia } from "../../lib/diary";
+import { api } from "../instance";
+import { unwrapData, unwrapListData } from "../response";
 
 export interface CreateArchiveInput {
   name: string;
@@ -61,26 +63,24 @@ const toArchive = (folder: ArchiveFolderResponse): Archive => ({
   entryCount: folder.diaryCount,
 });
 
-const toDiary = (diary: Diary): Diary => ({
-  ...diary,
-  mediaUrls: diary.mediaUrls ?? [],
-});
+const toArchiveList = (folders: ArchiveFolderResponse[]) => folders.map(toArchive);
+const toDiaryList = (diaries: Diary[]) => diaries.map(normalizeDiaryMedia);
 
 export const getArchives = async () => {
   const { data } = await api.get<{ data: ArchiveFolderResponse[] }>("/api/v1/archives");
-  return (data.data ?? []).map(toArchive);
+  return toArchiveList(unwrapListData(data));
 };
 
 export const getAllDiaries = async () => {
   const { data } = await api.get<{ data: Diary[] }>("/api/v1/diaries/all-diaries");
-  return (data.data ?? []).map(toDiary);
+  return toDiaryList(unwrapListData(data));
 };
 
 export const getArchiveDiaries = async (archiveId: number) => {
   const { data } = await api.get<{ data: Diary[] }>(
     `/api/v1/archives/${archiveId}/diaries`,
   );
-  return (data.data ?? []).map(toDiary);
+  return toDiaryList(unwrapListData(data));
 };
 
 export const createArchive = async (input: CreateArchiveInput) => {
@@ -88,7 +88,7 @@ export const createArchive = async (input: CreateArchiveInput) => {
     name: input.name,
     color: input.color,
   });
-  return toArchive(data.data);
+  return toArchive(unwrapData(data));
 };
 
 export const updateArchive = async (archiveId: number, input: UpdateArchiveInput) => {
@@ -96,7 +96,7 @@ export const updateArchive = async (archiveId: number, input: UpdateArchiveInput
     `/api/v1/archives/${archiveId}`,
     input,
   );
-  return toArchive(data.data);
+  return toArchive(unwrapData(data));
 };
 
 export const deleteArchive = async (archiveId: number) => {

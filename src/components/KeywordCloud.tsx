@@ -9,10 +9,10 @@ interface KeywordCloudProps {
 
 const HEIGHT = 150;
 const COLORS = [
-  "rgba(55,40,25,0.80)",
-  "rgba(80,60,40,0.70)",
-  "rgba(120,95,65,0.60)",
-  "rgba(100,75,50,0.55)",
+  "var(--keyword-cloud-1)",
+  "var(--keyword-cloud-2)",
+  "var(--keyword-cloud-3)",
+  "var(--keyword-cloud-4)",
 ];
 
 export function KeywordCloud({ keywords }: KeywordCloudProps) {

@@ -1,6 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { getPersonas, type PersonaCurrent, type PersonaResponse } from "../api/persona";
+import { useAsyncResource } from "./useAsyncResource";
+
+const EMPTY_PERSONAS: PersonaResponse[] = [];
 
 const historyColors = [
   "var(--tab-stats)",
@@ -29,36 +32,20 @@ const formatGeneratedAt = (value: string) => {
 };
 
 export function usePersona() {
-  const [personas, setPersonas] = useState<PersonaResponse[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<unknown>(null);
   const [tick, setTick] = useState(0);
   const location = useLocation();
 
-  const refetch = useCallback(() => setTick((t) => t + 1), []);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-
-    getPersonas()
-      .then((data) => {
-        if (cancelled) return;
-        setPersonas(data);
-        setError(null);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.error("[usePersona] error", err);
-        setPersonas([]);
-        setError(err);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => { cancelled = true; };
+  const refetch = useCallback(() => setTick((currentTick) => currentTick + 1), []);
+  const loadPersonas = useCallback(() => {
+    void location.key;
+    void tick;
+    return getPersonas();
   }, [location.key, tick]);
+  const {
+    data: personas,
+    loading,
+    error,
+  } = useAsyncResource(loadPersonas, EMPTY_PERSONAS, "[usePersona]");
 
   const current: PersonaCurrent | null = personas[0] ?? null;
   const history = useMemo<PersonaHistoryItem[]>(

@@ -1,32 +1,22 @@
-import { useState, useEffect } from "react";
+import { useCallback } from "react";
 import { useLocation } from "react-router-dom";
 import { getMonthlyStat, type MonthlyStatResponse } from "../api/stat";
+import { useAsyncResource } from "./useAsyncResource";
 
 export function useMonthlyStat(year: number, month: number) {
-  const [stat, setStat] = useState<MonthlyStatResponse | null>(null);
-  const [loading, setLoading] = useState(false);
   const location = useLocation();
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-
-    getMonthlyStat(year, month)
-      .then((data) => {
-        if (cancelled) return;
-        setStat(data);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.error("[useMonthlyStat] error", err);
-        setStat(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-
-    return () => { cancelled = true; };
-  }, [year, month, location.key]);
+  const loadMonthlyStat = useCallback(
+    () => {
+      void location.key;
+      return getMonthlyStat(year, month);
+    },
+    [location.key, month, year],
+  );
+  const { data: stat, loading } = useAsyncResource<MonthlyStatResponse | null>(
+    loadMonthlyStat,
+    null,
+    "[useMonthlyStat]",
+  );
 
   return { stat, loading };
 }

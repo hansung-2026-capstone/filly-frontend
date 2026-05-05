@@ -1,4 +1,6 @@
+import { normalizeDiaryMedia } from "../../lib/diary";
 import { api } from "../instance";
+import { unwrapData, unwrapListData } from "../response";
 
 export interface DiaryItem {
   id: number;
@@ -18,29 +20,32 @@ export interface DraftResponse {
   };
 }
 
+const MULTIPART_HEADERS = { headers: { "Content-Type": "multipart/form-data" } };
+const toDiaryList = (diaries: DiaryItem[]) => diaries.map(normalizeDiaryMedia);
+
 export const getDiaries = async (year: number, month: number) => {
-  const { data } = await api.get<{ data: DiaryItem[] }>(
-    `/api/v1/diaries?year=${year}&month=${month}`,
-  );
-  return data.data ?? [];
+  const { data } = await api.get<{ data: DiaryItem[] }>("/api/v1/diaries", {
+    params: { year, month },
+  });
+  return toDiaryList(unwrapListData(data));
 };
 
 export const createDraft = async (form: FormData) => {
   const { data } = await api.post<{ data: DraftResponse }>(
     "/api/v1/diaries/draft",
     form,
-    { headers: { "Content-Type": "multipart/form-data" } },
+    MULTIPART_HEADERS,
   );
-  return data.data;
+  return unwrapData(data);
 };
 
 export const saveDiary = async (form: FormData) => {
   const { data } = await api.post<{ data: { id: number } }>(
     "/api/v1/diaries",
     form,
-    { headers: { "Content-Type": "multipart/form-data" } },
+    MULTIPART_HEADERS,
   );
-  return data.data;
+  return unwrapData(data);
 };
 
 export const deleteDiary = async (id: number) => {
@@ -49,5 +54,5 @@ export const deleteDiary = async (id: number) => {
 
 export const updateDiary = async (id: number, body: { rawContent?: string; emoji?: string }) => {
   const { data } = await api.put<{ data: DiaryItem }>(`/api/v1/diaries/${id}`, body);
-  return data.data;
+  return normalizeDiaryMedia(unwrapData(data));
 };

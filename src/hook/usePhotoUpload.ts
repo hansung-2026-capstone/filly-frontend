@@ -6,7 +6,10 @@ export function usePhotoUpload(max = 4) {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const inputRef = useRef<HTMLInputElement>(null);
   const photosRef = useRef(photos);
-  photosRef.current = photos;
+
+  useEffect(() => {
+    photosRef.current = photos;
+  }, [photos]);
 
   useEffect(() => () => {
     photosRef.current.forEach((p) => URL.revokeObjectURL(p.url));

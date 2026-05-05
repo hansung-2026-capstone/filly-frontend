@@ -73,13 +73,13 @@ export function NicknameEditor() {
           className="group relative flex items-center justify-center cursor-pointer py-2 w-full rounded-lg transition-all"
         >
           {/* 닉네임 */}
-          <span className="text-[15px] font-bold tracking-[1px] text-[rgba(60,45,30,0.95)] font-['Nanum_Myeongjo'] transition-colors group-hover:text-[rgba(40,30,20,1)]">
+          <span className="text-[15px] font-bold tracking-[1px] text-text-stronger font-['Nanum_Myeongjo'] transition-colors group-hover:text-[var(--text-dark)]">
             {loading ? "···" : nickname}
           </span>
 
           {/* 연필 아이콘  */}
           <div className="ml-2 opacity-40 group-hover:opacity-100 transition-opacity">
-            <Pencil className="w-3.5 h-3.5 text-[rgba(60,45,30,0.95)]" />
+            <Pencil className="w-3.5 h-3.5 text-text-stronger" />
           </div>
         </div>
       ) : (
@@ -93,7 +93,7 @@ export function NicknameEditor() {
             disabled={saving}
             maxLength={10}
             placeholder="이름 입력"
-            className="w-full text-center text-[14px] font-medium text-[rgba(40,30,20,1)] bg-white/70 border-b-2 border-[rgba(120,95,65,0.5)] py-1.5 outline-none focus:border-[rgba(100,75,50,0.9)] tracking-[0.5px] font-['Nanum_Myeongjo'] placeholder:text-[rgba(160,140,120,0.5)]"
+            className="w-full text-center text-[14px] font-medium text-[var(--text-dark)] bg-[var(--bg-editor-panel)] border-b-2 border-[var(--border-input-strong)] py-1.5 outline-none focus:border-[var(--border-input-focus-strong)] tracking-[0.5px] font-['Nanum_Myeongjo'] placeholder:text-[var(--text-placeholder)]"
           />
 
           {error && (
@@ -106,14 +106,14 @@ export function NicknameEditor() {
             <button
               onClick={handleSave}
               disabled={!draft.trim() || draft.trim() === nickname || saving}
-              className="flex items-center gap-1 text-[11px] font-bold text-[rgba(80,65,50,0.8)] hover:text-[rgba(60,45,30,1)] transition-colors whitespace-nowrap disabled:opacity-35 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 text-[11px] font-bold text-[var(--text-control-muted)] hover:text-[var(--text-control-strong)] transition-colors whitespace-nowrap disabled:opacity-35 disabled:cursor-not-allowed"
             >
               <Check className="w-3.5 h-3.5" /> {saving ? "저장 중" : "저장"}
             </button>
             <button
               onClick={handleCancel}
               disabled={saving}
-              className="flex items-center gap-1 text-[11px] font-bold text-[rgba(80,65,50,0.8)] hover:text-[rgba(60,45,30,1)] transition-colors whitespace-nowrap opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-1 text-[11px] font-bold text-[var(--text-control-muted)] hover:text-[var(--text-control-strong)] transition-colors whitespace-nowrap opacity-50 disabled:cursor-not-allowed"
             >
               <X className="w-3.5 h-3.5" /> 취소
             </button>

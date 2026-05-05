@@ -1,4 +1,5 @@
 import { api } from "../instance";
+import { unwrapData } from "../response";
 
 export interface UserData {
   id: number;
@@ -9,7 +10,7 @@ export interface UserData {
   createdAt: string;
 }
 
-export interface UserResponse {
+interface UserResponse {
   success: boolean;
   data: UserData;
   message: string | null;
@@ -17,10 +18,9 @@ export interface UserResponse {
 
 export const getMe = async (): Promise<UserData> => {
   const { data } = await api.get<UserResponse>("/api/v1/users/me");
-  return data.data;
+  return unwrapData(data);
 };
 
 export const updateNickname = async (nickname: string): Promise<void> => {
-  const body = { nickname };
-  await api.patch("/api/v1/users/me/nickname", body);
+  await api.patch("/api/v1/users/me/nickname", { nickname });
 };

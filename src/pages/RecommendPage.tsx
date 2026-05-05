@@ -63,7 +63,7 @@ export function RecommendPage() {
       // 영수증: 펼쳐진 스크롤 컨테이너 전체 캡처
       if (receiptScrollRef.current)
         downloadPng(
-          await toPng(receiptScrollRef.current, { backgroundColor: "#ffffff", pixelRatio: 2 }),
+          await toPng(receiptScrollRef.current, { backgroundColor: "var(--receipt-barcode-light)", pixelRatio: 2 }),
           `${prefix}-영수증.png`,
         );
 
@@ -99,8 +99,8 @@ export function RecommendPage() {
         {/* Right page - 공유 컨텐츠 */}
         <div className="flex-1 flex flex-col py-3 px-3 gap-3 overflow-y-auto">
           {/* 헤더 */}
-          <div className="flex items-center justify-between pb-2.5 border-b border-[rgba(160,140,120,0.12)] mb-1 flex-shrink-0">
-            <div className="text-sm text-[rgba(70,55,35,0.65)] tracking-wide">
+          <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
+            <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
               공유용 컨텐츠 (Shared Content)
             </div>
             <button
@@ -170,7 +170,7 @@ export function RecommendPage() {
                   style={{
                     opacity: receiptAtBottom ? 0 : 1,
                     background:
-                      "linear-gradient(to bottom, transparent, #faf6ed)",
+                      "linear-gradient(to bottom, transparent, var(--notebook-page))",
                   }}
                 />
               </div>
@@ -219,7 +219,7 @@ export function RecommendPage() {
         receipt &&
         createPortal(
           <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-[rgba(0,0,0,0.4)]"
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-bg-overlay"
             onClick={() => setShowReceiptModal(false)}
           >
             <div
@@ -229,7 +229,7 @@ export function RecommendPage() {
               <button
                 onClick={() => setShowReceiptModal(false)}
                 className="absolute top-2 right-2 z-10 w-6 h-6 flex items-center justify-center
-              rounded-full bg-[rgba(0,0,0,0.08)] hover:bg-[rgba(0,0,0,0.15)] transition-colors"
+              rounded-full bg-[var(--bg-black-subtle)] hover:bg-[var(--bg-black-subtle-hover)] transition-colors"
               >
                 <X className="w-3.5 h-3.5 text-text-muted" />
               </button>
