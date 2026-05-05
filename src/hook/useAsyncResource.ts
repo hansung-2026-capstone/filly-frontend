@@ -1,4 +1,5 @@
-import { useEffect, useReducer } from "react";
+import { useCallback, useEffect, useReducer } from "react";
+import type { Dispatch, SetStateAction } from "react";
 
 type AsyncState<T> = {
   data: T;
@@ -9,7 +10,14 @@ type AsyncState<T> = {
 type AsyncAction<T> =
   | { type: "start" }
   | { type: "success"; data: T }
-  | { type: "error"; error: unknown; fallbackData: T };
+  | { type: "error"; error: unknown; fallbackData: T }
+  | { type: "setData"; value: SetStateAction<T> };
+
+function resolveNextData<T>(currentData: T, value: SetStateAction<T>) {
+  return typeof value === "function"
+    ? (value as (previousData: T) => T)(currentData)
+    : value;
+}
 
 function asyncResourceReducer<T>(
   state: AsyncState<T>,
@@ -22,6 +30,12 @@ function asyncResourceReducer<T>(
       return { data: action.data, loading: false, error: null };
     case "error":
       return { data: action.fallbackData, loading: false, error: action.error };
+    case "setData":
+      return {
+        ...state,
+        data: resolveNextData(state.data, action.value),
+        error: null,
+      };
     default:
       return state;
   }
@@ -31,7 +45,7 @@ export function useAsyncResource<T>(
   load: () => Promise<T>,
   fallbackData: T,
   debugLabel?: string,
-) {
+): AsyncState<T> & { setData: Dispatch<SetStateAction<T>> } {
   const [state, dispatch] = useReducer(asyncResourceReducer<T>, {
     data: fallbackData,
     loading: false,
@@ -57,5 +71,9 @@ export function useAsyncResource<T>(
     };
   }, [debugLabel, fallbackData, load]);
 
-  return state;
+  const setData = useCallback<Dispatch<SetStateAction<T>>>((value) => {
+    dispatch({ type: "setData", value });
+  }, []);
+
+  return { ...state, setData };
 }
