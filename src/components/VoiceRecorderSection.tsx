@@ -86,7 +86,7 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
             if (audioRef.current) audioRef.current.currentTime = t;
             setCurrentTime(t);
           }}
-          className="flex-1 min-w-0 h-1 accent-[rgba(100,80,60,0.7)] cursor-pointer"
+          className="flex-1 min-w-0 h-1 accent-[var(--accent-audio-progress)] cursor-pointer"
         />
         <span className="text-[11px] text-text-muted tabular-nums flex-shrink-0">
           {formatTime(currentTime)}/{formatTime(duration)}

@@ -3,9 +3,9 @@ import { ArrowLeft, MoreVertical, Plus, X } from "lucide-react";
 import { Portal } from "../components/Portal";
 import { DiaryDetailModal } from "../components/DiaryDetailModal";
 import { useArchive } from "../hook/useArchive";
-import type { DiaryItem } from "../api/diary";
 import type { Archive } from "../types/archive";
 import type { Diary } from "../types/diary";
+import { getDiaryPreview, toDiaryItem } from "../lib/diary";
 
 const ARCHIVE_COLOR_OPTIONS = [
   { key: "pink", label: "핑크", value: "var(--archive-pink)" },
@@ -21,26 +21,6 @@ type ArchiveModalMode = "create" | "edit";
 interface ArchiveModalState {
   mode: ArchiveModalMode;
   archive: Archive | null;
-}
-
-const toDiaryItem = (diary: Diary): DiaryItem => ({
-  id: diary.id,
-  writtenAt: diary.writtenAt,
-  mode: diary.mode,
-  emoji: diary.emoji,
-  rawContent: diary.rawContent ?? "",
-  starRating: diary.starRating,
-  mediaUrls: diary.mediaUrls ?? [],
-});
-
-function getDiaryPreview(entry: Diary) {
-  const source = entry.rawContent || "";
-  if (!source.trim()) return entry.writtenAt;
-
-  const parsed = new DOMParser().parseFromString(source, "text/html");
-  const text = parsed.body.textContent?.replace(/\s+/g, " ").trim();
-
-  return text || entry.writtenAt;
 }
 
 export function ArchivePage() {
@@ -137,7 +117,7 @@ export function ArchivePage() {
                     rounded-sm flex flex-col items-center justify-center gap-0.5 transition-all duration-200
                     ${
                       selectedArchiveId === archive.id
-                        ? "scale-105 outline outline-2 outline-[rgba(0,0,0,0.1)] z-[2]"
+                        ? "scale-105 outline outline-2 outline-[var(--outline-archive-selected)] z-[2]"
                         : "hover:-translate-y-0.5 hover:scale-[1.03]"
                     }`}
                   style={{
@@ -145,7 +125,7 @@ export function ArchivePage() {
                     boxShadow:
                       selectedArchiveId === archive.id
                         ? `2px 4px 14px ${archive.shadowValue}`
-                        : `1px 2px 5px ${archive.shadowValue}, inset 0 -1px 2px rgba(0,0,0,0.04)`,
+                        : `1px 2px 5px ${archive.shadowValue}, var(--shadow-archive-card-inset)`,
                     transform:
                       index % 2 === 0 ? "rotate(-0.8deg)" : "rotate(1.2deg)",
                   }}

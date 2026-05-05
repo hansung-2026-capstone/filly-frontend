@@ -3,17 +3,17 @@ import { usePersona } from "../hook/usePersona";
 import { useMonthlyStat } from "../hook/useMonthlyStat";
 
 const EMOTION_COLORS = [
-  "rgba(100,140,80,0.7)",
-  "rgba(190,145,80,0.7)",
-  "rgba(105,140,170,0.7)",
-  "rgba(175,105,95,0.7)",
-  "rgba(140,115,165,0.7)",
-  "rgba(120,105,85,0.55)",
+  "var(--emotion-chart-1)",
+  "var(--emotion-chart-2)",
+  "var(--emotion-chart-3)",
+  "var(--emotion-chart-4)",
+  "var(--emotion-chart-5)",
+  "var(--emotion-chart-6)",
 ];
 
 function buildEmotionGradient(entries: [string, number][]) {
   const total = entries.reduce((sum, [, value]) => sum + value, 0);
-  if (total <= 0) return "rgba(70,95,45,0.12)";
+  if (total <= 0) return "var(--emotion-chart-empty)";
 
   let cursor = 0;
   const stops = entries.map(([, value], index) => {

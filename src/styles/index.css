@@ -13,7 +13,7 @@
 
 /* Placeholder 색상 */
 .tiptap p.is-editor-empty:first-child::before {
-  color: rgba(140, 120, 90, 0.35);
+  color: var(--text-editor-placeholder);
   content: attr(data-placeholder);
   pointer-events: none;
   float: left;

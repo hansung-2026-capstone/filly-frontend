@@ -10,6 +10,21 @@
   --notebook-page-gradient-left: linear-gradient(135deg, #f5f0e6 0%, #faf6ed 40%, #f2ecdf 100%);
   --notebook-page-gradient-right: linear-gradient(225deg, #f5f0e6 0%, #faf6ed 40%, #f2ecdf 100%);
 
+  /* Notebook scene effects */
+  --notebook-bg-radial: radial-gradient(circle at 30% 40%, rgba(92, 74, 58, 0.8) 0%, rgba(92, 74, 58, 0.4) 50%, transparent 100%);
+  --notebook-texture-lines: repeating-linear-gradient(92deg, transparent, transparent 18px, rgba(0, 0, 0, 0.03) 18px, rgba(0, 0, 0, 0.03) 19px);
+  --notebook-desk-shadow: 0 40px 80px rgba(0, 0, 0, 0.45), 0 15px 35px rgba(0, 0, 0, 0.3);
+  --notebook-left-page-shadow: inset -6px 0 14px -6px rgba(0, 0, 0, 0.03), inset 0 0 60px rgba(0, 0, 0, 0.03);
+  --notebook-right-page-shadow: inset 6px 0 14px -6px rgba(0, 0, 0, 0.03), inset 0 0 60px rgba(0, 0, 0, 0.03);
+  --notebook-left-edge-gradient: linear-gradient(to left, rgba(0, 0, 0, 0.04), transparent);
+  --notebook-right-edge-gradient: linear-gradient(to right, rgba(0, 0, 0, 0.04), transparent);
+  --notebook-spine-gradient: linear-gradient(to right, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.07) 45%, rgba(0, 0, 0, 0.07) 55%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0.02) 100%);
+  --notebook-spine-stitches: repeating-linear-gradient(to bottom, transparent, transparent 16px, rgba(120, 100, 80, 0.08) 16px, rgba(120, 100, 80, 0.08) 24px);
+  --notebook-page-edge-gradient: repeating-linear-gradient(to right, var(--border-page-edge-left), var(--border-page-edge-left) 1px, var(--border-page-edge-right) 1px, var(--border-page-edge-right) 2px);
+  --notebook-page-edge-top-shadow: 0 -1px 2px rgba(0, 0, 0, 0.08);
+  --notebook-page-edge-bottom-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --notebook-tab-inset-shadow: inset 0 0 12px rgba(255, 255, 255, 0.25);
+
   /* Tab Colors */
   --tab-home: #ff7eb3;
   --tab-home-text: rgba(120, 20, 50, 0.8);
@@ -185,6 +200,22 @@
   --shadow-thumbnail: 0 1px 3px rgba(0, 0, 0, 0.1);
   --shadow-tape: 0 0.5px 1px rgba(0, 0, 0, 0.06);
   --shadow-binding: inset 5px 0 15px rgba(0, 0, 0, 0.08);
+  --shadow-action-button: 0 2px 6px rgba(0, 0, 0, 0.15);
+  --shadow-archive-card-inset: inset 0 -1px 2px rgba(0, 0, 0, 0.04);
+  --outline-archive-selected: rgba(0, 0, 0, 0.1);
+  --accent-audio-progress: rgba(100, 80, 60, 0.7);
+  --text-editor-placeholder: rgba(140, 120, 90, 0.35);
+  --keyword-cloud-1: rgba(55, 40, 25, 0.8);
+  --keyword-cloud-2: rgba(80, 60, 40, 0.7);
+  --keyword-cloud-3: rgba(120, 95, 65, 0.6);
+  --keyword-cloud-4: rgba(100, 75, 50, 0.55);
+  --emotion-chart-1: rgba(100, 140, 80, 0.7);
+  --emotion-chart-2: rgba(190, 145, 80, 0.7);
+  --emotion-chart-3: rgba(105, 140, 170, 0.7);
+  --emotion-chart-4: rgba(175, 105, 95, 0.7);
+  --emotion-chart-5: rgba(140, 115, 165, 0.7);
+  --emotion-chart-6: rgba(120, 105, 85, 0.55);
+  --emotion-chart-empty: rgba(70, 95, 45, 0.12);
 
   /* Original theme variables */
   --background: #ffffff;

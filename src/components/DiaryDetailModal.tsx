@@ -10,6 +10,7 @@ import {
 } from "../api/archive";
 import { deleteDiary, type DiaryItem } from "../api/diary";
 import type { Archive } from "../types/archive";
+import { formatKoreanDateKey, getKoreanDayLabelFromKey } from "../lib/date";
 import { Portal } from "./Portal";
 import { TiptapEditor } from "./TiptapEditor";
 
@@ -20,13 +21,11 @@ interface DiaryDetailModalProps {
   onArchived?: () => void;
 }
 
-const DAY_NAMES = ["일", "월", "화", "수", "목", "금", "토"];
-
-function formatDate(writtenAt: string) {
-  const [y, m, d] = writtenAt.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
-  const dow = DAY_NAMES[date.getDay()];
-  return { label: `${y}년 ${m}월 ${d}일`, dow };
+function formatDiaryDate(writtenAt: string) {
+  return {
+    label: formatKoreanDateKey(writtenAt),
+    dow: getKoreanDayLabelFromKey(writtenAt).replace("요일", ""),
+  };
 }
 
 function PhotoGrid({ urls }: { urls: string[] }) {
@@ -72,7 +71,7 @@ function PhotoGrid({ urls }: { urls: string[] }) {
 }
 
 export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: DiaryDetailModalProps) {
-  const { label, dow } = formatDate(diary.writtenAt);
+  const { label, dow } = formatDiaryDate(diary.writtenAt);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
@@ -195,7 +194,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           className="bg-notebook-page rounded-xl w-[400px] max-h-[78vh] flex flex-col
             shadow-[var(--shadow-modal)]
             overflow-hidden font-['Nanum_Myeongjo']"
-          style={{ animation: 'modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)' }}
+          style={{ animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* 날짜 헤더 */}

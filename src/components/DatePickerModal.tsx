@@ -1,12 +1,21 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { createPortal } from "react-dom";
+import { getCalendarDays, WEEK_DAYS_SHORT } from "../lib/date";
+import { Portal } from "./Portal";
 
 interface DatePickerModalProps {
   isOpen: boolean;
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
   onClose: () => void;
+}
+
+function isSelectedDay(day: number, selectedDate: Date, pickerMonth: Date) {
+  return (
+    selectedDate.getDate() === day &&
+    selectedDate.getMonth() === pickerMonth.getMonth() &&
+    selectedDate.getFullYear() === pickerMonth.getFullYear()
+  );
 }
 
 export function DatePickerModal({
@@ -19,136 +28,92 @@ export function DatePickerModal({
     new Date(selectedDate.getFullYear(), selectedDate.getMonth()),
   );
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-  };
-
-  const getFirstDayOfMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
-  };
-
-  const generateCalendarDays = () => {
-    const daysInMonth = getDaysInMonth(pickerMonth);
-    const firstDay = getFirstDayOfMonth(pickerMonth);
-    const days: (number | null)[] = [];
-
-    // 이전달의 비어있는 날들
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
-
-    // 현재달의 날들
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(i);
-    }
-
-    return days;
-  };
-
   const handleDateSelect = (day: number) => {
-    const newDate = new Date(
-      pickerMonth.getFullYear(),
-      pickerMonth.getMonth(),
-      day,
-    );
-    onDateSelect(newDate);
+    onDateSelect(new Date(pickerMonth.getFullYear(), pickerMonth.getMonth(), day));
   };
 
-  const handlePrevMonth = () => {
+  const moveMonth = (amount: number) => {
     setPickerMonth(
-      new Date(pickerMonth.getFullYear(), pickerMonth.getMonth() - 1),
+      (currentMonth) =>
+        new Date(currentMonth.getFullYear(), currentMonth.getMonth() + amount),
     );
   };
-
-  const handleNextMonth = () => {
-    setPickerMonth(
-      new Date(pickerMonth.getFullYear(), pickerMonth.getMonth() + 1),
-    );
-  };
-
-  const calendarDays = generateCalendarDays();
-  const weekDays = ["일", "월", "화", "수", "목", "금", "토"];
 
   if (!isOpen) return null;
 
-  return createPortal(
-    <div
-      className="fixed inset-0 bg-bg-overlay-light flex items-center justify-center z-[9999]"
-      onClick={onClose}
-    >
+  return (
+    <Portal>
       <div
-        className="relative z-[91] bg-notebook-page rounded-lg p-6 shadow-lg w-80"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 bg-bg-overlay-light flex items-center justify-center z-[9999]"
+        onClick={onClose}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <button
-            onClick={handlePrevMonth}
-            className="p-1 hover:bg-[var(--bg-hover-soft)] rounded transition-all"
-          >
-            <ChevronLeft className="w-5 h-5 text-text-muted" />
-          </button>
-          <h3 className="text-base font-medium text-text-heading">
-            {pickerMonth.getFullYear()}년 {pickerMonth.getMonth() + 1}월
-          </h3>
-          <button
-            onClick={handleNextMonth}
-            className="p-1 hover:bg-[var(--bg-hover-soft)] rounded transition-all"
-          >
-            <ChevronRight className="w-5 h-5 text-text-muted" />
-          </button>
-        </div>
-
-        {/* Weekday Header */}
-        <div className="grid grid-cols-7 gap-2 mb-2">
-          {weekDays.map((day) => (
-            <div
-              key={day}
-              className="text-center text-[11px] font-medium text-text-soft py-1"
-            >
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Calendar Grid */}
-        <div className="grid grid-cols-7 gap-2">
-          {calendarDays.map((day, idx) => (
+        <div
+          className="relative z-[91] bg-notebook-page rounded-lg p-6 shadow-lg w-80"
+          onClick={(event) => event.stopPropagation()}
+        >
+          <div className="flex items-center justify-between mb-4">
             <button
-              key={idx}
-              onClick={() => day && handleDateSelect(day)}
-              disabled={!day}
-              className={`
-                w-9 h-9 rounded text-sm font-medium transition-all
-                ${
-                  !day
-                    ? "bg-transparent cursor-default"
-                    : selectedDate.getDate() === day &&
-                        selectedDate.getMonth() === pickerMonth.getMonth() &&
-                        selectedDate.getFullYear() === pickerMonth.getFullYear()
-                      ? "bg-bg-strong-control text-notebook-page"
-                      : "text-text-heading hover:bg-bg-selected-hover"
-                }
-              `}
+              onClick={() => moveMonth(-1)}
+              className="p-1 hover:bg-[var(--bg-hover-soft)] rounded transition-all"
             >
-              {day}
+              <ChevronLeft className="w-5 h-5 text-text-muted" />
             </button>
-          ))}
-        </div>
+            <h3 className="text-base font-medium text-text-heading">
+              {pickerMonth.getFullYear()}년 {pickerMonth.getMonth() + 1}월
+            </h3>
+            <button
+              onClick={() => moveMonth(1)}
+              className="p-1 hover:bg-[var(--bg-hover-soft)] rounded transition-all"
+            >
+              <ChevronRight className="w-5 h-5 text-text-muted" />
+            </button>
+          </div>
 
-        {/* Footer */}
-        <div className="flex justify-end gap-2 mt-6">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 text-sm border border-border-medium rounded-md
-              text-text-primary hover:bg-bg-hover
-              transition-all duration-150 font-['Nanum_Myeongjo']"
-          >
-            닫기
-          </button>
+          <div className="grid grid-cols-7 gap-2 mb-2">
+            {WEEK_DAYS_SHORT.map((day) => (
+              <div
+                key={day}
+                className="text-center text-[11px] font-medium text-text-soft py-1"
+              >
+                {day}
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7 gap-2">
+            {getCalendarDays(pickerMonth).map((day, index) => (
+              <button
+                key={index}
+                onClick={() => day && handleDateSelect(day)}
+                disabled={!day}
+                className={`
+                  w-9 h-9 rounded text-sm font-medium transition-all
+                  ${
+                    !day
+                      ? "bg-transparent cursor-default"
+                      : isSelectedDay(day, selectedDate, pickerMonth)
+                        ? "bg-bg-strong-control text-notebook-page"
+                        : "text-text-heading hover:bg-bg-selected-hover"
+                  }
+                `}
+              >
+                {day}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex justify-end gap-2 mt-6">
+            <button
+              onClick={onClose}
+              className="px-4 py-2 text-sm border border-border-medium rounded-md
+                text-text-primary hover:bg-bg-hover
+                transition-all duration-150 font-['Nanum_Myeongjo']"
+            >
+              닫기
+            </button>
+          </div>
         </div>
       </div>
-    </div>,
-    document.body,
+    </Portal>
   );
 }

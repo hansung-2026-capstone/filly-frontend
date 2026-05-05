@@ -1,20 +1,6 @@
 import { useState } from "react";
+import { MONTHS } from "../lib/date";
 import { Portal } from "./Portal";
-
-const MONTHS = [
-  { num: 1, name: 'JANUARY' },
-  { num: 2, name: 'FEBRUARY' },
-  { num: 3, name: 'MARCH' },
-  { num: 4, name: 'APRIL' },
-  { num: 5, name: 'MAY' },
-  { num: 6, name: 'JUNE' },
-  { num: 7, name: 'JULY' },
-  { num: 8, name: 'AUGUST' },
-  { num: 9, name: 'SEPTEMBER' },
-  { num: 10, name: 'OCTOBER' },
-  { num: 11, name: 'NOVEMBER' },
-  { num: 12, name: 'DECEMBER' },
-];
 
 interface MonthPickerModalProps {
   isOpen: boolean;
@@ -45,7 +31,7 @@ export function MonthPickerModal({
           className="bg-notebook-page rounded-xl w-[420px] shadow-[var(--shadow-modal)]
             overflow-hidden font-['Nanum_Myeongjo']"
           onClick={(e) => e.stopPropagation()}
-          style={{ animation: 'modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)' }}
+          style={{ animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}
         >
           {/* 헤더 - 연도 선택 */}
           <div className="flex items-center justify-between py-4 px-5 pb-3.5 border-b border-border-light">
@@ -94,11 +80,11 @@ export function MonthPickerModal({
                   className={`py-3 px-3 border rounded-lg cursor-pointer font-['Nanum_Myeongjo']
                     text-[11px] transition-all duration-200 flex flex-col items-center gap-1
                     ${selectedYear === pickerYear && selectedMonth === month.num
-                      ? 'bg-bg-active border-border-strong text-text-heading'
-                      : 'bg-transparent border-border-medium text-text-muted hover:bg-bg-hover'
+                      ? "bg-bg-active border-border-strong text-text-heading"
+                      : "bg-transparent border-border-medium text-text-muted hover:bg-bg-hover"
                     }`}
                 >
-                  <div className="text-[18px] leading-none">{String(month.num).padStart(2, '0')}</div>
+                  <div className="text-[18px] leading-none">{String(month.num).padStart(2, "0")}</div>
                   <div className="text-[9px] tracking-[0.5px] uppercase opacity-60">{month.name.slice(0, 3)}</div>
                 </button>
               ))}
