@@ -1,4 +1,5 @@
 import { api } from "../instance";
+import { unwrapData } from "../response";
 
 export interface IdCardResponse {
   avatarUrl: string;
@@ -16,12 +17,12 @@ export interface ReceiptResponse {
 
 export const getIdCard = async () => {
   const { data } = await api.get<{ data: IdCardResponse }>("/api/v1/share/id-card");
-  return data.data;
+  return unwrapData(data);
 };
 
 export const getReceipt = async (year: number, month: number) => {
   const { data } = await api.get<{ data: ReceiptResponse }>("/api/v1/share/receipt", {
     params: { year, month },
   });
-  return data.data;
+  return unwrapData(data);
 };
