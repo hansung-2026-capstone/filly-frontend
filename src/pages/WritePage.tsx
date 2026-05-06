@@ -1,13 +1,14 @@
 import { Calendar } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { createDraft, getDiaries, saveDiary, updateDiary, type DiaryItem } from "../api/diary";
+import type { DiaryItem } from "../types/diary";
 import { DatePickerModal } from "../components/DatePickerModal";
 import { PhotoUploadSection } from "../components/PhotoUploadSection";
 import { TiptapEditor } from "../components/TiptapEditor";
 import { VoiceRecorderSection } from "../components/VoiceRecorderSection";
 import { usePhotoUpload } from "../hook/usePhotoUpload";
 import { useVoiceRecorder } from "../hook/useVoiceRecorder";
+import { useDiaryMutations } from "../hook/common/useDiaryMutations";
 import {
   formatDateKey,
   formatKoreanDate,
@@ -30,7 +31,6 @@ export function WritePage() {
   const navigate = useNavigate();
   const location = useLocation();
   const editDiary = getEditDiary(location.state);
-
   const [emoji, setEmoji] = useState<string | null>(editDiary?.emoji ?? EMOJIS[0]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -46,6 +46,7 @@ export function WritePage() {
   const aiPhotos = usePhotoUpload();
   const diaryPhotos = usePhotoUpload();
   const voiceRecorder = useVoiceRecorder();
+  const diaryMutations = useDiaryMutations(selectedDate);
   const dateLabel = editDiary
     ? formatKoreanDateKey(editDiary.writtenAt)
     : formatKoreanDate(selectedDate);
@@ -69,7 +70,7 @@ export function WritePage() {
       appendPhotos(form, aiPhotos.photos);
       if (voiceRecorder.record) form.append("voice", voiceRecorder.record.file);
 
-      const draft = await createDraft(form);
+      const draft = await diaryMutations.createDraft(form);
       setDraftContent(draft.generatedText);
       diaryPhotos.replacePhotos(aiPhotos.photos);
     } finally {
@@ -82,10 +83,14 @@ export function WritePage() {
     setIsSaving(true);
     try {
       if (editDiary) {
-        await updateDiary(editDiary.id, {
-          rawContent: finalText.trim() || undefined,
-          emoji: emoji || undefined,
+        await diaryMutations.updateDiary({
+          id: editDiary.id,
+          body: {
+            rawContent: finalText.trim() || undefined,
+            emoji: emoji || undefined,
+          },
         });
+        await diaryMutations.invalidateDiaries();
       } else {
         const writtenAt = formatDateKey(selectedDate);
 
@@ -96,10 +101,7 @@ export function WritePage() {
 
         let diaries: DiaryItem[];
         try {
-          diaries = await getDiaries(
-            selectedDate.getFullYear(),
-            selectedDate.getMonth() + 1,
-          );
+          diaries = await diaryMutations.loadMonthlyDiaries();
         } catch {
           setValidationMessage("기존 일기 확인에 실패했어요. 잠시 후 다시 시도해주세요.");
           return;
@@ -117,7 +119,8 @@ export function WritePage() {
         if (emoji) form.append("emoji", emoji);
         appendPhotos(form, diaryPhotos.photos);
 
-        await saveDiary(form);
+        await diaryMutations.saveDiary(form);
+        await diaryMutations.invalidateDiaries();
       }
       navigate("/");
     } finally {
@@ -168,7 +171,7 @@ export function WritePage() {
           <div className="flex justify-end pt-2">
             <button
               onClick={handleGenerateDraft}
-              disabled={isDraftGenerating}
+              disabled={isDraftGenerating || diaryMutations.draftPending}
               className="py-2.5 px-8 bg-bg-strong-control text-notebook-page border-none rounded-md
                 cursor-pointer font-['Nanum_Myeongjo'] text-sm transition-all duration-150
                 hover:bg-bg-strong-control-hover shadow-[var(--shadow-action-button)]
@@ -260,7 +263,7 @@ export function WritePage() {
         <div className="flex flex-col items-end gap-2">
           <button
             onClick={handleSaveDiary}
-            disabled={isSaving}
+            disabled={isSaving || diaryMutations.savePending || diaryMutations.updatePending}
             className="py-2.5 px-8 bg-bg-strong-control text-notebook-page border-none rounded-md
                 cursor-pointer font-['Nanum_Myeongjo'] text-sm transition-all duration-150
                 hover:bg-bg-strong-control-hover shadow-[var(--shadow-action-button)]

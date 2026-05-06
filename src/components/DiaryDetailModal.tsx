@@ -1,16 +1,10 @@
 import { Bookmark, Check, Plus, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  addDiaryToArchive,
-  createArchive,
-  getArchiveDiaries,
-  getArchives,
-  removeDiaryFromArchive,
-} from "../api/archive";
-import { deleteDiary, type DiaryItem } from "../api/diary";
+import type { DiaryItem } from "../types/diary";
 import type { Archive } from "../types/archive";
 import { formatKoreanDateKey, getKoreanDayLabelFromKey } from "../lib/date";
+import { useDiaryArchiveStatus } from "../hook/common/useDiaryArchiveStatus";
 import { Portal } from "./Portal";
 import { TiptapEditor } from "./TiptapEditor";
 
@@ -75,20 +69,30 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
-  const [archives, setArchives] = useState<Archive[]>([]);
-  const [archivedArchiveIds, setArchivedArchiveIds] = useState<Set<number>>(new Set());
-  const [loadingArchives, setLoadingArchives] = useState(false);
   const [archiving, setArchiving] = useState(false);
-  const [archiveError, setArchiveError] = useState<string | null>(null);
+  const [archiveActionError, setArchiveActionError] = useState<string | null>(null);
   const [isAddingArchive, setIsAddingArchive] = useState(false);
   const [newArchiveName, setNewArchiveName] = useState("");
   const navigate = useNavigate();
+  const {
+    archives,
+    archivedArchiveIds,
+    loadingArchives,
+    archiveError: archiveLoadError,
+    refetchArchiveStatus,
+    deleteDiary,
+    addDiaryToArchive,
+    removeDiaryFromArchive,
+    createArchiveAndAddDiary,
+    mutating,
+  } = useDiaryArchiveStatus(diary.id);
+  const archiveError = archiveActionError ?? archiveLoadError;
   const isArchived = archivedArchiveIds.size > 0;
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteDiary(diary.id);
+      await deleteDiary();
       onDeleted?.();
       onClose();
     } finally {
@@ -96,62 +100,26 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
     }
   };
 
-  const loadArchiveStatus = useCallback(async () => {
-    setArchiveError(null);
-    setLoadingArchives(true);
-
-    try {
-      const folders = await getArchives();
-      const folderDiaries = await Promise.all(
-        folders.map(async (archive) => ({
-          archiveId: archive.id,
-          diaries: await getArchiveDiaries(archive.id),
-        })),
-      );
-      const nextArchivedArchiveIds = new Set(
-        folderDiaries
-          .filter(({ diaries }) => diaries.some((item) => item.id === diary.id))
-          .map(({ archiveId }) => archiveId),
-      );
-
-      setArchives(folders);
-      setArchivedArchiveIds(nextArchivedArchiveIds);
-    } catch {
-      setArchives([]);
-      setArchiveError("아카이브 목록을 불러오지 못했습니다.");
-    } finally {
-      setLoadingArchives(false);
-    }
-  }, [diary.id]);
-
-  useEffect(() => {
-    void loadArchiveStatus();
-  }, [loadArchiveStatus]);
-
   const openArchiveModal = () => {
+    setArchiveActionError(null);
     setShowArchiveModal(true);
-    void loadArchiveStatus();
+    void refetchArchiveStatus();
   };
 
   const handleArchiveToggle = async (archive: Archive) => {
     setArchiving(true);
-    setArchiveError(null);
+    setArchiveActionError(null);
 
     try {
-      const nextArchivedArchiveIds = new Set(archivedArchiveIds);
-
-      if (nextArchivedArchiveIds.has(archive.id)) {
-        await removeDiaryFromArchive(archive.id, diary.id);
-        nextArchivedArchiveIds.delete(archive.id);
+      if (archivedArchiveIds.has(archive.id)) {
+        await removeDiaryFromArchive(archive.id);
       } else {
-        await addDiaryToArchive(archive.id, diary.id);
-        nextArchivedArchiveIds.add(archive.id);
+        await addDiaryToArchive(archive.id);
       }
 
-      setArchivedArchiveIds(nextArchivedArchiveIds);
       onArchived?.();
     } catch {
-      setArchiveError("아카이브 상태를 변경하지 못했습니다.");
+      setArchiveActionError("아카이브 상태를 변경하지 못했습니다.");
     } finally {
       setArchiving(false);
     }
@@ -162,18 +130,15 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
     if (!trimmedName) return;
 
     setArchiving(true);
-    setArchiveError(null);
+    setArchiveActionError(null);
 
     try {
-      const archive = await createArchive({ name: trimmedName, color: "pink" });
-      await addDiaryToArchive(archive.id, diary.id);
-      setArchives((prev) => [archive, ...prev]);
-      setArchivedArchiveIds((prev) => new Set(prev).add(archive.id));
+      await createArchiveAndAddDiary(trimmedName);
       setNewArchiveName("");
       setIsAddingArchive(false);
       onArchived?.();
     } catch {
-      setArchiveError("새 아카이브를 만들거나 일기를 추가하지 못했습니다.");
+      setArchiveActionError("새 아카이브를 만들거나 일기를 추가하지 못했습니다.");
     } finally {
       setArchiving(false);
     }
@@ -268,7 +233,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
               <>
                 <button
                   onClick={openArchiveModal}
-                  disabled={archiving}
+                  disabled={archiving || mutating}
                   className={`w-9 h-9 rounded-full flex items-center justify-center border-none cursor-pointer
                     transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed ${
                       isArchived
@@ -359,7 +324,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                   <div className="flex gap-1 flex-shrink-0">
                     <button
                       onClick={() => void handleAddArchive()}
-                      disabled={archiving || !newArchiveName.trim()}
+                      disabled={archiving || mutating || !newArchiveName.trim()}
                       className="w-6 h-6 border-none bg-transparent cursor-pointer rounded
                         transition-all duration-150 hover:bg-bg-selected-hover flex items-center justify-center
                         disabled:opacity-50 disabled:cursor-not-allowed"
@@ -368,7 +333,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                     </button>
                     <button
                       onClick={handleCancelAdd}
-                      disabled={archiving}
+                      disabled={archiving || mutating}
                       className="w-6 h-6 border-none bg-transparent cursor-pointer rounded
                         transition-all duration-150 hover:bg-bg-selected-hover flex items-center justify-center
                         disabled:opacity-50 disabled:cursor-not-allowed"
@@ -380,7 +345,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
               ) : (
                 <button
                   onClick={() => setIsAddingArchive(true)}
-                  disabled={archiving}
+                  disabled={archiving || mutating}
                   className="w-full py-3 px-4 border rounded-lg cursor-pointer
                     font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
                     flex items-center gap-2.5 bg-transparent border-border-medium text-text-primary
@@ -405,7 +370,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                     <button
                       key={archive.id}
                       onClick={() => void handleArchiveToggle(archive)}
-                      disabled={archiving}
+                      disabled={archiving || mutating}
                       className={`w-full py-3 px-4 border rounded-lg cursor-pointer
                         font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
                         flex items-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed ${

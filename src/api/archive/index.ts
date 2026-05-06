@@ -2,7 +2,6 @@ import type { Archive } from "../../types/archive";
 import type { Diary } from "../../types/diary";
 import { normalizeDiaryMedia } from "../../lib/diary";
 import { api } from "../instance";
-import { unwrapData, unwrapListData } from "../response";
 
 export interface CreateArchiveInput {
   name: string;
@@ -15,7 +14,7 @@ export interface UpdateArchiveInput {
   color?: string;
 }
 
-interface ArchiveFolderResponse {
+interface ArchiveFolderData {
   id: number;
   name: string;
   color: string;
@@ -53,7 +52,7 @@ const ARCHIVE_COLOR_META: Record<string, Pick<Archive, "colorValue" | "shadowVal
 const getArchiveColorMeta = (color: string) =>
   ARCHIVE_COLOR_META[color] ?? ARCHIVE_COLOR_META.gray;
 
-const toArchive = (folder: ArchiveFolderResponse): Archive => ({
+const toArchive = (folder: ArchiveFolderData): Archive => ({
   id: folder.id,
   name: folder.name,
   icon: null,
@@ -63,40 +62,40 @@ const toArchive = (folder: ArchiveFolderResponse): Archive => ({
   entryCount: folder.diaryCount,
 });
 
-const toArchiveList = (folders: ArchiveFolderResponse[]) => folders.map(toArchive);
+const toArchiveList = (folders: ArchiveFolderData[]) => folders.map(toArchive);
 const toDiaryList = (diaries: Diary[]) => diaries.map(normalizeDiaryMedia);
 
 export const getArchives = async () => {
-  const { data } = await api.get<{ data: ArchiveFolderResponse[] }>("/api/v1/archives");
-  return toArchiveList(unwrapListData(data));
+  const { data } = await api.get<{ data?: ArchiveFolderData[] | null }>("/api/v1/archives");
+  return toArchiveList(data.data ?? []);
 };
 
 export const getAllDiaries = async () => {
-  const { data } = await api.get<{ data: Diary[] }>("/api/v1/diaries/all-diaries");
-  return toDiaryList(unwrapListData(data));
+  const { data } = await api.get<{ data?: Diary[] | null }>("/api/v1/diaries/all-diaries");
+  return toDiaryList(data.data ?? []);
 };
 
 export const getArchiveDiaries = async (archiveId: number) => {
-  const { data } = await api.get<{ data: Diary[] }>(
+  const { data } = await api.get<{ data?: Diary[] | null }>(
     `/api/v1/archives/${archiveId}/diaries`,
   );
-  return toDiaryList(unwrapListData(data));
+  return toDiaryList(data.data ?? []);
 };
 
 export const createArchive = async (input: CreateArchiveInput) => {
-  const { data } = await api.post<{ data: ArchiveFolderResponse }>("/api/v1/archives", {
+  const { data } = await api.post<{ data: ArchiveFolderData }>("/api/v1/archives", {
     name: input.name,
     color: input.color,
   });
-  return toArchive(unwrapData(data));
+  return toArchive(data.data);
 };
 
 export const updateArchive = async (archiveId: number, input: UpdateArchiveInput) => {
-  const { data } = await api.patch<{ data: ArchiveFolderResponse }>(
+  const { data } = await api.patch<{ data: ArchiveFolderData }>(
     `/api/v1/archives/${archiveId}`,
     input,
   );
-  return toArchive(unwrapData(data));
+  return toArchive(data.data);
 };
 
 export const deleteArchive = async (archiveId: number) => {

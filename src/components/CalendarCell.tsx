@@ -1,4 +1,4 @@
-import type { DiaryItem } from "../api/diary";
+import type { DiaryItem } from "../types/diary";
 
 interface CalendarCellProps {
   day: number | null;

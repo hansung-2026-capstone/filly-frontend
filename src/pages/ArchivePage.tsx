@@ -2,7 +2,7 @@ import { type FormEvent, useEffect, useState } from "react";
 import { ArrowLeft, MoreVertical, Plus, X } from "lucide-react";
 import { Portal } from "../components/Portal";
 import { DiaryDetailModal } from "../components/DiaryDetailModal";
-import { useArchive } from "../hook/useArchive";
+import { useArchive } from "../hook/common/useArchive";
 import type { Archive } from "../types/archive";
 import type { Diary } from "../types/diary";
 import { getDiaryPreview, toDiaryItem } from "../lib/diary";
