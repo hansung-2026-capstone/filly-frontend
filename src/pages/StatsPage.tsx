@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
-import { usePersona } from "../hook/usePersona";
-import { useMonthlyStat } from "../hook/useMonthlyStat";
+import { usePersona } from "../hook/common/usePersona";
+import { useMonthlyStat } from "../hook/common/useMonthlyStat";
 
 const EMOTION_COLORS = [
   "var(--emotion-chart-1)",

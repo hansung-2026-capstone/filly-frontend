@@ -1,12 +1,12 @@
 import { ChevronDown, Pencil } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getMe } from "../api/user";
 import { CalendarCell } from "../components/CalendarCell";
 import { DiaryDetailModal } from "../components/DiaryDetailModal";
 import { MonthPickerModal } from "../components/MonthPickerModal";
 import { NicknameEditor } from "../components/NicknameEditor";
-import { useMonthlyDiaries } from "../hook/useMonthlyDiaries";
+import { useMonthlyDiaries } from "../hook/common/useMonthlyDiaries";
+import { useCurrentUser } from "../hook/common/useCurrentUser";
 import {
   formatDateKeyFromParts,
   getWeeksInMonth,
@@ -94,17 +94,11 @@ export function HomePage() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const [showMonthModal, setShowMonthModal] = useState(false);
   const [selectedDiary, setSelectedDiary] = useState<DiaryItem | null>(null);
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(null);
-
   const navigate = useNavigate();
   const weeks = getWeeksInMonth(currentYear, currentMonth);
   const { diaries, loading, refetch } = useMonthlyDiaries(currentYear, currentMonth);
-
-  useEffect(() => {
-    getMe()
-      .then((user) => setProfileImageUrl(user.currentAvatarUrl))
-      .catch(() => setProfileImageUrl(null));
-  }, []);
+  const { data: user } = useCurrentUser();
+  const profileImageUrl = user?.currentAvatarUrl ?? null;
 
   const handleMonthSelect = (year: number, month: number) => {
     setCurrentYear(year);
@@ -151,7 +145,7 @@ export function HomePage() {
                 src={profileImageUrl}
                 alt="프로필 이미지"
                 className="w-full h-full object-cover"
-                onError={() => setProfileImageUrl(null)}
+                onError={(event) => { event.currentTarget.style.display = "none"; }}
               />
             ) : (
               <span className="text-[22px] text-[var(--text-muted-light)]">👤</span>

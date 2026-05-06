@@ -1,28 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { Pencil, Check, X } from "lucide-react";
-import { getMe, updateNickname } from "../api/user";
+import { useCurrentUser } from "../hook/common/useCurrentUser";
+import { useUpdateNickname } from "../hook/common/useUpdateNickname";
 
 export function NicknameEditor() {
-  const [nickname, setNickname] = useState("");
+  const { data: user, isLoading } = useCurrentUser();
   const [draft, setDraft] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    getMe()
-      .then((user) => {
-        setNickname(user.nickname);
-        setDraft(user.nickname);
-      })
-      .catch(() => {
-        setNickname("이름 없음");
-        setDraft("이름 없음");
-      })
-      .finally(() => setLoading(false));
-  }, []);
+  const nickname = user?.nickname ?? "이름 없음";
+  const { updateNickname, saving, error, clearError } = useUpdateNickname();
 
   useEffect(() => {
     if (isEditing) inputRef.current?.focus();
@@ -30,37 +17,26 @@ export function NicknameEditor() {
 
   const handleEdit = () => {
     setDraft(nickname);
-    setError(null);
+    clearError();
     setIsEditing(true);
   };
 
   const handleSave = async () => {
     const trimmed = draft.trim();
     if (!trimmed || trimmed === nickname || saving) return;
-
-    setSaving(true);
-    setError(null);
-
-    try {
-      await updateNickname(trimmed);
-      setNickname(trimmed);
-      setDraft(trimmed);
-      setIsEditing(false);
-    } catch {
-      setError("닉네임을 저장하지 못했습니다.");
-    } finally {
-      setSaving(false);
-    }
+    await updateNickname(trimmed)
+      .then(() => setIsEditing(false))
+      .catch(() => undefined);
   };
 
   const handleCancel = () => {
     setDraft(nickname);
-    setError(null);
+    clearError();
     setIsEditing(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSave();
+    if (e.key === "Enter") void handleSave();
     if (e.key === "Escape") handleCancel();
   };
 
@@ -74,7 +50,7 @@ export function NicknameEditor() {
         >
           {/* 닉네임 */}
           <span className="text-[15px] font-bold tracking-[1px] text-text-stronger font-['Nanum_Myeongjo'] transition-colors group-hover:text-[var(--text-dark)]">
-            {loading ? "···" : nickname}
+            {isLoading ? "···" : nickname}
           </span>
 
           {/* 연필 아이콘  */}
@@ -97,14 +73,14 @@ export function NicknameEditor() {
           />
 
           {error && (
-            <p className="text-[10px] font-bold text-red-500 leading-none">
+            <p className="text-[10px] font-bold text-[var(--text-error)] leading-none">
               {error}
             </p>
           )}
 
           <div className="flex items-center justify-center gap-4 mt-1">
             <button
-              onClick={handleSave}
+              onClick={() => void handleSave()}
               disabled={!draft.trim() || draft.trim() === nickname || saving}
               className="flex items-center gap-1 text-[11px] font-bold text-[var(--text-control-muted)] hover:text-[var(--text-control-strong)] transition-colors whitespace-nowrap disabled:opacity-35 disabled:cursor-not-allowed"
             >

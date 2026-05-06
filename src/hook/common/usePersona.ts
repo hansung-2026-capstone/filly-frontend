@@ -1,8 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { getPersonas } from "../api/persona";
-import type { Persona } from "../types/persona";
-import { useAsyncResource } from "./useAsyncResource";
+import { useMemo } from "react";
+import { usePersonasQuery } from "../queries/persona";
+import type { Persona } from "../../types/persona";
 
 const EMPTY_PERSONAS: Persona[] = [];
 
@@ -33,20 +31,8 @@ const formatGeneratedAt = (value: string) => {
 };
 
 export function usePersona() {
-  const [tick, setTick] = useState(0);
-  const location = useLocation();
-
-  const refetch = useCallback(() => setTick((currentTick) => currentTick + 1), []);
-  const loadPersonas = useCallback(() => {
-    void location.key;
-    void tick;
-    return getPersonas();
-  }, [location.key, tick]);
-  const {
-    data: personas,
-    loading,
-    error,
-  } = useAsyncResource(loadPersonas, EMPTY_PERSONAS, "[usePersona]");
+  const query = usePersonasQuery();
+  const personas = query.data ?? EMPTY_PERSONAS;
 
   const current: Persona | null = personas[0] ?? null;
   const history = useMemo<PersonaHistoryItem[]>(
@@ -59,5 +45,11 @@ export function usePersona() {
     [personas],
   );
 
-  return { current, history, loading, error, refetch };
+  return {
+    current,
+    history,
+    loading: query.isLoading,
+    error: query.error,
+    refetch: query.refetch,
+  };
 }
