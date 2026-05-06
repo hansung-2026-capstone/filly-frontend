@@ -1,6 +1,6 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { getCalendarDays, WEEK_DAYS_SHORT } from "../lib/date";
+import { formatDateKey, getCalendarDays, isDateKeyAfter, WEEK_DAYS_SHORT } from "../lib/date";
 import { Portal } from "./Portal";
 
 interface DatePickerModalProps {
@@ -8,6 +8,7 @@ interface DatePickerModalProps {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
   onClose: () => void;
+  maxDate?: Date;
 }
 
 function isSelectedDay(day: number, selectedDate: Date, pickerMonth: Date) {
@@ -23,12 +24,30 @@ export function DatePickerModal({
   selectedDate,
   onDateSelect,
   onClose,
+  maxDate,
 }: DatePickerModalProps) {
   const [pickerMonth, setPickerMonth] = useState(
     new Date(selectedDate.getFullYear(), selectedDate.getMonth()),
   );
 
+  const maxDateKey = maxDate ? formatDateKey(maxDate) : null;
+  const nextMonth = new Date(pickerMonth.getFullYear(), pickerMonth.getMonth() + 1);
+  const nextMonthDisabled = maxDate
+    ? nextMonth > new Date(maxDate.getFullYear(), maxDate.getMonth())
+    : false;
+
+  const isDisabledDay = (day: number | null) => {
+    if (!day) return true;
+    if (!maxDateKey) return false;
+
+    return isDateKeyAfter(
+      formatDateKey(new Date(pickerMonth.getFullYear(), pickerMonth.getMonth(), day)),
+      maxDateKey,
+    );
+  };
+
   const handleDateSelect = (day: number) => {
+    if (isDisabledDay(day)) return;
     onDateSelect(new Date(pickerMonth.getFullYear(), pickerMonth.getMonth(), day));
   };
 
@@ -63,7 +82,8 @@ export function DatePickerModal({
             </h3>
             <button
               onClick={() => moveMonth(1)}
-              className="p-1 hover:bg-[var(--bg-hover-soft)] rounded transition-all"
+              disabled={nextMonthDisabled}
+              className="p-1 hover:bg-[var(--bg-hover-soft)] rounded transition-all disabled:opacity-35 disabled:cursor-not-allowed"
             >
               <ChevronRight className="w-5 h-5 text-text-muted" />
             </button>
@@ -81,25 +101,31 @@ export function DatePickerModal({
           </div>
 
           <div className="grid grid-cols-7 gap-2">
-            {getCalendarDays(pickerMonth).map((day, index) => (
-              <button
-                key={index}
-                onClick={() => day && handleDateSelect(day)}
-                disabled={!day}
-                className={`
-                  w-9 h-9 rounded text-sm font-medium transition-all
-                  ${
-                    !day
-                      ? "bg-transparent cursor-default"
-                      : isSelectedDay(day, selectedDate, pickerMonth)
-                        ? "bg-bg-strong-control text-notebook-page"
-                        : "text-text-heading hover:bg-bg-selected-hover"
-                  }
-                `}
-              >
-                {day}
-              </button>
-            ))}
+            {getCalendarDays(pickerMonth).map((day, index) => {
+              const disabled = isDisabledDay(day);
+
+              return (
+                <button
+                  key={index}
+                  onClick={() => day && handleDateSelect(day)}
+                  disabled={disabled}
+                  className={`
+                    w-9 h-9 rounded text-sm font-medium transition-all
+                    ${
+                      !day
+                        ? "bg-transparent cursor-default"
+                        : disabled
+                          ? "text-text-soft opacity-35 cursor-not-allowed"
+                          : isSelectedDay(day, selectedDate, pickerMonth)
+                            ? "bg-bg-strong-control text-notebook-page"
+                            : "text-text-heading hover:bg-bg-selected-hover"
+                    }
+                  `}
+                >
+                  {day}
+                </button>
+              );
+            })}
           </div>
 
           <div className="flex justify-end gap-2 mt-6">
