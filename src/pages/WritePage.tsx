@@ -58,7 +58,6 @@ export function WritePage() {
 
       if (shortText.trim()) form.append("content", shortText.trim());
       form.append("writtenAt", formatDateKey(selectedDate));
-      form.append("mode", "AI"); // Todo: 수정 필요 (mode 구분 방식 논의 후 결정)
       appendPhotos(form, aiPhotos.photos);
       if (voiceRecorder.record) form.append("voice", voiceRecorder.record.file);
 
@@ -81,11 +80,8 @@ export function WritePage() {
       } else {
         const form = new FormData();
         const plainText = finalText.trim();
-        const mode = draftContent ? "AI" : "DEFAULT"; // Todo: 수정 필요 (mode 구분 방식 논의 후 결정)
-
         if (plainText) form.append("rawContent", plainText);
         form.append("writtenAt", formatDateKey(selectedDate));
-        form.append("mode", mode);
         if (emoji) form.append("emoji", emoji);
         appendPhotos(form, diaryPhotos.photos);
 

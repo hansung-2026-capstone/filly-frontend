@@ -5,7 +5,6 @@ import { unwrapData, unwrapListData } from "../response";
 export interface DiaryItem {
   id: number;
   writtenAt: string;
-  mode: string;
   emoji: string;
   rawContent: string;
   starRating: number;
