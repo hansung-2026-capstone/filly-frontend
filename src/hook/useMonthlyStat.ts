@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { getMonthlyStat, type MonthlyStatResponse } from "../api/stat";
+import { getMonthlyStat } from "../api/stat";
+import type { MonthlyStat } from "../types/stat";
 import { useAsyncResource } from "./useAsyncResource";
 
 export function useMonthlyStat(year: number, month: number) {
@@ -12,7 +13,7 @@ export function useMonthlyStat(year: number, month: number) {
     },
     [location.key, month, year],
   );
-  const { data: stat, loading } = useAsyncResource<MonthlyStatResponse | null>(
+  const { data: stat, loading } = useAsyncResource<MonthlyStat | null>(
     loadMonthlyStat,
     null,
     "[useMonthlyStat]",

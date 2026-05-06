@@ -1,28 +1,14 @@
+import type { IdCard, Receipt } from "../../types/share";
 import { api } from "../instance";
-import { unwrapData } from "../response";
-
-export interface IdCardResponse {
-  avatarUrl: string;
-  nickname: string;
-  keywords: string[];
-}
-
-export interface ReceiptResponse {
-  orderNumber: string;
-  diaryCount: number;
-  totalChars: number;
-  emotionDistribution: Record<string, number>;
-  personaTitle: string | null;
-}
 
 export const getIdCard = async () => {
-  const { data } = await api.get<{ data: IdCardResponse }>("/api/v1/share/id-card");
-  return unwrapData(data);
+  const { data } = await api.get<{ data: IdCard }>("/api/v1/share/id-card");
+  return data.data;
 };
 
 export const getReceipt = async (year: number, month: number) => {
-  const { data } = await api.get<{ data: ReceiptResponse }>("/api/v1/share/receipt", {
+  const { data } = await api.get<{ data: Receipt }>("/api/v1/share/receipt", {
     params: { year, month },
   });
-  return unwrapData(data);
+  return data.data;
 };

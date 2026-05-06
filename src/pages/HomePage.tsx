@@ -13,7 +13,7 @@ import {
   MONTHS,
   WEEK_DAYS_SHORT,
 } from "../lib/date";
-import type { DiaryItem } from "../api/diary";
+import type { DiaryItem } from "../types/diary";
 
 interface CalendarColumnProps {
   columnCount: 3 | 4;

@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getDiaries, type DiaryItem } from "../api/diary";
+import { getDiaries } from "../api/diary";
+import type { DiaryItem } from "../types/diary";
 import { useAsyncResource } from "./useAsyncResource";
 
 const EMPTY_DIARY_MAP: Record<string, DiaryItem> = {};

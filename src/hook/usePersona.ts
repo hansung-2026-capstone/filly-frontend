@@ -1,9 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { getPersonas, type PersonaCurrent, type PersonaResponse } from "../api/persona";
+import { getPersonas } from "../api/persona";
+import type { Persona } from "../types/persona";
 import { useAsyncResource } from "./useAsyncResource";
 
-const EMPTY_PERSONAS: PersonaResponse[] = [];
+const EMPTY_PERSONAS: Persona[] = [];
 
 const historyColors = [
   "var(--tab-stats)",
@@ -12,7 +13,7 @@ const historyColors = [
   "var(--tab-home)",
 ];
 
-export interface PersonaHistoryItem extends PersonaResponse {
+export interface PersonaHistoryItem extends Persona {
   generatedAtLabel: string;
   color: string;
 }
@@ -47,7 +48,7 @@ export function usePersona() {
     error,
   } = useAsyncResource(loadPersonas, EMPTY_PERSONAS, "[usePersona]");
 
-  const current: PersonaCurrent | null = personas[0] ?? null;
+  const current: Persona | null = personas[0] ?? null;
   const history = useMemo<PersonaHistoryItem[]>(
     () =>
       personas.map((persona, index) => ({

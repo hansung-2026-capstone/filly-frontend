@@ -1,5 +1,4 @@
-import type { DiaryItem } from "../api/diary";
-import type { Diary } from "../types/diary";
+import type { Diary, DiaryItem } from "../types/diary";
 
 export function normalizeDiaryMedia<T extends { mediaUrls?: string[] | null }>(diary: T) {
   return {

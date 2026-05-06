@@ -8,7 +8,8 @@ import {
   getArchives,
   removeDiaryFromArchive,
 } from "../api/archive";
-import { deleteDiary, type DiaryItem } from "../api/diary";
+import { deleteDiary } from "../api/diary";
+import type { DiaryItem } from "../types/diary";
 import type { Archive } from "../types/archive";
 import { formatKoreanDateKey, getKoreanDayLabelFromKey } from "../lib/date";
 import { Portal } from "./Portal";

@@ -1,7 +1,7 @@
-import type { ReceiptResponse } from "../api/share";
+import type { Receipt as ReceiptData } from "../types/share";
 
 interface ReceiptProps {
-  receipt: ReceiptResponse;
+  receipt: ReceiptData;
   nickname: string;
   year: number;
   month: number;

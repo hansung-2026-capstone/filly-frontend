@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { useLocation } from "react-router-dom";
-import { getReceipt, type ReceiptResponse } from "../api/share";
+import { getReceipt } from "../api/share";
+import type { Receipt } from "../types/share";
 import { useAsyncResource } from "./useAsyncResource";
 
 export function useReceipt(year: number, month: number) {
@@ -12,7 +13,7 @@ export function useReceipt(year: number, month: number) {
     },
     [location.key, month, year],
   );
-  const { data: receipt, loading } = useAsyncResource<ReceiptResponse | null>(
+  const { data: receipt, loading } = useAsyncResource<Receipt | null>(
     loadReceipt,
     null,
     "[useReceipt]",

@@ -1,7 +1,8 @@
 import { Calendar } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { createDraft, getDiaries, saveDiary, updateDiary, type DiaryItem } from "../api/diary";
+import { createDraft, getDiaries, saveDiary, updateDiary } from "../api/diary";
+import type { DiaryItem } from "../types/diary";
 import { DatePickerModal } from "../components/DatePickerModal";
 import { PhotoUploadSection } from "../components/PhotoUploadSection";
 import { TiptapEditor } from "../components/TiptapEditor";

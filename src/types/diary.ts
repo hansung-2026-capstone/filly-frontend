@@ -7,3 +7,13 @@ export interface Diary {
   mediaUrls: string[]
   archiveId?: number
 }
+
+
+export interface DiaryItem {
+  id: number
+  writtenAt: string
+  emoji: string
+  rawContent: string
+  starRating: number
+  mediaUrls: string[]
+}
