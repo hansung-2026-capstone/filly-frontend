@@ -12,7 +12,6 @@ export function toDiaryItem(diary: Diary): DiaryItem {
   return {
     id: diary.id,
     writtenAt: diary.writtenAt,
-    mode: diary.mode,
     emoji: diary.emoji,
     rawContent: diary.rawContent ?? "",
     starRating: diary.starRating,
