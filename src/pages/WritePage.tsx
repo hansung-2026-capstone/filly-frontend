@@ -1,7 +1,7 @@
 import { Calendar } from "lucide-react";
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router";
-import { createDraft, saveDiary, updateDiary, type DiaryItem } from "../api/diary";
+import { createDraft, getDiaries, saveDiary, updateDiary, type DiaryItem } from "../api/diary";
 import { DatePickerModal } from "../components/DatePickerModal";
 import { PhotoUploadSection } from "../components/PhotoUploadSection";
 import { TiptapEditor } from "../components/TiptapEditor";
@@ -12,6 +12,7 @@ import {
   formatDateKey,
   formatKoreanDate,
   formatKoreanDateKey,
+  isFutureDate,
   getKoreanDayLabel,
   getKoreanDayLabelFromKey,
 } from "../lib/date";
@@ -37,6 +38,7 @@ export function WritePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [shortText, setShortText] = useState("");
   const [finalText, setFinalText] = useState("");
+  const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [draftContent, setDraftContent] = useState<string | undefined>(
     editDiary?.rawContent ?? undefined,
   );
@@ -52,6 +54,12 @@ export function WritePage() {
     : getKoreanDayLabel(selectedDate);
 
   const handleGenerateDraft = async () => {
+    if (isFutureDate(selectedDate)) {
+      setValidationMessage("오늘 이후 날짜의 일기 초안은 만들 수 없어요.");
+      return;
+    }
+
+    setValidationMessage(null);
     setIsDraftGenerating(true);
     try {
       const form = new FormData();
@@ -70,6 +78,7 @@ export function WritePage() {
   };
 
   const handleSaveDiary = async () => {
+    setValidationMessage(null);
     setIsSaving(true);
     try {
       if (editDiary) {
@@ -78,10 +87,33 @@ export function WritePage() {
           emoji: emoji || undefined,
         });
       } else {
+        const writtenAt = formatDateKey(selectedDate);
+
+        if (isFutureDate(selectedDate)) {
+          setValidationMessage("오늘 이후 날짜에는 일기를 작성할 수 없어요.");
+          return;
+        }
+
+        let diaries: DiaryItem[];
+        try {
+          diaries = await getDiaries(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth() + 1,
+          );
+        } catch {
+          setValidationMessage("기존 일기 확인에 실패했어요. 잠시 후 다시 시도해주세요.");
+          return;
+        }
+
+        if (diaries.some((diary) => diary.writtenAt === writtenAt)) {
+          setValidationMessage("이미 이 날짜에 작성한 일기가 있어요.");
+          return;
+        }
+
         const form = new FormData();
         const plainText = finalText.trim();
         if (plainText) form.append("rawContent", plainText);
-        form.append("writtenAt", formatDateKey(selectedDate));
+        form.append("writtenAt", writtenAt);
         if (emoji) form.append("emoji", emoji);
         appendPhotos(form, diaryPhotos.photos);
 
@@ -225,7 +257,7 @@ export function WritePage() {
           <PhotoUploadSection title="사진" {...diaryPhotos} />
         )}
 
-        <div className="flex justify-end">
+        <div className="flex flex-col items-end gap-2">
           <button
             onClick={handleSaveDiary}
             disabled={isSaving}
@@ -236,14 +268,21 @@ export function WritePage() {
           >
             {editDiary ? "일기 수정" : "일기 작성"}
           </button>
+          {validationMessage && (
+            <p className="m-0 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[11px] text-[var(--text-error)]">
+              {validationMessage}
+            </p>
+          )}
         </div>
       </div>
 
       <DatePickerModal
         isOpen={showDatePicker}
         selectedDate={selectedDate}
+        maxDate={new Date()}
         onDateSelect={(date) => {
           setSelectedDate(date);
+          setValidationMessage(null);
           setShowDatePicker(false);
         }}
         onClose={() => setShowDatePicker(false)}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MONTHS } from "../lib/date";
+import { isFutureMonth, MONTHS } from "../lib/date";
 import { Portal } from "./Portal";
 
 interface MonthPickerModalProps {
@@ -18,6 +18,8 @@ export function MonthPickerModal({
   onClose,
 }: MonthPickerModalProps) {
   const [pickerYear, setPickerYear] = useState(selectedYear);
+
+  const nextYearDisabled = isFutureMonth(pickerYear + 1, 1);
 
   if (!isOpen) return null;
 
@@ -50,8 +52,10 @@ export function MonthPickerModal({
               </div>
               <button
                 onClick={() => setPickerYear((y) => y + 1)}
+                disabled={nextYearDisabled}
                 className="w-7 h-7 border-none bg-bg-hover cursor-pointer rounded-md
-                  flex items-center justify-center transition-all duration-150 hover:bg-bg-selected-hover"
+                  flex items-center justify-center transition-all duration-150 hover:bg-bg-selected-hover
+                  disabled:opacity-35 disabled:cursor-not-allowed"
               >
                 <svg className="w-4 h-4 text-[var(--text-icon-soft)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="9 18 15 12 9 6" />
@@ -73,21 +77,33 @@ export function MonthPickerModal({
           {/* 월 그리드 */}
           <div className="py-5 px-5">
             <div className="grid grid-cols-3 gap-2.5">
-              {MONTHS.map((month) => (
-                <button
-                  key={month.num}
-                  onClick={() => { onSelect(pickerYear, month.num); onClose(); }}
-                  className={`py-3 px-3 border rounded-lg cursor-pointer font-['Nanum_Myeongjo']
-                    text-[11px] transition-all duration-200 flex flex-col items-center gap-1
-                    ${selectedYear === pickerYear && selectedMonth === month.num
-                      ? "bg-bg-active border-border-strong text-text-heading"
-                      : "bg-transparent border-border-medium text-text-muted hover:bg-bg-hover"
-                    }`}
-                >
-                  <div className="text-[18px] leading-none">{String(month.num).padStart(2, "0")}</div>
-                  <div className="text-[9px] tracking-[0.5px] uppercase opacity-60">{month.name.slice(0, 3)}</div>
-                </button>
-              ))}
+              {MONTHS.map((month) => {
+                const disabled = isFutureMonth(pickerYear, month.num);
+
+                return (
+                  <button
+                    key={month.num}
+                    onClick={() => {
+                      if (disabled) return;
+                      onSelect(pickerYear, month.num);
+                      onClose();
+                    }}
+                    disabled={disabled}
+                    className={`py-3 px-3 border rounded-lg font-['Nanum_Myeongjo']
+                      text-[11px] transition-all duration-200 flex flex-col items-center gap-1
+                      disabled:opacity-35 disabled:cursor-not-allowed
+                      ${selectedYear === pickerYear && selectedMonth === month.num
+                        ? "bg-bg-active border-border-strong text-text-heading"
+                        : disabled
+                          ? "bg-transparent border-border-medium text-text-soft"
+                          : "bg-transparent border-border-medium text-text-muted hover:bg-bg-hover cursor-pointer"
+                      }`}
+                  >
+                    <div className="text-[18px] leading-none">{String(month.num).padStart(2, "0")}</div>
+                    <div className="text-[9px] tracking-[0.5px] uppercase opacity-60">{month.name.slice(0, 3)}</div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

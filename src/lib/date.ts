@@ -35,6 +35,22 @@ export function formatDateKey(date: Date) {
   );
 }
 
+export function isDateKeyAfter(dateKey: string, maxDateKey: string) {
+  return dateKey > maxDateKey;
+}
+
+export function isFutureDate(date: Date) {
+  return isDateKeyAfter(formatDateKey(date), formatDateKey(new Date()));
+}
+
+export function isFutureMonth(year: number, month: number) {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
+
+  return year > currentYear || (year === currentYear && month > currentMonth);
+}
+
 export function parseDateKey(dateKey: string) {
   const [year, month, day] = dateKey.split("-").map(Number);
   return { year, month, day };
