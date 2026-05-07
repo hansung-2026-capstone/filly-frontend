@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { usePersona } from "../hook/common/usePersona";
 import { useMonthlyStat } from "../hook/common/useMonthlyStat";
+import { MonthPickerModal } from "../components/MonthPickerModal";
 
 const EMOTION_COLORS = [
   "var(--emotion-chart-1)",
@@ -30,9 +32,12 @@ function buildEmotionGradient(entries: [string, number][]) {
 export function StatsPage() {
   const { current, history, loading: personaLoading, error } = usePersona();
   const now = new Date();
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
   const { stat, loading: statLoading } = useMonthlyStat(
-    now.getFullYear(),
-    now.getMonth() + 1,
+    selectedYear,
+    selectedMonth
   );
   const emotionEntries = Object.entries(stat?.emotionDistribution ?? {})
     .filter(([, value]) => value > 0)
@@ -139,6 +144,19 @@ export function StatsPage() {
 
       {/* Right page - Stats */}
       <div className="flex-1 h-full max-h-[680px] flex flex-col py-4 px-5 gap-3.5 overflow-hidden">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
+          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+            공유용 컨텐츠 (Shared Content)
+          </div>
+          <button
+            onClick={() => setShowMonthPicker(true)}
+            className="px-2 py-0.5 rounded border border-border-light
+            text-[10px] text-text-muted hover:bg-bg-hover transition-colors"
+          >
+            {selectedYear}년 {selectedMonth}월
+          </button>
+        </div>
         <div className="flex gap-5 flex-shrink-0">
           <div className="w-[110px] flex flex-col gap-3.5">
             <div className="h-[88px] border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] flex flex-col items-center justify-center gap-1">
@@ -271,6 +289,17 @@ export function StatsPage() {
           </div>
         </div>
       </div>
+
+      <MonthPickerModal
+        isOpen={showMonthPicker}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        onSelect={(year, month) => {
+          setSelectedYear(year);
+          setSelectedMonth(month);
+        }}
+        onClose={() => setShowMonthPicker(false)}
+      />
     </div>
   );
 }
