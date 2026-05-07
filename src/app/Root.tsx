@@ -18,6 +18,7 @@ const PAPER_TEXTURE_STYLE = {
 const NOTEBOOK_LAYOUT = {
   baseWidth: 1064,
   baseHeight: 728,
+  maxScale: 1.12,
   pageWidth: 1000,
   pageHeight: 680,
   shadowWidth: 1040,
@@ -25,7 +26,7 @@ const NOTEBOOK_LAYOUT = {
   pageOffsetX: 20,
   pageOffsetY: 24,
   shadowOffsetY: 4,
-  padding: 48,
+  padding: 24,
 };
 
 function getNotebookScale() {
@@ -35,7 +36,7 @@ function getNotebookScale() {
   const availableHeight = window.innerHeight - NOTEBOOK_LAYOUT.padding;
 
   return Math.max(0.25, Math.min(
-    1,
+    NOTEBOOK_LAYOUT.maxScale,
     availableWidth / NOTEBOOK_LAYOUT.baseWidth,
     availableHeight / NOTEBOOK_LAYOUT.baseHeight,
   ));
@@ -108,7 +109,7 @@ export function Root() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden p-6">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden p-3">
       <div
         className="absolute inset-0 opacity-50"
         style={{ background: "var(--notebook-bg-radial)" }}
