@@ -1,3 +1,4 @@
+import { useEffect, useState, type CSSProperties } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 
 const TABS = [
@@ -13,6 +14,32 @@ const PAPER_TEXTURE_STYLE = {
   backgroundSize: "400px",
   mixBlendMode: "multiply",
 } as const;
+
+const NOTEBOOK_LAYOUT = {
+  baseWidth: 1064,
+  baseHeight: 728,
+  pageWidth: 1000,
+  pageHeight: 680,
+  shadowWidth: 1040,
+  shadowHeight: 720,
+  pageOffsetX: 20,
+  pageOffsetY: 24,
+  shadowOffsetY: 4,
+  padding: 48,
+};
+
+function getNotebookScale() {
+  if (typeof window === "undefined") return 1;
+
+  const availableWidth = window.innerWidth - NOTEBOOK_LAYOUT.padding;
+  const availableHeight = window.innerHeight - NOTEBOOK_LAYOUT.padding;
+
+  return Math.max(0.25, Math.min(
+    1,
+    availableWidth / NOTEBOOK_LAYOUT.baseWidth,
+    availableHeight / NOTEBOOK_LAYOUT.baseHeight,
+  ));
+}
 
 function NotebookPage({ side }: { side: "left" | "right" }) {
   const isLeft = side === "left";
@@ -50,14 +77,38 @@ function NotebookPage({ side }: { side: "left" | "right" }) {
 export function Root() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [notebookScale, setNotebookScale] = useState(getNotebookScale);
   const activePage = location.pathname === "/" ? "home" : location.pathname.slice(1);
+
+  useEffect(() => {
+    const updateNotebookScale = () => {
+      setNotebookScale(getNotebookScale());
+    };
+
+    updateNotebookScale();
+    window.addEventListener("resize", updateNotebookScale);
+
+    return () => {
+      window.removeEventListener("resize", updateNotebookScale);
+    };
+  }, []);
 
   const handleTabClick = (path: string) => {
     navigate(path === "home" ? "/" : `/${path}`);
   };
 
+  const shellStyle: CSSProperties = {
+    width: NOTEBOOK_LAYOUT.baseWidth * notebookScale,
+    height: NOTEBOOK_LAYOUT.baseHeight * notebookScale,
+  };
+
+  const scaledStageStyle: CSSProperties = {
+    transform: `scale(${notebookScale})`,
+    transformOrigin: "top left",
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden p-6">
       <div
         className="absolute inset-0 opacity-50"
         style={{ background: "var(--notebook-bg-radial)" }}
@@ -68,13 +119,28 @@ export function Root() {
         style={{ background: "var(--notebook-texture-lines)" }}
       />
 
-      <div className="relative z-[2]">
+      <div className="relative z-[2]" style={shellStyle}>
         <div
-          className="absolute w-[1040px] h-[720px] rounded-xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] pointer-events-none"
-          style={{ boxShadow: "var(--notebook-desk-shadow)" }}
+          className="absolute left-0 rounded-xl z-[1] pointer-events-none"
+          style={{
+            ...scaledStageStyle,
+            top: NOTEBOOK_LAYOUT.shadowOffsetY * notebookScale,
+            width: NOTEBOOK_LAYOUT.shadowWidth,
+            height: NOTEBOOK_LAYOUT.shadowHeight,
+            boxShadow: "var(--notebook-desk-shadow)",
+          }}
         />
 
-        <div className="relative flex w-[1000px] h-[680px] z-[2]">
+        <div
+          className="absolute flex z-[2]"
+          style={{
+            ...scaledStageStyle,
+            left: NOTEBOOK_LAYOUT.pageOffsetX * notebookScale,
+            top: NOTEBOOK_LAYOUT.pageOffsetY * notebookScale,
+            width: NOTEBOOK_LAYOUT.pageWidth,
+            height: NOTEBOOK_LAYOUT.pageHeight,
+          }}
+        >
           <NotebookPage side="left" />
           <NotebookPage side="right" />
 
