@@ -1,6 +1,9 @@
+import { useState } from "react";
 import { Sparkles } from "lucide-react";
 import { usePersona } from "../hook/common/usePersona";
 import { useMonthlyStat } from "../hook/common/useMonthlyStat";
+import { MonthPickerModal } from "../components/MonthPickerModal";
+import { KeywordCloud } from "../components/KeywordCloud";
 
 const EMOTION_COLORS = [
   "var(--emotion-chart-1)",
@@ -30,16 +33,16 @@ function buildEmotionGradient(entries: [string, number][]) {
 export function StatsPage() {
   const { current, history, loading: personaLoading, error } = usePersona();
   const now = new Date();
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
   const { stat, loading: statLoading } = useMonthlyStat(
-    now.getFullYear(),
-    now.getMonth() + 1,
+    selectedYear,
+    selectedMonth
   );
   const emotionEntries = Object.entries(stat?.emotionDistribution ?? {})
     .filter(([, value]) => value > 0)
     .sort(([, a], [, b]) => b - a);
-  const keywordEntries = Object.entries(stat?.keywordCloud ?? {})
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 8);
   const dailyPatternEntries = Object.entries(stat?.dailyPattern ?? {})
     .flatMap(([day, times]) =>
       Object.entries(times).map(([time, count]) => ({
@@ -138,10 +141,23 @@ export function StatsPage() {
       </div>
 
       {/* Right page - Stats */}
-      <div className="flex-1 h-full max-h-[680px] flex flex-col py-4 px-5 gap-3.5 overflow-hidden">
+      <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-5 gap-2 overflow-hidden">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
+          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+            월간 리포트
+          </div>
+          <button
+            onClick={() => setShowMonthPicker(true)}
+            className="px-2 py-0.5 rounded border border-border-light
+            text-[10px] text-text-muted hover:bg-bg-hover transition-colors"
+          >
+            {selectedYear}년 {selectedMonth}월
+          </button>
+        </div>
         <div className="flex gap-5 flex-shrink-0">
           <div className="w-[110px] flex flex-col gap-3.5">
-            <div className="h-[88px] border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] flex flex-col items-center justify-center gap-1">
+            <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
               <span className="text-[9px] tracking-[1.5px] text-text-secondary">
                 일기 개수
               </span>
@@ -150,7 +166,7 @@ export function StatsPage() {
               </span>
             </div>
 
-            <div className="h-[88px] border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] flex flex-col items-center justify-center gap-1">
+            <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
               <span className="text-[9px] tracking-[1.5px] text-text-secondary">
                 글자 수
               </span>
@@ -159,7 +175,7 @@ export function StatsPage() {
               </span>
             </div>
 
-            <div className="h-[88px] border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] flex flex-col items-center justify-center gap-1 px-2">
+            <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1 px-2">
               <span className="text-[9px] tracking-[1.5px] text-text-secondary">
                 자주 나온 사람
               </span>
@@ -169,7 +185,7 @@ export function StatsPage() {
             </div>
           </div>
 
-          <div className="flex-1 h-[292px] border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-5">
+          <div className="flex-1 h-[292px] rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-5">
             <div className="text-[18px] text-[var(--text-stats-primary)] mb-8">
               감정 분포
             </div>
@@ -222,32 +238,24 @@ export function StatsPage() {
           </div>
         </div>
 
-        <div className="h-[154px] flex-shrink-0 border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-4">
-          <div className="text-[15px] text-[var(--text-stats-primary)] mb-4">
+        <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
+          <div className="text-[15px] text-[var(--text-stats-primary)] mb-2">
             클라우드 키워드
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div>
             {statLoading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-6 w-14 rounded-full bg-[var(--bg-stats-skeleton)] animate-pulse" />
-              ))
-            ) : keywordEntries.length > 0 ? (
-              keywordEntries.map(([keyword, count]) => (
-                <span
-                  key={keyword}
-                  className="px-2.5 py-1 rounded-full bg-[var(--bg-stats-tag)] text-[11px] text-[var(--text-stats-green)]"
-                >
-                  {keyword} {count}
-                </span>
-              ))
+              <div className="h-[88px] rounded-lg bg-[var(--bg-stats-skeleton)] animate-pulse" />
             ) : (
-              <span className="text-[11px] text-[var(--text-soft-label)]">
-                아직 키워드 기록이 없어요.
-              </span>
+              <KeywordCloud
+                keywords={stat?.keywordCloud ?? null}
+                height={88}
+                framed={false}
+                emptyClassName="text-[11px] text-[var(--text-soft-label)]"
+              />
             )}
           </div>
         </div>
-        <div className="h-[154px] flex-shrink-0 border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-4">
+        <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
           <div className="text-[15px] text-[var(--text-stats-primary)] mb-3">
             일상 패턴
           </div>
@@ -264,13 +272,24 @@ export function StatsPage() {
                 </div>
               ))
             ) : (
-              <span className="text-[11px] text-[var(--text-soft-label)]">
+              <span className="h-[72px] flex items-center justify-center text-center text-[11px] text-[var(--text-soft-label)]">
                 아직 일상 패턴 기록이 없어요.
               </span>
             )}
           </div>
         </div>
       </div>
+
+      <MonthPickerModal
+        isOpen={showMonthPicker}
+        selectedYear={selectedYear}
+        selectedMonth={selectedMonth}
+        onSelect={(year, month) => {
+          setSelectedYear(year);
+          setSelectedMonth(month);
+        }}
+        onClose={() => setShowMonthPicker(false)}
+      />
     </div>
   );
 }
