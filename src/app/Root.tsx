@@ -176,7 +176,7 @@ export function Root() {
             </div>
           </div>
 
-          <div className="absolute right-[-44px] top-10 flex flex-col gap-1.5 z-20">
+          <div className="absolute left-full top-10 flex flex-col items-start gap-1.5 z-20">
             {TABS.map((tab) => (
               <button
                 key={tab.path}
@@ -185,8 +185,8 @@ export function Root() {
                 className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                   font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
                   shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
-                  hover:translate-x-1 hover:shadow-[var(--shadow-tab-hover)]
-                  ${activePage === tab.path ? "active -translate-x-1.5 shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
+                  hover:w-14 hover:shadow-[var(--shadow-tab-hover)]
+                  ${activePage === tab.path ? "active shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
                 style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
               >
                 <div
