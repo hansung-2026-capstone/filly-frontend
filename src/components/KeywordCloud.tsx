@@ -5,6 +5,10 @@ import { Text } from "@visx/text";
 
 interface KeywordCloudProps {
   keywords: Record<string, number> | null;
+  height?: number;
+  framed?: boolean;
+  emptyMessage?: string;
+  emptyClassName?: string;
 }
 
 const HEIGHT = 150;
@@ -15,7 +19,13 @@ const COLORS = [
   "var(--keyword-cloud-4)",
 ];
 
-export function KeywordCloud({ keywords }: KeywordCloudProps) {
+export function KeywordCloud({
+  keywords,
+  height = HEIGHT,
+  framed = true,
+  emptyMessage = "아직 키워드 기록이 없어요",
+  emptyClassName = "text-[11px] text-text-secondary",
+}: KeywordCloudProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
 
@@ -35,14 +45,16 @@ export function KeywordCloud({ keywords }: KeywordCloudProps) {
   return (
     <div
       ref={containerRef}
-      className="rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden w-full"
-      style={{ height: HEIGHT }}
+      className={`overflow-hidden w-full ${
+        framed
+          ? "rounded-lg border border-border-medium bg-bg-beige-subtle"
+          : ""
+      }`}
+      style={{ height }}
     >
       {entries.length === 0 ? (
         <div className="h-full flex items-center justify-center">
-          <span className="text-[10px] text-text-secondary italic">
-            키워드가 없습니다
-          </span>
+          <span className={emptyClassName}>{emptyMessage}</span>
         </div>
       ) : width > 0 ? (
         (() => {
@@ -53,7 +65,7 @@ export function KeywordCloud({ keywords }: KeywordCloudProps) {
             <Wordcloud
               words={words}
               width={width}
-              height={HEIGHT}
+              height={height}
               fontSize={(w) => fontScale(w.value)}
               font="Nanum Myeongjo, serif"
               fontWeight="bold"
