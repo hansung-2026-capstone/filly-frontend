@@ -3,6 +3,7 @@ import { Sparkles } from "lucide-react";
 import { usePersona } from "../hook/common/usePersona";
 import { useMonthlyStat } from "../hook/common/useMonthlyStat";
 import { MonthPickerModal } from "../components/MonthPickerModal";
+import { KeywordCloud } from "../components/KeywordCloud";
 
 const EMOTION_COLORS = [
   "var(--emotion-chart-1)",
@@ -42,9 +43,6 @@ export function StatsPage() {
   const emotionEntries = Object.entries(stat?.emotionDistribution ?? {})
     .filter(([, value]) => value > 0)
     .sort(([, a], [, b]) => b - a);
-  const keywordEntries = Object.entries(stat?.keywordCloud ?? {})
-    .sort(([, a], [, b]) => b - a)
-    .slice(0, 8);
   const dailyPatternEntries = Object.entries(stat?.dailyPattern ?? {})
     .flatMap(([day, times]) =>
       Object.entries(times).map(([time, count]) => ({
@@ -241,27 +239,19 @@ export function StatsPage() {
         </div>
 
         <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
-          <div className="text-[15px] text-[var(--text-stats-primary)] mb-4">
+          <div className="text-[15px] text-[var(--text-stats-primary)] mb-2">
             클라우드 키워드
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div>
             {statLoading ? (
-              Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="h-6 w-14 rounded-full bg-[var(--bg-stats-skeleton)] animate-pulse" />
-              ))
-            ) : keywordEntries.length > 0 ? (
-              keywordEntries.map(([keyword, count]) => (
-                <span
-                  key={keyword}
-                  className="px-2.5 py-1 rounded-full bg-[var(--bg-stats-tag)] text-[11px] text-[var(--text-stats-green)]"
-                >
-                  {keyword} {count}
-                </span>
-              ))
+              <div className="h-[88px] rounded-lg bg-[var(--bg-stats-skeleton)] animate-pulse" />
             ) : (
-              <span className="w-full h-[72px] flex items-center justify-center text-center text-[11px] text-[var(--text-soft-label)]">
-                아직 키워드 기록이 없어요.
-              </span>
+              <KeywordCloud
+                keywords={stat?.keywordCloud ?? null}
+                height={88}
+                framed={false}
+                emptyClassName="text-[11px] text-[var(--text-soft-label)]"
+              />
             )}
           </div>
         </div>
