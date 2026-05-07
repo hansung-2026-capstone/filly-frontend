@@ -143,9 +143,9 @@ export function StatsPage() {
       </div>
 
       {/* Right page - Stats */}
-      <div className="flex-1 h-full max-h-[680px] flex flex-col py-4 px-5 gap-3.5 overflow-hidden">
+      <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-5 gap-2 overflow-hidden">
         {/* 헤더 */}
-        <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
+        <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
           <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
             월간 리포트
           </div>
@@ -240,7 +240,7 @@ export function StatsPage() {
           </div>
         </div>
 
-        <div className="h-[154px] flex-shrink-0 border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-4">
+        <div className="h-[144px] flex-shrink-0 border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-4">
           <div className="text-[15px] text-[var(--text-stats-primary)] mb-4">
             클라우드 키워드
           </div>
@@ -265,7 +265,7 @@ export function StatsPage() {
             )}
           </div>
         </div>
-        <div className="h-[154px] flex-shrink-0 border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-4">
+        <div className="h-[144px] flex-shrink-0 border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-4">
           <div className="text-[15px] text-[var(--text-stats-primary)] mb-3">
             일상 패턴
           </div>
