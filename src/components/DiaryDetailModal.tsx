@@ -156,14 +156,16 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
         onClick={onClose}
       >
         <div
-          className="bg-notebook-page rounded-xl w-[400px] max-h-[78vh] flex flex-col
+          className="relative bg-notebook-page rounded-xl w-[400px] max-h-[78vh] flex flex-col
             shadow-[var(--shadow-modal)]
             overflow-hidden font-['Nanum_Myeongjo']"
           style={{ animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}
           onClick={(e) => e.stopPropagation()}
         >
+          <div className="paper-texture absolute inset-0 pointer-events-none rounded-xl z-0" />
+
           {/* 날짜 헤더 */}
-          <div className="flex items-center justify-between px-5 pt-5 pb-3">
+          <div className="relative z-10 flex items-center justify-between px-5 pt-5 pb-3">
             <div className="flex items-center gap-2">
               <span className="text-[15px] text-text-heading tracking-wide">{label}</span>
               <span className="text-[12px] text-[var(--text-soft-label)]">{dow}요일</span>
@@ -179,10 +181,10 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           </div>
 
           {/* 구분선 */}
-          <div className="mx-5 border-b border-border-light" />
+          <div className="relative z-10 mx-5 border-b border-border-light" />
 
           {/* 스크롤 바디 */}
-          <div className="flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
+          <div className="relative z-10 flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
 
             {/* 사진 */}
             <PhotoGrid urls={diary.mediaUrls ?? []} />
@@ -203,7 +205,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           </div>
 
           {/* 하단 버튼 */}
-          <div className="flex items-center justify-between gap-2 px-5 py-3 border-t border-border-light min-h-[52px]">
+          <div className="relative z-10 flex items-center justify-between gap-2 px-5 py-3 border-t border-border-light min-h-[52px]">
             {confirmDelete ? (
               <>
                 <div />
