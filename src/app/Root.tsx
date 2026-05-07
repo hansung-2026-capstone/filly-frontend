@@ -48,7 +48,7 @@ function NotebookPage({ side }: { side: "left" | "right" }) {
   return (
     <div className="w-[500px] h-[680px] relative overflow-hidden">
       <div
-        className={`w-full h-full relative ${isLeft ? "rounded-l-md" : "rounded-r-md"}`}
+        className={`w-full h-full relative overflow-hidden ${isLeft ? "rounded-l-md" : "rounded-r-md"}`}
         style={{
           background: isLeft
             ? "var(--notebook-page-gradient-left)"
@@ -67,7 +67,7 @@ function NotebookPage({ side }: { side: "left" | "right" }) {
           }}
         />
         <div
-          className="absolute inset-0 pointer-events-none rounded-l-md"
+          className={`absolute inset-0 pointer-events-none ${isLeft ? "rounded-l-md" : "rounded-r-md"}`}
           style={PAPER_TEXTURE_STYLE}
         />
       </div>
