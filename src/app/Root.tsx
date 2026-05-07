@@ -8,13 +8,6 @@ const TABS = [
   { path: "archive", label: "아카이브", bgClass: "bg-[var(--tab-archive)]", textClass: "text-[var(--tab-archive-text)]" },
 ];
 
-const PAPER_TEXTURE_STYLE = {
-  backgroundImage: 'url("https://www.transparenttextures.com/patterns/exclusive-paper.png")',
-  filter: "contrast(100%) brightness(100%)",
-  backgroundSize: "400px",
-  mixBlendMode: "multiply",
-} as const;
-
 const NOTEBOOK_LAYOUT = {
   baseWidth: 1064,
   baseHeight: 728,
@@ -67,8 +60,7 @@ function NotebookPage({ side }: { side: "left" | "right" }) {
           }}
         />
         <div
-          className={`absolute inset-0 pointer-events-none ${isLeft ? "rounded-l-md" : "rounded-r-md"}`}
-          style={PAPER_TEXTURE_STYLE}
+          className={`paper-texture absolute inset-0 pointer-events-none ${isLeft ? "rounded-l-md" : "rounded-r-md"}`}
         />
       </div>
     </div>

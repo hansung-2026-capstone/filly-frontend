@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "./theme.css";
 
+.paper-texture {
+  background-image: url("https://www.transparenttextures.com/patterns/exclusive-paper.png");
+  background-size: 400px;
+  filter: contrast(100%) brightness(100%);
+  mix-blend-mode: multiply;
+}
+
 /* 스크롤바 숨김 */
 @layer base {
   * { scrollbar-width: none; }
