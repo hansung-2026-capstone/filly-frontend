@@ -147,7 +147,7 @@ export function StatsPage() {
         {/* 헤더 */}
         <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
           <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
-            공유용 컨텐츠 (Shared Content)
+            월간 리포트
           </div>
           <button
             onClick={() => setShowMonthPicker(true)}
