@@ -159,7 +159,7 @@ export function StatsPage() {
         </div>
         <div className="flex gap-5 flex-shrink-0">
           <div className="w-[110px] flex flex-col gap-3.5">
-            <div className="h-[88px] border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] flex flex-col items-center justify-center gap-1">
+            <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
               <span className="text-[9px] tracking-[1.5px] text-text-secondary">
                 일기 개수
               </span>
@@ -168,7 +168,7 @@ export function StatsPage() {
               </span>
             </div>
 
-            <div className="h-[88px] border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] flex flex-col items-center justify-center gap-1">
+            <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
               <span className="text-[9px] tracking-[1.5px] text-text-secondary">
                 글자 수
               </span>
@@ -177,7 +177,7 @@ export function StatsPage() {
               </span>
             </div>
 
-            <div className="h-[88px] border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] flex flex-col items-center justify-center gap-1 px-2">
+            <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1 px-2">
               <span className="text-[9px] tracking-[1.5px] text-text-secondary">
                 자주 나온 사람
               </span>
@@ -187,7 +187,7 @@ export function StatsPage() {
             </div>
           </div>
 
-          <div className="flex-1 h-[292px] border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-5">
+          <div className="flex-1 h-[292px] rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-5">
             <div className="text-[18px] text-[var(--text-stats-primary)] mb-8">
               감정 분포
             </div>
@@ -240,7 +240,7 @@ export function StatsPage() {
           </div>
         </div>
 
-        <div className="h-[144px] flex-shrink-0 border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-4">
+        <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
           <div className="text-[15px] text-[var(--text-stats-primary)] mb-4">
             클라우드 키워드
           </div>
@@ -259,13 +259,13 @@ export function StatsPage() {
                 </span>
               ))
             ) : (
-              <span className="text-[11px] text-[var(--text-soft-label)]">
+              <span className="w-full h-[72px] flex items-center justify-center text-center text-[11px] text-[var(--text-soft-label)]">
                 아직 키워드 기록이 없어요.
               </span>
             )}
           </div>
         </div>
-        <div className="h-[144px] flex-shrink-0 border border-[var(--border-stats-panel)] rounded-md bg-[var(--bg-stats-panel)] p-4">
+        <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
           <div className="text-[15px] text-[var(--text-stats-primary)] mb-3">
             일상 패턴
           </div>
@@ -282,7 +282,7 @@ export function StatsPage() {
                 </div>
               ))
             ) : (
-              <span className="text-[11px] text-[var(--text-soft-label)]">
+              <span className="h-[72px] flex items-center justify-center text-center text-[11px] text-[var(--text-soft-label)]">
                 아직 일상 패턴 기록이 없어요.
               </span>
             )}
