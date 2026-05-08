@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import type { DiaryItem } from "../types/diary";
 import type { Archive } from "../types/archive";
 import { formatKoreanDateKey, getKoreanDayLabelFromKey } from "../lib/date";
+import { hasDiaryText } from "../lib/diary";
 import { useDiaryArchiveStatus } from "../hook/common/useDiaryArchiveStatus";
 import { Portal } from "./Portal";
 import { TiptapEditor } from "./TiptapEditor";
@@ -22,44 +23,52 @@ function formatDiaryDate(writtenAt: string) {
   };
 }
 
-function PhotoGrid({ urls }: { urls: string[] }) {
+function PhotoCarousel({ urls }: { urls: string[] }) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
   if (urls.length === 0) return null;
 
-  if (urls.length === 1) {
-    return (
-      <img src={urls[0]} alt="" className="w-full rounded-lg object-cover max-h-56 shadow-sm" />
-    );
-  }
+  const hasMultiplePhotos = urls.length > 1;
+  const currentUrl = urls[currentIndex] ?? urls[0];
 
-  if (urls.length === 2) {
+  if (!hasMultiplePhotos) {
     return (
-      <div className="grid grid-cols-2 gap-1.5">
-        {urls.map((url, i) => (
-          <img key={i} src={url} alt="" className="w-full aspect-square object-cover rounded-lg shadow-sm" />
-        ))}
+      <div className="w-full overflow-hidden rounded-lg bg-bg-surface-muted shadow-sm">
+        <img src={currentUrl} alt="" className="block w-full h-[260px] max-h-[42vh] object-cover" />
       </div>
     );
   }
 
-  if (urls.length === 3) {
-    return (
-      <div className="flex flex-col gap-1.5">
-        <img src={urls[0]} alt="" className="w-full rounded-lg object-cover max-h-40 shadow-sm" />
-        <div className="grid grid-cols-2 gap-1.5">
-          {urls.slice(1).map((url, i) => (
-            <img key={i} src={url} alt="" className="w-full aspect-square object-cover rounded-lg shadow-sm" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  // 4장
   return (
-    <div className="grid grid-cols-2 gap-1.5">
-      {urls.slice(0, 4).map((url, i) => (
-        <img key={i} src={url} alt="" className="w-full aspect-square object-cover rounded-lg shadow-sm" />
-      ))}
+    <div className="flex w-full gap-2">
+      <div className="flex-1 overflow-hidden rounded-lg bg-bg-surface-muted shadow-sm">
+        <img src={currentUrl} alt="" className="block w-full h-[260px] max-h-[42vh] object-cover" />
+      </div>
+
+      <div className="flex h-[260px] max-h-[42vh] w-10 flex-shrink-0 flex-col gap-1.5 overflow-y-auto
+        rounded-lg border border-border-light bg-[var(--bg-hover-faint)] p-1">
+        {urls.map((url, index) => {
+          const selected = index === currentIndex;
+
+          return (
+            <button
+              key={`${url}-${index}`}
+              type="button"
+              onClick={() => setCurrentIndex(index)}
+              aria-label={`${index + 1}번째 사진 보기`}
+              aria-current={selected ? "true" : undefined}
+              className={`w-8 h-8 flex-shrink-0 overflow-hidden rounded border-2 p-0 cursor-pointer
+                bg-bg-hover transition-all duration-150 hover:border-[var(--border-calendar-hover)] ${
+                  selected
+                    ? "border-[var(--border-strong)] shadow-[var(--shadow-thumbnail)]"
+                    : "border-border-light opacity-70 hover:opacity-100"
+                }`}
+            >
+              <img src={url} alt="" className="w-full h-full object-cover" />
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -156,7 +165,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
         onClick={onClose}
       >
         <div
-          className="relative bg-notebook-page rounded-xl w-[400px] max-h-[78vh] flex flex-col
+          className="relative bg-notebook-page rounded-xl w-[480px] max-h-[78vh] flex flex-col
             shadow-[var(--shadow-modal)]
             overflow-hidden font-['Nanum_Myeongjo']"
           style={{ animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}
@@ -187,10 +196,10 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           <div className="relative z-10 flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
 
             {/* 사진 */}
-            <PhotoGrid urls={diary.mediaUrls ?? []} />
+            <PhotoCarousel key={diary.id} urls={diary.mediaUrls ?? []} />
 
             {/* 본문 */}
-            {diary.rawContent?.trim() ? (
+            {hasDiaryText(diary.rawContent) ? (
               <TiptapEditor
                 showToolbar={false}
                 readOnly

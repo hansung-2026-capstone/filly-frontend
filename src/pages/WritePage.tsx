@@ -17,6 +17,7 @@ import {
   getKoreanDayLabel,
   getKoreanDayLabelFromKey,
 } from "../lib/date";
+import { hasDiaryText } from "../lib/diary";
 
 const EMOJIS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
 function getEditDiary(locationState: unknown) {
@@ -37,7 +38,7 @@ export function WritePage() {
   const [isDraftGenerating, setIsDraftGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [shortText, setShortText] = useState("");
-  const [finalText, setFinalText] = useState("");
+  const [finalText, setFinalText] = useState(editDiary?.rawContent ?? "");
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [draftContent, setDraftContent] = useState<string | undefined>(
     editDiary?.rawContent ?? undefined,
@@ -53,6 +54,10 @@ export function WritePage() {
   const dayLabel = editDiary
     ? getKoreanDayLabelFromKey(editDiary.writtenAt)
     : getKoreanDayLabel(selectedDate);
+  const editDiaryPhotos = (editDiary?.mediaUrls ?? []).map((url, index) => ({
+    id: index,
+    url,
+  }));
 
   const handleGenerateDraft = async () => {
     if (isFutureDate(selectedDate)) {
@@ -72,6 +77,7 @@ export function WritePage() {
 
       const draft = await diaryMutations.createDraft(form);
       setDraftContent(draft.generatedText);
+      setFinalText(draft.generatedText);
       diaryPhotos.replacePhotos(aiPhotos.photos);
     } finally {
       setIsDraftGenerating(false);
@@ -80,13 +86,19 @@ export function WritePage() {
 
   const handleSaveDiary = async () => {
     setValidationMessage(null);
+
+    if (!hasDiaryText(finalText)) {
+      setValidationMessage("일기 본문을 작성해주세요. 공백만 입력할 수는 없어요.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       if (editDiary) {
         await diaryMutations.updateDiary({
           id: editDiary.id,
           body: {
-            rawContent: finalText.trim() || undefined,
+            rawContent: finalText.trim(),
             emoji: emoji || undefined,
           },
         });
@@ -114,7 +126,7 @@ export function WritePage() {
 
         const form = new FormData();
         const plainText = finalText.trim();
-        if (plainText) form.append("rawContent", plainText);
+        form.append("rawContent", plainText);
         form.append("writtenAt", writtenAt);
         if (emoji) form.append("emoji", emoji);
         appendPhotos(form, diaryPhotos.photos);
@@ -245,16 +257,14 @@ export function WritePage() {
         </div>
 
         {editDiary ? (
-          editDiary.mediaUrls?.length > 0 && (
-            <div className="flex flex-col gap-2.5">
-              <h3 className="text-sm text-text-primary tracking-[0.5px] m-0 font-medium">사진</h3>
-              <div className={`grid gap-1.5 ${editDiary.mediaUrls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-                {editDiary.mediaUrls.slice(0, 4).map((url) => (
-                  <img key={url} src={url} alt="" className="w-full aspect-square object-cover rounded-lg shadow-sm" />
-                ))}
-              </div>
-              <p className="text-[11px] text-text-secondary m-0">사진은 수정할 수 없습니다.</p>
-            </div>
+          editDiaryPhotos.length > 0 && (
+            <PhotoUploadSection
+              title="사진"
+              photos={editDiaryPhotos}
+              max={editDiaryPhotos.length}
+              readOnly
+              helperText="사진은 수정할 수 없습니다."
+            />
           )
         ) : (
           <PhotoUploadSection title="사진" {...diaryPhotos} />
