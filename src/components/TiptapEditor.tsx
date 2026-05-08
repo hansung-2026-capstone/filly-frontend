@@ -183,10 +183,11 @@ export function TiptapEditor({
         </div>
       )}
 
-      <div className="bg-bg-editor-panel rounded-lg border border-border-medium p-3.5 flex-1 flex flex-col">
-        <EditorContent editor={editor} className="flex-1 overflow-y-auto" />
+      <div className="relative overflow-hidden bg-bg-editor-panel rounded-lg border border-border-medium p-3.5 flex-1 flex flex-col">
+        <div className="paper-texture absolute inset-0 pointer-events-none rounded-lg opacity-40" />
+        <EditorContent editor={editor} className="relative z-10 flex-1 overflow-y-auto" />
         {maxLength !== undefined && (
-          <div className="text-[9px] text-text-subtle mt-1.5 text-right">
+          <div className="relative z-10 text-[9px] text-text-subtle mt-1.5 text-right">
             {editorState?.charCount ?? 0}/{maxLength}글자
           </div>
         )}
