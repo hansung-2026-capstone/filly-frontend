@@ -21,7 +21,11 @@ export function CalendarCell({ day, diary, loading, dayTextClass, onClick }: Cal
       {diary && (
         <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden">
           {diary.mediaUrls?.[0] ? (
-            <img src={diary.mediaUrls[0]} alt="" className="w-full h-full object-cover rounded opacity-80" />
+            <img
+              src={diary.mediaUrls[0]}
+              alt=""
+              className="w-full h-full object-cover rounded shadow-[var(--shadow-thumbnail)]"
+            />
           ) : (
             <span className="text-4xl leading-none select-none">{diary.emoji}</span>
           )}
