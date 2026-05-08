@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from "react";
 import { Pencil, Check, X } from "lucide-react";
+import { useCurrentUser } from "../hook/common/useCurrentUser";
+import { useUpdateNickname } from "../hook/common/useUpdateNickname";
 
-interface NicknameEditorProps {
-  initialNickname: string;
-}
-
-export function NicknameEditor({ initialNickname }: NicknameEditorProps) {
-  const [nickname, setNickname] = useState(initialNickname);
-  const [draft, setDraft] = useState(initialNickname);
+export function NicknameEditor() {
+  const { data: user, isLoading } = useCurrentUser();
+  const [draft, setDraft] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const nickname = user?.nickname ?? "이름 없음";
+  const { updateNickname, saving, error, clearError } = useUpdateNickname();
 
   useEffect(() => {
     if (isEditing) inputRef.current?.focus();
@@ -17,86 +17,81 @@ export function NicknameEditor({ initialNickname }: NicknameEditorProps) {
 
   const handleEdit = () => {
     setDraft(nickname);
+    clearError();
     setIsEditing(true);
   };
 
   const handleSave = async () => {
     const trimmed = draft.trim();
-    if (!trimmed) return;
-
-    // TODO: 백엔드 연결 시 아래 주석 해제
-    // const token = localStorage.getItem('accessToken');
-    // await fetch('/api/user/nickname', {
-    //   method: 'PATCH',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     Authorization: `Bearer ${token}`,
-    //   },
-    //   body: JSON.stringify({ nickname: trimmed }),
-    // });
-
-    setNickname(trimmed);
-    setIsEditing(false);
+    if (!trimmed || trimmed === nickname || saving) return;
+    await updateNickname(trimmed)
+      .then(() => setIsEditing(false))
+      .catch(() => undefined);
   };
 
   const handleCancel = () => {
     setDraft(nickname);
+    clearError();
     setIsEditing(false);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") handleSave();
+    if (e.key === "Enter") void handleSave();
     if (e.key === "Escape") handleCancel();
   };
 
   return (
-    <div className="relative flex flex-col items-center">
-      {/* [보기 모드] */}
-      <div className="relative flex items-center justify-center w-full py-1 group">
-        <span className="text-xs text-[rgba(80,60,40,0.7)] tracking-[0.5px] font-['Nanum_Myeongjo'] relative">
-          {nickname}
-        </span>
-        <button
+    <div className="relative flex flex-col items-center w-full px-2">
+      {/* 보기 모드 */}
+      {!isEditing ? (
+        <div
           onClick={handleEdit}
-          className="absolute left-[calc(100%+6px)] top-1/2 -translate-y-1/2 w-4 h-4 
-            flex items-center justify-center rounded opacity-0 group-hover:opacity-100
-            transition-opacity hover:bg-[rgba(160,140,120,0.15)] shrink-0"
+          className="group relative flex items-center justify-center cursor-pointer py-2 w-full rounded-lg transition-all"
         >
-          <Pencil className="w-3 h-3 text-[rgba(120,100,75,0.6)]" />
-        </button> 
-      </div>
+          {/* 닉네임 */}
+          <span className="text-[15px] font-bold tracking-[1px] text-text-stronger font-['Nanum_Myeongjo'] transition-colors group-hover:text-[var(--text-dark)]">
+            {isLoading ? "···" : nickname}
+          </span>
 
-      {/* [수정 모드 - 팝오버] */}
-      {isEditing && (
-        <div 
-          className="absolute top-3 -translate-y-1/2 left-0 z-[100] 
-            flex items-center gap-2 p-1.5 px-2
-            bg-[#fafaf8] border border-[rgba(160,140,120,0.3)] rounded-lg shadow-xl"
-          style={{ width: '200px' }} 
-        >
+          {/* 연필 아이콘  */}
+          <div className="ml-2 opacity-40 group-hover:opacity-100 transition-opacity">
+            <Pencil className="w-3.5 h-3.5 text-text-stronger" />
+          </div>
+        </div>
+      ) : (
+        /* 수정 모드 */
+        <div className="flex flex-col items-center w-full gap-2.5 py-1 animate-in fade-in duration-200">
           <input
             ref={inputRef}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={handleKeyDown}
+            disabled={saving}
             maxLength={10}
-            className="flex-1 min-w-0 text-[11px] text-[rgba(60,45,30,0.8)] bg-white border border-[rgba(160,140,120,0.2)]
-              rounded px-2 py-1 outline-none focus:border-[rgba(120,95,65,0.5)] tracking-[0.5px]
-              font-['Nanum_Myeongjo']"
+            placeholder="이름 입력"
+            className="w-full text-center text-[14px] font-medium text-[var(--text-dark)] bg-[var(--bg-editor-panel)] border-b-2 border-[var(--border-input-strong)] py-1.5 outline-none focus:border-[var(--border-input-focus-strong)] tracking-[0.5px] font-['Nanum_Myeongjo'] placeholder:text-[var(--text-placeholder)]"
           />
-          
-          <div className="flex items-center gap-1 shrink-0">
+
+          {error && (
+            <p className="text-[10px] font-bold text-[var(--text-error)] leading-none">
+              {error}
+            </p>
+          )}
+
+          <div className="flex items-center justify-center gap-4 mt-1">
             <button
-              onClick={handleSave}
-              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-green-50 text-green-700 transition-colors"
+              onClick={() => void handleSave()}
+              disabled={!draft.trim() || draft.trim() === nickname || saving}
+              className="flex items-center gap-1 text-[11px] font-bold text-[var(--text-control-muted)] hover:text-[var(--text-control-strong)] transition-colors whitespace-nowrap disabled:opacity-35 disabled:cursor-not-allowed"
             >
-              <Check className="w-3.5 h-3.5" />
+              <Check className="w-3.5 h-3.5" /> {saving ? "저장 중" : "저장"}
             </button>
             <button
               onClick={handleCancel}
-              className="w-6 h-6 flex items-center justify-center rounded-md hover:bg-red-50 text-red-700 transition-colors"
+              disabled={saving}
+              className="flex items-center gap-1 text-[11px] font-bold text-[var(--text-control-muted)] hover:text-[var(--text-control-strong)] transition-colors whitespace-nowrap opacity-50 disabled:cursor-not-allowed"
             >
-              <X className="w-3.5 h-3.5" />
+              <X className="w-3.5 h-3.5" /> 취소
             </button>
           </div>
         </div>

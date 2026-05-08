@@ -2,14 +2,29 @@
 
 :root {
   --font-size: 16px;
-  
+
   /* Notebook App Design System */
   /* Primary Colors */
   --notebook-bg: #5c4a3a;
   --notebook-page: #faf6ed;
   --notebook-page-gradient-left: linear-gradient(135deg, #f5f0e6 0%, #faf6ed 40%, #f2ecdf 100%);
   --notebook-page-gradient-right: linear-gradient(225deg, #f5f0e6 0%, #faf6ed 40%, #f2ecdf 100%);
-  
+
+  /* Notebook scene effects */
+  --notebook-bg-radial: radial-gradient(circle at 30% 40%, rgba(92, 74, 58, 0.8) 0%, rgba(92, 74, 58, 0.4) 50%, transparent 100%);
+  --notebook-texture-lines: repeating-linear-gradient(92deg, transparent, transparent 18px, rgba(0, 0, 0, 0.03) 18px, rgba(0, 0, 0, 0.03) 19px);
+  --notebook-desk-shadow: 0 40px 80px rgba(0, 0, 0, 0.45), 0 15px 35px rgba(0, 0, 0, 0.3);
+  --notebook-left-page-shadow: inset -6px 0 14px -6px rgba(0, 0, 0, 0.03), inset 0 0 60px rgba(0, 0, 0, 0.03);
+  --notebook-right-page-shadow: inset 6px 0 14px -6px rgba(0, 0, 0, 0.03), inset 0 0 60px rgba(0, 0, 0, 0.03);
+  --notebook-left-edge-gradient: linear-gradient(to left, rgba(0, 0, 0, 0.04), transparent);
+  --notebook-right-edge-gradient: linear-gradient(to right, rgba(0, 0, 0, 0.04), transparent);
+  --notebook-spine-gradient: linear-gradient(to right, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.07) 45%, rgba(0, 0, 0, 0.07) 55%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0.02) 100%);
+  --notebook-spine-stitches: repeating-linear-gradient(to bottom, transparent, transparent 16px, rgba(120, 100, 80, 0.08) 16px, rgba(120, 100, 80, 0.08) 24px);
+  --notebook-page-edge-gradient: repeating-linear-gradient(to right, var(--border-page-edge-left), var(--border-page-edge-left) 1px, var(--border-page-edge-right) 1px, var(--border-page-edge-right) 2px);
+  --notebook-page-edge-top-shadow: 0 -1px 2px rgba(0, 0, 0, 0.08);
+  --notebook-page-edge-bottom-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --notebook-tab-inset-shadow: inset 0 0 12px rgba(255, 255, 255, 0.25);
+
   /* Tab Colors */
   --tab-home: #ff7eb3;
   --tab-home-text: rgba(120, 20, 50, 0.8);
@@ -19,14 +34,52 @@
   --tab-recommend-text: rgba(120, 90, 10, 0.8);
   --tab-archive: #66e0ff;
   --tab-archive-text: rgba(15, 80, 110, 0.8);
-  
+
   /* Text Colors */
   --text-primary: rgba(60, 45, 30, 0.75);
   --text-secondary: rgba(120, 105, 85, 0.45);
   --text-strong: rgba(55, 40, 25, 0.75);
   --text-muted: rgba(80, 60, 40, 0.6);
   --text-dark-muted: rgba(100, 80, 60, 0.5);
-  
+  --text-heading: rgba(60, 45, 30, 0.85);
+  --text-stronger: rgba(60, 45, 30, 0.95);
+  --text-control: rgba(80, 60, 40, 0.8);
+  --text-subtle: rgba(120, 100, 80, 0.4);
+  --text-soft: rgba(120, 100, 80, 0.6);
+  --text-danger: rgba(200, 70, 60, 0.7);
+  --text-recording: rgba(200, 60, 60, 0.8);
+  --text-icon-muted: rgba(100, 80, 60, 0.5);
+  --text-icon-soft: rgba(100, 80, 60, 0.6);
+  --text-control-muted: rgba(80, 65, 50, 0.8);
+  --text-control-strong: rgba(60, 45, 30, 1);
+  --text-dark: rgba(40, 30, 20, 1);
+  --text-soft-label: rgba(120, 105, 85, 0.5);
+  --text-page-label: rgba(120, 105, 85, 0.4);
+  --text-input: rgba(55, 40, 25, 0.8);
+  --text-placeholder: rgba(160, 140, 120, 0.5);
+  --text-upload-plus: rgba(140, 120, 90, 0.4);
+  --text-upload-plus-soft: rgba(140, 120, 90, 0.35);
+  --text-danger-dark: rgba(180, 60, 40, 0.7);
+  --text-error: rgba(150, 50, 40, 0.78);
+  --text-black-title: rgba(0, 0, 0, 0.55);
+  --text-black-subtitle: rgba(0, 0, 0, 0.28);
+  --text-black-icon: rgba(0, 0, 0, 0.45);
+  --text-stats-heading: rgba(70, 55, 35, 0.65);
+  --text-stats-primary: rgba(60, 45, 30, 0.72);
+  --text-stats-secondary: rgba(120, 105, 85, 0.5);
+  --text-stats-muted: rgba(80, 60, 40, 0.58);
+  --text-stats-green: rgba(70, 95, 45, 0.72);
+  --text-white-muted: rgba(255, 255, 255, 0.75);
+  --text-white-soft: rgba(255, 255, 255, 0.7);
+  --text-white-strong: rgba(255, 255, 255, 0.82);
+  --text-weekend-sun: rgba(185, 75, 65, 0.6);
+  --text-weekend-sun-soft: rgba(185, 75, 65, 0.5);
+  --text-weekend-sat: rgba(65, 95, 165, 0.55);
+  --text-weekend-sat-soft: rgba(65, 95, 165, 0.45);
+  --text-muted-light: rgba(120, 105, 85, 0.55);
+  --text-pencil-muted: rgba(140, 120, 90, 0.5);
+  --text-editor-inactive: rgba(60, 45, 30, 0.4);
+
   /* Background Colors */
   --bg-white: #ffffff;
   --bg-beige-light: rgba(200, 140, 130, 0.1);
@@ -37,7 +90,48 @@
   --bg-card-back: #3a5fa0;
   --bg-card-back-hover: #4a6fb8;
   --bg-dropdown: #fffdf7;
-  
+  --bg-surface-muted: rgba(240, 235, 225, 0.6);
+  --bg-surface-muted-hover: rgba(240, 235, 225, 0.9);
+  --bg-upload: rgba(220, 200, 185, 0.4);
+  --bg-upload-hover: rgba(220, 200, 185, 0.6);
+  --bg-control: rgba(100, 80, 60, 0.15);
+  --bg-control-hover: rgba(100, 80, 60, 0.25);
+  --bg-strong-control: rgba(80, 60, 40, 0.85);
+  --bg-strong-control-hover: rgba(60, 40, 20, 0.95);
+  --bg-selected-hover: rgba(160, 140, 120, 0.15);
+  --bg-active: rgba(80, 60, 40, 0.12);
+  --bg-active-hover: rgba(80, 60, 40, 0.18);
+  --bg-danger-subtle: rgba(200, 60, 60, 0.15);
+  --bg-danger-hover: rgba(200, 70, 60, 0.06);
+  --bg-overlay-light: rgba(0, 0, 0, 0.2);
+  --bg-page-loading: rgba(250, 246, 237, 0.92);
+  --bg-editor-panel: rgba(255, 253, 247, 0.8);
+  --bg-hover-soft: rgba(160, 140, 120, 0.1);
+  --bg-hover-faint: rgba(160, 140, 120, 0.06);
+  --bg-hover-medium: rgba(160, 140, 120, 0.16);
+  --bg-muted-dot: rgba(160, 140, 120, 0.2);
+  --bg-toolbar-active: rgba(120, 100, 75, 0.25);
+  --bg-black-subtle: rgba(0, 0, 0, 0.08);
+  --bg-black-subtle-hover: rgba(0, 0, 0, 0.15);
+  --bg-paper-tape: rgba(255, 255, 255, 0.45);
+  --bg-paper-thumbnail: rgba(240, 235, 225, 0.8);
+  --bg-page-loading-soft: rgba(250, 246, 237, 0.88);
+  --bg-emotion-selected: rgba(160, 140, 120, 0.2);
+  --bg-stats-persona: rgba(100, 140, 80, 0.65);
+  --bg-stats-panel: rgba(255, 255, 255, 0.2);
+  --bg-stats-row: rgba(160, 140, 120, 0.04);
+  --bg-stats-tag: rgba(100, 140, 80, 0.12);
+  --bg-stats-skeleton: rgba(120, 105, 85, 0.12);
+  --bg-white-skeleton-strong: rgba(255, 255, 255, 0.2);
+  --bg-white-skeleton-soft: rgba(255, 255, 255, 0.15);
+  --bg-danger-confirm: rgba(180, 60, 40, 0.8);
+  --bg-danger-confirm-hover: rgba(160, 40, 20, 0.9);
+  --bg-danger-weak: rgba(180, 60, 40, 0.05);
+  --bg-danger-weak-hover: rgba(180, 60, 40, 0.1);
+  --bg-error: rgba(200, 70, 60, 0.08);
+  --bg-save-button: rgba(80, 60, 40, 0.7);
+  --bg-save-button-hover: rgba(60, 40, 20, 0.8);
+
   /* Border Colors */
   --border-light: rgba(160, 140, 120, 0.12);
   --border-medium: rgba(160, 140, 120, 0.2);
@@ -46,7 +140,24 @@
   --border-page-edge-left: #ede8dc;
   --border-page-edge-right: #e5dfd2;
   --border-card: rgba(220, 210, 195, 0.5);
-  
+  --border-dashed: rgba(160, 140, 120, 0.25);
+  --border-dashed-hover: rgba(140, 120, 90, 0.35);
+  --border-danger-strong: rgba(200, 60, 60, 0.4);
+  --border-subtle: rgba(160, 140, 120, 0.15);
+  --border-faint: rgba(160, 140, 120, 0.08);
+  --border-calendar: rgba(160, 140, 120, 0.1);
+  --border-calendar-hover: rgba(160, 140, 120, 0.3);
+  --border-input-focus: rgba(140, 120, 90, 0.4);
+  --border-input-strong: rgba(120, 95, 65, 0.5);
+  --border-input-focus-strong: rgba(100, 75, 50, 0.9);
+  --border-avatar: rgba(200, 185, 165, 0.5);
+  --border-stats-panel: rgba(70, 95, 45, 0.35);
+  --border-stats-row: rgba(160, 140, 120, 0.08);
+  --border-emotion-selected: rgba(160, 140, 120, 0.4);
+  --border-danger-muted: rgba(180, 60, 40, 0.2);
+  --border-spinner: rgba(80, 60, 40, 0.4);
+  --border-spinner-active: rgba(80, 60, 40, 0.9);
+
   /* Archive Colors */
   --archive-pink: #ffb3c1;
   --archive-pink-shadow: rgba(255, 179, 193, 0.35);
@@ -58,22 +169,53 @@
   --archive-blue-shadow: rgba(179, 217, 255, 0.35);
   --archive-purple: #e6b3ff;
   --archive-purple-shadow: rgba(230, 179, 255, 0.35);
+  --archive-gray: rgba(210, 204, 194, 0.95);
+  --archive-gray-shadow: rgba(160, 150, 138, 0.35);
   --archive-peach: #ffd4b3;
   --archive-peach-shadow: rgba(255, 212, 179, 0.35);
   --archive-lavender: #d4b3ff;
   --archive-lavender-shadow: rgba(212, 179, 255, 0.35);
-  
+
   /* Star Colors */
   --star-filled: rgba(230, 190, 60, 0.85);
   --star-filled-stroke: rgba(200, 160, 40, 0.7);
   --star-empty: transparent;
   --star-empty-stroke: rgba(200, 180, 120, 0.4);
-  
+
+  /* Receipt */
+  --receipt-barcode-dark: #000000;
+  --receipt-barcode-light: #ffffff;
+
   /* Shadows */
   --shadow-small: 0 2px 8px rgba(0, 0, 0, 0.12);
   --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.1);
   --shadow-large: 0 16px 48px rgba(0, 0, 0, 0.25);
+  --shadow-modal: 0 16px 48px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-tab: 2px 2px 6px rgba(0, 0, 0, 0.15);
+  --shadow-tab-hover: 3px 3px 10px rgba(0, 0, 0, 0.2);
+  --shadow-tab-active: 1px 2px 4px rgba(0, 0, 0, 0.12);
+  --shadow-remove-button: 0 2px 4px rgba(0, 0, 0, 0.15);
+  --shadow-photo: 0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-subtle: 1px 2px 6px rgba(0, 0, 0, 0.06);
+  --shadow-thumbnail: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-tape: 0 0.5px 1px rgba(0, 0, 0, 0.06);
   --shadow-binding: inset 5px 0 15px rgba(0, 0, 0, 0.08);
+  --shadow-action-button: 0 2px 6px rgba(0, 0, 0, 0.15);
+  --shadow-archive-card-inset: inset 0 -1px 2px rgba(0, 0, 0, 0.04);
+  --outline-archive-selected: rgba(0, 0, 0, 0.1);
+  --accent-audio-progress: rgba(100, 80, 60, 0.7);
+  --text-editor-placeholder: rgba(140, 120, 90, 0.35);
+  --keyword-cloud-1: rgba(55, 40, 25, 0.8);
+  --keyword-cloud-2: rgba(80, 60, 40, 0.7);
+  --keyword-cloud-3: rgba(120, 95, 65, 0.6);
+  --keyword-cloud-4: rgba(100, 75, 50, 0.55);
+  --emotion-chart-1: rgba(100, 140, 80, 0.7);
+  --emotion-chart-2: rgba(190, 145, 80, 0.7);
+  --emotion-chart-3: rgba(105, 140, 170, 0.7);
+  --emotion-chart-4: rgba(175, 105, 95, 0.7);
+  --emotion-chart-5: rgba(140, 115, 165, 0.7);
+  --emotion-chart-6: rgba(120, 105, 85, 0.55);
+  --emotion-chart-empty: rgba(70, 95, 45, 0.12);
 
   /* Original theme variables */
   --background: #ffffff;
@@ -112,7 +254,18 @@
   --sidebar-accent: oklch(0.97 0 0);
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+
+  /* External brand/login tokens */
+  --brand-kakao: #fee500;
+  --brand-kakao-hover: #fdd835;
+  --brand-naver: #03c75a;
+  --brand-naver-hover: #02b351;
+  --brand-google-border: #dadce0;
+  --login-bg: #f8f9fa;
+  --login-logo-bg: #6c6052;
+  --login-text: #191919;
+  --login-muted: #757575;
+  --login-subtle: #a5a5a5;
 }
 
 .dark {
@@ -179,7 +332,7 @@
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
-  
+
   /* Notebook Design System Colors */
   --color-notebook-bg: var(--notebook-bg);
   --color-notebook-page: var(--notebook-page);
@@ -196,6 +349,13 @@
   --color-text-strong: var(--text-strong);
   --color-text-muted: var(--text-muted);
   --color-text-dark-muted: var(--text-dark-muted);
+  --color-text-heading: var(--text-heading);
+  --color-text-stronger: var(--text-stronger);
+  --color-text-control: var(--text-control);
+  --color-text-subtle: var(--text-subtle);
+  --color-text-soft: var(--text-soft);
+  --color-text-danger: var(--text-danger);
+  --color-text-recording: var(--text-recording);
   --color-bg-white: var(--bg-white);
   --color-bg-beige-light: var(--bg-beige-light);
   --color-bg-beige-subtle: var(--bg-beige-subtle);
@@ -205,11 +365,30 @@
   --color-bg-card-back: var(--bg-card-back);
   --color-bg-card-back-hover: var(--bg-card-back-hover);
   --color-bg-dropdown: var(--bg-dropdown);
+  --color-bg-surface-muted: var(--bg-surface-muted);
+  --color-bg-surface-muted-hover: var(--bg-surface-muted-hover);
+  --color-bg-upload: var(--bg-upload);
+  --color-bg-upload-hover: var(--bg-upload-hover);
+  --color-bg-control: var(--bg-control);
+  --color-bg-control-hover: var(--bg-control-hover);
+  --color-bg-strong-control: var(--bg-strong-control);
+  --color-bg-strong-control-hover: var(--bg-strong-control-hover);
+  --color-bg-selected-hover: var(--bg-selected-hover);
+  --color-bg-active: var(--bg-active);
+  --color-bg-active-hover: var(--bg-active-hover);
+  --color-bg-danger-subtle: var(--bg-danger-subtle);
+  --color-bg-danger-hover: var(--bg-danger-hover);
+  --color-bg-overlay-light: var(--bg-overlay-light);
+  --color-bg-page-loading: var(--bg-page-loading);
+  --color-bg-editor-panel: var(--bg-editor-panel);
   --color-border-light: var(--border-light);
   --color-border-medium: var(--border-medium);
   --color-border-strong: var(--border-strong);
   --color-border-danger: var(--border-danger);
   --color-border-card: var(--border-card);
+  --color-border-dashed: var(--border-dashed);
+  --color-border-dashed-hover: var(--border-dashed-hover);
+  --color-border-danger-strong: var(--border-danger-strong);
   --color-archive-pink: var(--archive-pink);
   --color-archive-mint: var(--archive-mint);
   --color-archive-yellow: var(--archive-yellow);
@@ -221,7 +400,17 @@
   --color-star-filled-stroke: var(--star-filled-stroke);
   --color-star-empty: var(--star-empty);
   --color-star-empty-stroke: var(--star-empty-stroke);
-  
+  --color-brand-kakao: var(--brand-kakao);
+  --color-brand-kakao-hover: var(--brand-kakao-hover);
+  --color-brand-naver: var(--brand-naver);
+  --color-brand-naver-hover: var(--brand-naver-hover);
+  --color-brand-google-border: var(--brand-google-border);
+  --color-login-bg: var(--login-bg);
+  --color-login-logo-bg: var(--login-logo-bg);
+  --color-login-text: var(--login-text);
+  --color-login-muted: var(--login-muted);
+  --color-login-subtle: var(--login-subtle);
+
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

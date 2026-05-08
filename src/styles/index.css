@@ -1,6 +1,13 @@
 @import "tailwindcss";
 @import "./theme.css";
 
+.paper-texture {
+  background-image: url("https://www.transparenttextures.com/patterns/exclusive-paper.png");
+  background-size: 400px;
+  filter: contrast(100%) brightness(100%);
+  mix-blend-mode: multiply;
+}
+
 /* 스크롤바 숨김 */
 @layer base {
   * { scrollbar-width: none; }
@@ -13,7 +20,7 @@
 
 /* Placeholder 색상 */
 .tiptap p.is-editor-empty:first-child::before {
-  color: rgba(140, 120, 90, 0.35);
+  color: var(--text-editor-placeholder);
   content: attr(data-placeholder);
   pointer-events: none;
   float: left;

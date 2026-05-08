@@ -1,232 +1,193 @@
-import { Outlet, useNavigate, useLocation } from "react-router";
+import { useEffect, useState, type CSSProperties } from "react";
+import { Outlet, useLocation, useNavigate } from "react-router";
+
+const TABS = [
+  { path: "home", label: "홈", bgClass: "bg-[var(--tab-home)]", textClass: "text-[var(--tab-home-text)]" },
+  { path: "stats", label: "통계", bgClass: "bg-[var(--tab-stats)]", textClass: "text-[var(--tab-stats-text)]" },
+  { path: "recommend", label: "추천", bgClass: "bg-[var(--tab-recommend)]", textClass: "text-[var(--tab-recommend-text)]" },
+  { path: "archive", label: "아카이브", bgClass: "bg-[var(--tab-archive)]", textClass: "text-[var(--tab-archive-text)]" },
+];
+
+const NOTEBOOK_LAYOUT = {
+  baseWidth: 1064,
+  baseHeight: 728,
+  maxScale: 1.12,
+  pageWidth: 1000,
+  pageHeight: 680,
+  shadowWidth: 1040,
+  shadowHeight: 720,
+  pageOffsetX: 20,
+  pageOffsetY: 24,
+  shadowOffsetY: 4,
+  padding: 24,
+};
+
+function getNotebookScale() {
+  if (typeof window === "undefined") return 1;
+
+  const availableWidth = window.innerWidth - NOTEBOOK_LAYOUT.padding;
+  const availableHeight = window.innerHeight - NOTEBOOK_LAYOUT.padding;
+
+  return Math.max(0.25, Math.min(
+    NOTEBOOK_LAYOUT.maxScale,
+    availableWidth / NOTEBOOK_LAYOUT.baseWidth,
+    availableHeight / NOTEBOOK_LAYOUT.baseHeight,
+  ));
+}
+
+function NotebookPage({ side }: { side: "left" | "right" }) {
+  const isLeft = side === "left";
+
+  return (
+    <div className="w-[500px] h-[680px] relative overflow-hidden">
+      <div
+        className={`w-full h-full relative overflow-hidden ${isLeft ? "rounded-l-md" : "rounded-r-md"}`}
+        style={{
+          background: isLeft
+            ? "var(--notebook-page-gradient-left)"
+            : "var(--notebook-page-gradient-right)",
+          boxShadow: isLeft
+            ? "var(--notebook-left-page-shadow)"
+            : "var(--notebook-right-page-shadow)",
+        }}
+      >
+        <div
+          className={`absolute top-2 bottom-2 ${isLeft ? "right-0" : "left-0"} w-[25px] pointer-events-none`}
+          style={{
+            background: isLeft
+              ? "var(--notebook-left-edge-gradient)"
+              : "var(--notebook-right-edge-gradient)",
+          }}
+        />
+        <div
+          className={`paper-texture absolute inset-0 pointer-events-none ${isLeft ? "rounded-l-md" : "rounded-r-md"}`}
+        />
+      </div>
+    </div>
+  );
+}
 
 export function Root() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [notebookScale, setNotebookScale] = useState(getNotebookScale);
+  const activePage = location.pathname === "/" ? "home" : location.pathname.slice(1);
+
+  useEffect(() => {
+    const updateNotebookScale = () => {
+      setNotebookScale(getNotebookScale());
+    };
+
+    updateNotebookScale();
+    window.addEventListener("resize", updateNotebookScale);
+
+    return () => {
+      window.removeEventListener("resize", updateNotebookScale);
+    };
+  }, []);
 
   const handleTabClick = (path: string) => {
     navigate(path === "home" ? "/" : `/${path}`);
   };
 
-  const getActivePage = () => {
-    if (location.pathname === "/") return "home";
-    return location.pathname.slice(1);
+  const shellStyle: CSSProperties = {
+    width: NOTEBOOK_LAYOUT.baseWidth * notebookScale,
+    height: NOTEBOOK_LAYOUT.baseHeight * notebookScale,
+  };
+
+  const scaledStageStyle: CSSProperties = {
+    transform: `scale(${notebookScale})`,
+    transformOrigin: "top left",
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden">
-      {/* Background gradient */}
+    <div className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden p-3">
       <div
         className="absolute inset-0 opacity-50"
-        style={{
-          background:
-            "radial-gradient(circle at 30% 40%, rgba(92,74,58,0.8) 0%, rgba(92,74,58,0.4) 50%, transparent 100%)",
-        }}
+        style={{ background: "var(--notebook-bg-radial)" }}
       />
 
-      {/* Texture overlay */}
       <div
         className="fixed inset-0 pointer-events-none z-0"
-        style={{
-          background:
-            "repeating-linear-gradient(92deg, transparent, transparent 18px, rgba(0,0,0,0.03) 18px, rgba(0,0,0,0.03) 19px)",
-        }}
+        style={{ background: "var(--notebook-texture-lines)" }}
       />
 
-      {/* Scene */}
-      <div className="relative z-[2]">
-        {/* Desk shadow */}
+      <div className="relative z-[2]" style={shellStyle}>
         <div
-          className="absolute w-[920px] h-[640px] rounded-xl top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[1] pointer-events-none"
+          className="absolute left-0 rounded-xl z-[1] pointer-events-none"
           style={{
-            boxShadow:
-              "0 40px 80px rgba(0,0,0,0.45), 0 15px 35px rgba(0,0,0,0.3)",
+            ...scaledStageStyle,
+            top: NOTEBOOK_LAYOUT.shadowOffsetY * notebookScale,
+            width: NOTEBOOK_LAYOUT.shadowWidth,
+            height: NOTEBOOK_LAYOUT.shadowHeight,
+            boxShadow: "var(--notebook-desk-shadow)",
           }}
         />
 
-        {/* Notebook */}
-        <div className="relative flex w-[880px] h-[600px] z-[2]">
-          {/* Left page */}
-          <div className="w-[440px] h-[600px] relative overflow-hidden">
-            <div
-              className="w-full h-full relative rounded-l-md"
-              style={{
-                background:
-                  "linear-gradient(135deg, #f5f0e6 0%, #faf6ed 40%, #f2ecdf 100%)",
-                boxShadow:
-                  "inset -6px 0 14px -6px rgba(0,0,0,0.03), inset 0 0 60px rgba(0,0,0,0.03)",
-              }}
-            >
-              {/* Gradient edge effect */}
-              <div
-                className="absolute top-2 bottom-2 right-0 w-[25px] pointer-events-none"
-                style={{
-                  background:
-                    "linear-gradient(to left, rgba(0,0,0,0.04), transparent)",
-                }}
-              />
+        <div
+          className="absolute flex z-[2]"
+          style={{
+            ...scaledStageStyle,
+            left: NOTEBOOK_LAYOUT.pageOffsetX * notebookScale,
+            top: NOTEBOOK_LAYOUT.pageOffsetY * notebookScale,
+            width: NOTEBOOK_LAYOUT.pageWidth,
+            height: NOTEBOOK_LAYOUT.pageHeight,
+          }}
+        >
+          <NotebookPage side="left" />
+          <NotebookPage side="right" />
 
-              {/* Paper texture */}
-              <div
-                className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-l-md"
-                style={{
-                  backgroundImage: `
-                    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(120,100,80,0.15) 2px, rgba(120,100,80,0.15) 3px),
-                    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(100,80,60,0.1) 3px, rgba(100,80,60,0.1) 4px)
-                  `,
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Right page */}
-          <div className="w-[440px] h-[600px] relative overflow-hidden">
-            <div
-              className="w-full h-full relative rounded-r-md"
-              style={{
-                background:
-                  "linear-gradient(225deg, #f5f0e6 0%, #faf6ed 40%, #f2ecdf 100%)",
-                boxShadow:
-                  "inset 6px 0 14px -6px rgba(0,0,0,0.03), inset 0 0 60px rgba(0,0,0,0.03)",
-              }}
-            >
-              {/* Gradient edge effect */}
-              <div
-                className="absolute top-2 bottom-2 left-0 w-[25px] pointer-events-none"
-                style={{
-                  background:
-                    "linear-gradient(to right, rgba(0,0,0,0.04), transparent)",
-                }}
-              />
-
-              {/* Paper texture */}
-              <div
-                className="absolute inset-0 opacity-[0.03] pointer-events-none rounded-r-md"
-                style={{
-                  backgroundImage: `
-                    repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(120,100,80,0.15) 2px, rgba(120,100,80,0.15) 3px),
-                    repeating-linear-gradient(90deg, transparent, transparent 3px, rgba(100,80,60,0.1) 3px, rgba(100,80,60,0.1) 4px)
-                  `,
-                }}
-              />
-            </div>
-          </div>
-
-          {/* Spine */}
           <div
             className="absolute left-1/2 top-0 bottom-0 w-4 -translate-x-1/2 z-10 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(to right, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.07) 45%, rgba(0,0,0,0.07) 55%, rgba(0,0,0,0.05) 75%, rgba(0,0,0,0.02) 100%)",
-            }}
+            style={{ background: "var(--notebook-spine-gradient)" }}
           >
             <div
               className="absolute left-1/2 top-[30px] bottom-[30px] w-0.5 -translate-x-1/2"
-              style={{
-                background:
-                  "repeating-linear-gradient(to bottom, transparent, transparent 16px, rgba(120,100,80,0.08) 16px, rgba(120,100,80,0.08) 24px)",
-              }}
+              style={{ background: "var(--notebook-spine-stitches)" }}
             />
           </div>
 
-          {/* Page edges */}
           <div
             className="absolute left-2 right-2 h-[5px] top-[-4px] z-[3] rounded-t-sm"
             style={{
-              background:
-                "repeating-linear-gradient(to right, #ede8dc, #ede8dc 1px, #e5dfd2 1px, #e5dfd2 2px)",
-              boxShadow: "0 -1px 2px rgba(0,0,0,0.08)",
+              background: "var(--notebook-page-edge-gradient)",
+              boxShadow: "var(--notebook-page-edge-top-shadow)",
             }}
           />
           <div
             className="absolute left-2 right-2 h-[5px] bottom-[-4px] z-[3] rounded-b-sm"
             style={{
-              background:
-                "repeating-linear-gradient(to right, #ede8dc, #ede8dc 1px, #e5dfd2 1px, #e5dfd2 2px)",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.08)",
+              background: "var(--notebook-page-edge-gradient)",
+              boxShadow: "var(--notebook-page-edge-bottom-shadow)",
             }}
           />
 
-          {/* Content overlay */}
-          <div className="absolute top-0 left-0 w-[880px] h-[600px] z-[9] flex pointer-events-none">
+          <div className="absolute top-0 left-0 w-[1000px] h-[680px] z-[9] flex pointer-events-none">
             <div className="pointer-events-auto w-full h-full">
               <Outlet />
             </div>
           </div>
 
-          {/* Sticky tabs */}
-          <div className="absolute right-[-44px] top-10 flex flex-col gap-1.5 z-20">
-            <button
-              onClick={() => handleTabClick("home")}
-              data-page="home"
-              className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
-                font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
-                bg-[var(--tab-home)] text-[var(--tab-home-text)]
-                hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
-                ${getActivePage() === "home" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
-              style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-            >
-              <div
-                className="absolute inset-0 rounded-r-md pointer-events-none"
-                style={{ boxShadow: "inset 0 0 12px rgba(255,255,255,0.25)" }}
-              />
-              홈
-            </button>
-
-            <button
-              onClick={() => handleTabClick("stats")}
-              data-page="stats"
-              className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
-                font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
-                bg-[var(--tab-stats)] text-[var(--tab-stats-text)]
-                hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
-                ${getActivePage() === "stats" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
-              style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-            >
-              <div
-                className="absolute inset-0 rounded-r-md pointer-events-none"
-                style={{ boxShadow: "inset 0 0 12px rgba(255,255,255,0.25)" }}
-              />
-              통계
-            </button>
-
-            <button
-              onClick={() => handleTabClick("recommend")}
-              data-page="recommend"
-              className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
-                font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
-                bg-[var(--tab-recommend)] text-[var(--tab-recommend-text)]
-                hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
-                ${getActivePage() === "recommend" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
-              style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-            >
-              <div
-                className="absolute inset-0 rounded-r-md pointer-events-none"
-                style={{ boxShadow: "inset 0 0 12px rgba(255,255,255,0.25)" }}
-              />
-              추천
-            </button>
-
-            <button
-              onClick={() => handleTabClick("archive")}
-              data-page="archive"
-              className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
-                font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                shadow-[2px_2px_6px_rgba(0,0,0,0.15)] py-4 px-3.5
-                bg-[var(--tab-archive)] text-[var(--tab-archive-text)]
-                hover:translate-x-1 hover:shadow-[3px_3px_10px_rgba(0,0,0,0.2)]
-                ${getActivePage() === "archive" ? "active -translate-x-1.5 shadow-[1px_2px_4px_rgba(0,0,0,0.12)] font-bold" : ""}`}
-              style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-            >
-              <div
-                className="absolute inset-0 rounded-r-md pointer-events-none"
-                style={{ boxShadow: "inset 0 0 12px rgba(255,255,255,0.25)" }}
-              />
-              아카이브
-            </button>
+          <div className="absolute left-full top-10 flex flex-col items-start gap-1.5 z-20">
+            {TABS.map((tab) => (
+              <button
+                key={tab.path}
+                onClick={() => handleTabClick(tab.path)}
+                data-page={tab.path}
+                className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
+                  font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
+                  shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
+                  hover:w-14 hover:shadow-[var(--shadow-tab-hover)]
+                  ${activePage === tab.path ? "active shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
+                style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
+              >
+                <div
+                  className="absolute inset-0 rounded-r-md pointer-events-none"
+                  style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
+                />
+                {tab.label}
+              </button>
+            ))}
           </div>
         </div>
       </div>

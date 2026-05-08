@@ -11,7 +11,10 @@ export function useVoiceRecorder(maxSeconds = 10) {
   const chunksRef = useRef<Blob[]>([]);
   const recordRef = useRef(record);
   const startTimeRef = useRef<number>(0);
-  recordRef.current = record;
+
+  useEffect(() => {
+    recordRef.current = record;
+  }, [record]);
 
   useEffect(
     () => () => {
@@ -51,7 +54,7 @@ export function useVoiceRecorder(maxSeconds = 10) {
     mediaRecorder.start();
     mediaRecorderRef.current = mediaRecorder;
     setRecordingState("recording");
-  }, []);
+  }, [maxSeconds]);
 
   const stop = useCallback(() => {
     mediaRecorderRef.current?.stop();
