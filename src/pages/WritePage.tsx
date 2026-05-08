@@ -17,6 +17,7 @@ import {
   getKoreanDayLabel,
   getKoreanDayLabelFromKey,
 } from "../lib/date";
+import { hasDiaryText } from "../lib/diary";
 
 const EMOJIS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
 function getEditDiary(locationState: unknown) {
@@ -37,7 +38,7 @@ export function WritePage() {
   const [isDraftGenerating, setIsDraftGenerating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [shortText, setShortText] = useState("");
-  const [finalText, setFinalText] = useState("");
+  const [finalText, setFinalText] = useState(editDiary?.rawContent ?? "");
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [draftContent, setDraftContent] = useState<string | undefined>(
     editDiary?.rawContent ?? undefined,
@@ -76,6 +77,7 @@ export function WritePage() {
 
       const draft = await diaryMutations.createDraft(form);
       setDraftContent(draft.generatedText);
+      setFinalText(draft.generatedText);
       diaryPhotos.replacePhotos(aiPhotos.photos);
     } finally {
       setIsDraftGenerating(false);
@@ -84,13 +86,19 @@ export function WritePage() {
 
   const handleSaveDiary = async () => {
     setValidationMessage(null);
+
+    if (!hasDiaryText(finalText)) {
+      setValidationMessage("일기 본문을 작성해주세요. 공백만 입력할 수는 없어요.");
+      return;
+    }
+
     setIsSaving(true);
     try {
       if (editDiary) {
         await diaryMutations.updateDiary({
           id: editDiary.id,
           body: {
-            rawContent: finalText.trim() || undefined,
+            rawContent: finalText.trim(),
             emoji: emoji || undefined,
           },
         });
@@ -118,7 +126,7 @@ export function WritePage() {
 
         const form = new FormData();
         const plainText = finalText.trim();
-        if (plainText) form.append("rawContent", plainText);
+        form.append("rawContent", plainText);
         form.append("writtenAt", writtenAt);
         if (emoji) form.append("emoji", emoji);
         appendPhotos(form, diaryPhotos.photos);

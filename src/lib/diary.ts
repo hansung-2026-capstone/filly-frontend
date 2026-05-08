@@ -27,3 +27,14 @@ export function getDiaryPreview(entry: Pick<Diary, "rawContent" | "writtenAt">) 
 
   return text || entry.writtenAt;
 }
+
+export function hasDiaryText(content: string | undefined | null) {
+  if (!content) return false;
+
+  const parsed = new DOMParser().parseFromString(content, "text/html");
+  const text = (parsed.body.textContent ?? content)
+    .replace(/[\s\u00a0\u200B-\u200D\uFEFF]+/g, "")
+    .trim();
+
+  return text.length > 0;
+}

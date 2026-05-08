@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import type { DiaryItem } from "../types/diary";
 import type { Archive } from "../types/archive";
 import { formatKoreanDateKey, getKoreanDayLabelFromKey } from "../lib/date";
+import { hasDiaryText } from "../lib/diary";
 import { useDiaryArchiveStatus } from "../hook/common/useDiaryArchiveStatus";
 import { Portal } from "./Portal";
 import { TiptapEditor } from "./TiptapEditor";
@@ -198,7 +199,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
             <PhotoCarousel key={diary.id} urls={diary.mediaUrls ?? []} />
 
             {/* 본문 */}
-            {diary.rawContent?.trim() ? (
+            {hasDiaryText(diary.rawContent) ? (
               <TiptapEditor
                 showToolbar={false}
                 readOnly
