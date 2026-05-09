@@ -10,12 +10,20 @@ import { Receipt, ReceiptSkeleton } from "../components/Receipt";
 import { MonthPickerModal } from "../components/MonthPickerModal";
 import { KeywordCloud } from "../components/KeywordCloud";
 
+const CARD_COUNT = 3;
+const SHUFFLE_DURATION_MS = 950;
+const SHUFFLE_REORDER_DELAY_MS = 320;
+
 export function RecommendPage() {
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
+  const [cardOrder, setCardOrder] = useState(() =>
+    Array.from({ length: CARD_COUNT }, (_, index) => index),
+  );
+  const [isShuffling, setIsShuffling] = useState(false);
 
   const { idCard, loading: idCardLoading } = useIdCard();
   const { receipt, loading: receiptLoading } = useReceipt(
@@ -91,6 +99,26 @@ export function RecommendPage() {
     setReceiptAtBottom(scrollHeight - scrollTop - clientHeight < 8);
   }
 
+  function handleShuffleCards() {
+    if (isShuffling) return;
+
+    setIsShuffling(true);
+    window.setTimeout(() => {
+      setCardOrder((currentOrder) => {
+        const nextOrder = [...currentOrder].sort(() => Math.random() - 0.5);
+
+        if (
+          nextOrder.every((cardIndex, index) => cardIndex === currentOrder[index])
+        ) {
+          nextOrder.push(nextOrder.shift() ?? 0);
+        }
+
+        return nextOrder;
+      });
+    }, SHUFFLE_REORDER_DELAY_MS);
+    window.setTimeout(() => setIsShuffling(false), SHUFFLE_DURATION_MS);
+  }
+
   return (
     <>
       <div className="flex w-full h-full font-['Nanum_Myeongjo']">
@@ -105,44 +133,66 @@ export function RecommendPage() {
                 aria-hidden="true"
                 className="invisible px-2 py-0.5 rounded border border-border-light text-[10px]"
               >
-                0000년 00월
+                카드 섞기
               </div>
             </div>
 
-            <div className="flex-1 flex items-center gap-3 min-h-[260px]">
-              {Array.from({ length: 3 }).map((_, index) => {
-                const isSelected = selectedCardIndex === index;
+            <div className="flex-1 flex flex-col justify-center gap-4 min-h-[320px]">
+              <div
+                className={`recommend-card-stage relative h-[260px] w-full ${
+                  isShuffling ? "is-shuffling" : ""
+                }`}
+              >
+                {cardOrder.map((cardIndex, slotIndex) => {
+                  const isSelected = selectedCardIndex === cardIndex;
 
-                return (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => setSelectedCardIndex(index)}
-                    aria-pressed={isSelected}
-                    aria-label={`추천 카드 ${index + 1}`}
-                    className="group h-[260px] flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none"
-                  >
-                    <div
-                      className={`relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] ${
-                        isSelected ? "[transform:rotateY(180deg)]" : ""
-                      }`}
+                  return (
+                    <button
+                      key={cardIndex}
+                      type="button"
+                      onClick={() => setSelectedCardIndex(cardIndex)}
+                      aria-pressed={isSelected}
+                      aria-label={`추천 카드 ${cardIndex + 1}`}
+                      className="recommend-card-shell group absolute top-0 h-full text-left transition-[left] duration-700 ease-in-out [perspective:1000px] focus:outline-none"
+                      style={{
+                        left: `calc(${slotIndex} * ((100% - 1.5rem) / ${CARD_COUNT} + 0.75rem))`,
+                        width: `calc((100% - 1.5rem) / ${CARD_COUNT})`,
+                      }}
                     >
                       <div
-                        className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-colors duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
+                        className={`relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] ${
+                          isSelected ? "[transform:rotateY(180deg)]" : ""
+                        }`}
                       >
-                        <div className="absolute inset-0 opacity-25 paper-texture" />
-                        <div className="absolute inset-3 rounded-md border border-[rgba(255,255,255,0.22)]" />
-                        <div className="absolute inset-x-8 top-1/2 h-px bg-[rgba(255,255,255,0.24)]" />
-                        <div className="absolute left-1/2 top-8 bottom-8 w-px bg-[rgba(255,255,255,0.18)]" />
-                      </div>
+                        <div
+                          className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-colors duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
+                        >
+                          <div className="absolute inset-0 opacity-25 paper-texture" />
+                          <div className="absolute inset-3 rounded-md border border-[rgba(255,255,255,0.22)]" />
+                          <div className="absolute inset-x-8 top-1/2 h-px bg-[rgba(255,255,255,0.24)]" />
+                          <div className="absolute left-1/2 top-8 bottom-8 w-px bg-[rgba(255,255,255,0.18)]" />
+                        </div>
 
-                      <div
-                        className="absolute inset-0 rounded-lg border border-border-medium bg-bg-beige-subtle shadow-[var(--shadow-subtle)] [backface-visibility:hidden] [transform:rotateY(180deg)]"
-                      />
-                    </div>
-                  </button>
-                );
-              })}
+                        <div
+                          className="absolute inset-0 rounded-lg border border-border-medium bg-bg-beige-subtle shadow-[var(--shadow-subtle)] [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-center flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={handleShuffleCards}
+                  disabled={isShuffling}
+                  className="px-4 py-1.5 rounded-full border border-border-medium
+                  text-[10px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
+                >
+                  카드 섞기
+                </button>
+              </div>
             </div>
           </div>
         </div>
