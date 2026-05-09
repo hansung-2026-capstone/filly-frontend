@@ -15,6 +15,7 @@ export function RecommendPage() {
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
 
   const { idCard, loading: idCardLoading } = useIdCard();
   const { receipt, loading: receiptLoading } = useReceipt(
@@ -94,7 +95,57 @@ export function RecommendPage() {
     <>
       <div className="flex w-full h-full font-['Nanum_Myeongjo']">
         {/* Left page - 추천 */}
-        <div className="flex-1 flex flex-col py-4 px-4 pl-5 overflow-y-auto" />
+        <div className="flex-1 flex flex-col py-3 px-3 gap-3 overflow-y-auto">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
+              <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+                추천 컨텐츠
+              </div>
+              <div
+                aria-hidden="true"
+                className="invisible px-2 py-0.5 rounded border border-border-light text-[10px]"
+              >
+                0000년 00월
+              </div>
+            </div>
+
+            <div className="flex-1 flex items-center gap-3 min-h-[260px]">
+              {Array.from({ length: 3 }).map((_, index) => {
+                const isSelected = selectedCardIndex === index;
+
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedCardIndex(index)}
+                    aria-pressed={isSelected}
+                    aria-label={`추천 카드 ${index + 1}`}
+                    className="group h-[260px] flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none"
+                  >
+                    <div
+                      className={`relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] ${
+                        isSelected ? "[transform:rotateY(180deg)]" : ""
+                      }`}
+                    >
+                      <div
+                        className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-colors duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
+                      >
+                        <div className="absolute inset-0 opacity-25 paper-texture" />
+                        <div className="absolute inset-3 rounded-md border border-[rgba(255,255,255,0.22)]" />
+                        <div className="absolute inset-x-8 top-1/2 h-px bg-[rgba(255,255,255,0.24)]" />
+                        <div className="absolute left-1/2 top-8 bottom-8 w-px bg-[rgba(255,255,255,0.18)]" />
+                      </div>
+
+                      <div
+                        className="absolute inset-0 rounded-lg border border-border-medium bg-bg-beige-subtle shadow-[var(--shadow-subtle)] [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
         {/* Right page - 공유 컨텐츠 */}
         <div className="flex-1 flex flex-col py-3 px-3 gap-3 overflow-y-auto">
