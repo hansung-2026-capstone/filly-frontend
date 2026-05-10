@@ -390,8 +390,8 @@ export function RecommendPage() {
             </div>
 
             <div className="flex-1 flex flex-col gap-4 min-h-0 pt-5">
-              <div className="flex flex-col gap-5 flex-shrink-0">
-                <div className="flex h-[232px] w-full gap-5 px-3">
+              <div className="flex flex-col gap-4 flex-shrink-0">
+                <div className="flex h-[232px] w-full gap-3 px-2">
                   {cardOrder.map((cardId, slotIndex) => {
                     const card = recommendationDraw?.cards.find(
                       (item) => item.cardId === cardId,
@@ -402,33 +402,44 @@ export function RecommendPage() {
                     const isBlockedByRevealedCard =
                       currentRevealedCardId !== null &&
                       currentRevealedCardId !== cardId;
+                    const isCardDisabled =
+                      recommendationLoading ||
+                      !recommendationDraw ||
+                      isShuffling ||
+                      isPreparingShuffle ||
+                      isBlockedByRevealedCard ||
+                      (revealingCardId !== null && !isRevealing);
                     const cardLabel = `추천 카드 ${card?.position ?? slotIndex + 1}`;
 
                     return (
-                      <motion.button
+                      <motion.div
                         layout
                         key={cardId}
-                        type="button"
-                        onClick={() => handleRecommendationCardClick(cardId)}
-                        disabled={
-                          recommendationLoading ||
-                          !recommendationDraw ||
-                          isShuffling ||
-                          isPreparingShuffle ||
-                          isBlockedByRevealedCard ||
-                          (revealingCardId !== null && !isRevealing)
-                        }
+                        role="button"
+                        tabIndex={isCardDisabled ? -1 : 0}
+                        onClick={() => {
+                          if (!isCardDisabled) handleRecommendationCardClick(cardId);
+                        }}
+                        onKeyDown={(event) => {
+                          if (isCardDisabled) return;
+                          if (event.key !== "Enter" && event.key !== " ") return;
+
+                          event.preventDefault();
+                          handleRecommendationCardClick(cardId);
+                        }}
                         aria-pressed={isSelected}
+                        aria-disabled={isCardDisabled}
                         aria-label={cardLabel}
-                        className={`group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none disabled:cursor-default ${
+                        className={`group h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
                           isBlockedByRevealedCard ? "opacity-55" : ""
+                        } ${
+                          isCardDisabled ? "cursor-default" : "cursor-pointer"
                         }`}
                         animate={{
                           x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
                           y: isShuffling
                             ? SHUFFLE_PATHS[slotIndex].y
                             : 0,
-                          scale: isSelected && !isShuffling ? 1.08 : 1,
                         }}
                         transition={{
                           x: {
@@ -439,11 +450,6 @@ export function RecommendPage() {
                             duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
                             ease: [0.28, 0, 0.22, 1],
                           },
-                          scale: {
-                            type: "spring",
-                            stiffness: 210,
-                            damping: 17,
-                          },
                           layout: {
                             duration: 0.7,
                             ease: [0.4, 0, 0.2, 1],
@@ -452,9 +458,14 @@ export function RecommendPage() {
                         style={{ zIndex: isSelected ? 10 : 1 }}
                       >
                         <div
-                          className={`relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] ${
-                            isSelected ? "[transform:rotateY(180deg)]" : ""
+                          className={`relative left-1/2 top-1/2 transition-[height,width,transform] duration-700 [transform-style:preserve-3d] ${
+                            isSelected ? "h-[348px] w-[150%]" : "h-full w-full"
                           }`}
+                          style={{
+                            transform: isSelected
+                              ? "translate(-50%, -50%) rotateY(180deg)"
+                              : "translate(-50%, -50%)",
+                          }}
                         >
                           <div
                             className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
@@ -479,14 +490,14 @@ export function RecommendPage() {
                           >
                             <div className="absolute inset-0 opacity-20 paper-texture" />
                             <div className="absolute inset-3 rounded-md border border-[rgba(80,60,40,0.16)]" />
-                            <div className="relative z-[1] flex h-full flex-col gap-2 overflow-hidden text-text-heading">
+                            <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-hidden text-text-heading">
                               {isRevealing ? (
                                 <div className="flex h-full items-center justify-center text-center text-[12px] leading-[1.7] text-text-muted">
                                   추천을 펼치는 중...
                                 </div>
                               ) : detail ? (
                                 <>
-                                  <div className="flex items-center justify-between gap-2 text-[9px] tracking-[1.6px] text-text-secondary">
+                                  <div className="flex items-center justify-between gap-2 text-[8.5px] tracking-[1.4px] text-text-secondary">
                                     <span className="truncate">
                                       {detail.category}
                                       {detail.subCategory
@@ -497,20 +508,37 @@ export function RecommendPage() {
                                       {contentTypeLabels[detail.contentType]}
                                     </span>
                                   </div>
-                                  <div className="text-[15px] font-bold leading-[1.35]">
+                                  <div className="line-clamp-2 text-[14px] font-bold leading-[1.35]">
                                     {detail.title}
                                   </div>
-                                  <div className="line-clamp-3 text-[11px] leading-[1.55] text-text-muted">
+                                  <div className="line-clamp-4 text-[10.5px] leading-[1.6] text-text-muted">
                                     {detail.description}
                                   </div>
-                                  <div className="mt-auto border-t border-[rgba(80,60,40,0.18)] pt-2 text-[10px] leading-[1.55] text-text-secondary">
+                                  <div className="mt-auto line-clamp-3 border-t border-[rgba(80,60,40,0.18)] pt-2 text-[9.5px] leading-[1.6] text-text-secondary">
                                     {detail.reason}
                                   </div>
                                   {detail.searchKeyword && (
-                                    <div className="text-[9px] text-text-secondary">
+                                    <div className="truncate text-[8px] text-text-secondary">
                                       #{detail.searchKeyword}
                                     </div>
                                   )}
+                                  <button
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleShuffleCards();
+                                    }}
+                                    disabled={
+                                      isShuffling ||
+                                      isPreparingShuffle ||
+                                      revealingCardId !== null
+                                    }
+                                    className="mt-1 self-center rounded-full border border-border-medium px-3 py-1 text-[9.5px] text-text-muted transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {isShuffling || isPreparingShuffle
+                                      ? "뽑는 중..."
+                                      : "다른 카드 뽑기"}
+                                  </button>
                                 </>
                               ) : (
                                 <div className="flex h-full items-center justify-center text-center text-[12px] leading-[1.7] text-text-muted">
@@ -532,27 +560,9 @@ export function RecommendPage() {
                             </div>
                           </div>
                         </div>
-                      </motion.button>
+                      </motion.div>
                     );
                   })}
-                </div>
-
-                <div className="flex justify-center flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleShuffleCards}
-                    disabled={
-                      recommendationLoading ||
-                      !recommendationDraw ||
-                      isShuffling ||
-                      isPreparingShuffle ||
-                      revealingCardId !== null
-                    }
-                    className="px-4 py-1.5 rounded-full border border-border-medium
-                    text-[10px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
-                  >
-                    {isShuffling || isPreparingShuffle ? "섞는 중..." : "카드 섞기"}
-                  </button>
                 </div>
               </div>
 
