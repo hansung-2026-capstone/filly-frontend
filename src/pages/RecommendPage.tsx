@@ -254,6 +254,11 @@ export function RecommendPage() {
     setReceiptAtBottom(scrollHeight - scrollTop - clientHeight < 8);
   }
 
+  const currentRevealedCardId =
+    recommendationDraw?.cards.find(
+      (card) => card.revealed || revealedRecommendations[card.cardId],
+    )?.cardId ?? null;
+
   function startShuffleMotion() {
     setIsShuffling(true);
     window.setTimeout(() => {
@@ -269,6 +274,10 @@ export function RecommendPage() {
       isPreparingShuffle ||
       revealingCardId !== null
     ) {
+      return;
+    }
+
+    if (currentRevealedCardId !== null && currentRevealedCardId !== cardId) {
       return;
     }
 
@@ -329,6 +338,8 @@ export function RecommendPage() {
     }
 
     setRecommendationError(null);
+    const previousRevealedRecommendations = revealedRecommendations;
+    const previousSelectedCardId = selectedCardId;
 
     if (selectedCardId !== null) {
       setIsPreparingShuffle(true);
@@ -339,12 +350,15 @@ export function RecommendPage() {
 
     try {
       const nextDraw = await shuffleRecommendationDraw(recommendationDraw.drawId);
+      setRevealedRecommendations({});
       setRecommendationDraw(nextDraw);
       setCardOrder(getCardOrder(nextDraw));
       setSelectedCardId(null);
       startShuffleMotion();
     } catch (error) {
       console.error("[recommendation] 추천 카드를 섞지 못했어요.", error);
+      setRevealedRecommendations(previousRevealedRecommendations);
+      setSelectedCardId(previousSelectedCardId);
       setRecommendationError("추천 카드를 섞지 못했어요.");
     }
   }
@@ -385,6 +399,9 @@ export function RecommendPage() {
                     const detail = revealedRecommendations[cardId];
                     const isSelected = selectedCardId === cardId;
                     const isRevealing = revealingCardId === cardId;
+                    const isBlockedByRevealedCard =
+                      currentRevealedCardId !== null &&
+                      currentRevealedCardId !== cardId;
                     const cardLabel = `추천 카드 ${card?.position ?? slotIndex + 1}`;
 
                     return (
@@ -398,11 +415,14 @@ export function RecommendPage() {
                           !recommendationDraw ||
                           isShuffling ||
                           isPreparingShuffle ||
+                          isBlockedByRevealedCard ||
                           (revealingCardId !== null && !isRevealing)
                         }
                         aria-pressed={isSelected}
                         aria-label={cardLabel}
-                        className="group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none disabled:cursor-default"
+                        className={`group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none disabled:cursor-default ${
+                          isBlockedByRevealedCard ? "opacity-55" : ""
+                        }`}
                         animate={{
                           x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
                           y: isShuffling
@@ -494,9 +514,19 @@ export function RecommendPage() {
                                 </>
                               ) : (
                                 <div className="flex h-full items-center justify-center text-center text-[12px] leading-[1.7] text-text-muted">
-                                  카드를 선택하면
-                                  <br />
-                                  오늘의 추천이 열려요.
+                                  {isBlockedByRevealedCard ? (
+                                    <>
+                                      카드 섞기로
+                                      <br />
+                                      다음 추천을 만나보세요.
+                                    </>
+                                  ) : (
+                                    <>
+                                      카드를 선택하면
+                                      <br />
+                                      오늘의 추천이 열려요.
+                                    </>
+                                  )}
                                 </div>
                               )}
                             </div>
