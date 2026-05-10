@@ -12,6 +12,7 @@ import { MonthPickerModal } from "../components/MonthPickerModal";
 import { KeywordCloud } from "../components/KeywordCloud";
 
 const CARD_COUNT = 3;
+const CARD_RESET_DURATION_MS = 700;
 const SHUFFLE_DURATION_MS = 950;
 const SHUFFLE_REORDER_DELAY_MS = 320;
 const SHUFFLE_PATHS = [
@@ -39,6 +40,7 @@ export function RecommendPage() {
     Array.from({ length: CARD_COUNT }, (_, index) => index),
   );
   const [isShuffling, setIsShuffling] = useState(false);
+  const [isPreparingShuffle, setIsPreparingShuffle] = useState(false);
 
   const { idCard, loading: idCardLoading } = useIdCard();
   const { receipt, loading: receiptLoading } = useReceipt(
@@ -114,9 +116,7 @@ export function RecommendPage() {
     setReceiptAtBottom(scrollHeight - scrollTop - clientHeight < 8);
   }
 
-  function handleShuffleCards() {
-    if (isShuffling) return;
-
+  function startShuffleMotion() {
     setIsShuffling(true);
     window.setTimeout(() => {
       setCardOrder((currentOrder) => {
@@ -132,6 +132,22 @@ export function RecommendPage() {
       });
     }, SHUFFLE_REORDER_DELAY_MS);
     window.setTimeout(() => setIsShuffling(false), SHUFFLE_DURATION_MS);
+  }
+
+  function handleShuffleCards() {
+    if (isShuffling || isPreparingShuffle) return;
+
+    if (selectedCardIndex === null) {
+      startShuffleMotion();
+      return;
+    }
+
+    setIsPreparingShuffle(true);
+    setSelectedCardIndex(null);
+    window.setTimeout(() => {
+      setIsPreparingShuffle(false);
+      startShuffleMotion();
+    }, CARD_RESET_DURATION_MS);
   }
 
   return (
@@ -230,7 +246,7 @@ export function RecommendPage() {
                 <button
                   type="button"
                   onClick={handleShuffleCards}
-                  disabled={isShuffling}
+                  disabled={isShuffling || isPreparingShuffle}
                   className="px-4 py-1.5 rounded-full border border-border-medium
                   text-[10px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
                 >
