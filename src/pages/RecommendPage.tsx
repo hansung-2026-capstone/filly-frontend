@@ -78,6 +78,19 @@ function getShuffledCardOrder(currentOrder: number[]) {
   return nextOrder;
 }
 
+function getCenteredCardOrder(currentOrder: number[], cardId: number) {
+  const currentIndex = currentOrder.indexOf(cardId);
+  if (currentIndex < 0 || currentIndex === 1) return currentOrder;
+
+  const nextOrder = [...currentOrder];
+  [nextOrder[currentIndex], nextOrder[1]] = [
+    nextOrder[1],
+    nextOrder[currentIndex],
+  ];
+
+  return nextOrder;
+}
+
 function wait(ms: number) {
   return new Promise((resolve) => {
     window.setTimeout(resolve, ms);
@@ -289,10 +302,12 @@ export function RecommendPage() {
     }
 
     if (revealedRecommendations[cardId]) {
+      setCardOrder((currentOrder) => getCenteredCardOrder(currentOrder, cardId));
       setSelectedCardId(cardId);
       return;
     }
 
+    setCardOrder((currentOrder) => getCenteredCardOrder(currentOrder, cardId));
     setSelectedCardId(cardId);
     setRevealingCardId(cardId);
     setRecommendationError(null);
