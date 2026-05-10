@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Download, Check } from "lucide-react";
 import { toPng } from "html-to-image";
@@ -22,20 +22,17 @@ import type {
 
 const CARD_COUNT = 3;
 const CARD_RESET_DURATION_MS = 700;
-const SHUFFLE_DURATION_MS = 950;
-const SHUFFLE_REORDER_DELAY_MS = 320;
+const SHUFFLE_DURATION_MS = 1300;
+const SHUFFLE_REORDER_DELAY_MS = 460;
 const SHUFFLE_PATHS = [
   {
-    x: ["0%", "66%", "134%", "72%", "116%", "28%", "0%"],
-    y: [0, -14, 10, -8, 12, -4, 0],
+    x: ["0%", "58%", "118%", "82%", "24%", "0%"],
   },
   {
-    x: ["0%", "-46%", "58%", "-66%", "62%", "-24%", "0%"],
-    y: [0, 12, -10, 14, -8, 6, 0],
+    x: ["0%", "-48%", "54%", "-36%", "38%", "0%"],
   },
   {
-    x: ["0%", "-66%", "-134%", "-72%", "-116%", "-28%", "0%"],
-    y: [0, -10, 12, -14, 8, -6, 0],
+    x: ["0%", "-58%", "-118%", "-82%", "-24%", "0%"],
   },
 ];
 import { Portal } from "../components/Portal";
@@ -69,6 +66,16 @@ function getCardOrder(draw: RecommendationDraw | null) {
   return [...draw.cards]
     .sort((a, b) => a.position - b.position)
     .map((card) => card.cardId);
+}
+
+function getShuffledCardOrder(currentOrder: number[]) {
+  const nextOrder = [...currentOrder].sort(() => Math.random() - 0.5);
+
+  if (nextOrder.every((cardId, index) => cardId === currentOrder[index])) {
+    nextOrder.push(nextOrder.shift() ?? 0);
+  }
+
+  return nextOrder;
 }
 
 function wait(ms: number) {
@@ -262,7 +269,7 @@ export function RecommendPage() {
   function startShuffleMotion() {
     setIsShuffling(true);
     window.setTimeout(() => {
-      setCardOrder((currentOrder) => [...currentOrder].sort(() => Math.random() - 0.5));
+      setCardOrder((currentOrder) => getShuffledCardOrder(currentOrder));
     }, SHUFFLE_REORDER_DELAY_MS);
     window.setTimeout(() => setIsShuffling(false), SHUFFLE_DURATION_MS);
   }
@@ -340,6 +347,7 @@ export function RecommendPage() {
     setRecommendationError(null);
     const previousRevealedRecommendations = revealedRecommendations;
     const previousSelectedCardId = selectedCardId;
+    const nextDrawPromise = shuffleRecommendationDraw(recommendationDraw.drawId);
 
     if (selectedCardId !== null) {
       setIsPreparingShuffle(true);
@@ -348,13 +356,17 @@ export function RecommendPage() {
       setIsPreparingShuffle(false);
     }
 
+    setRevealedRecommendations({});
+    startShuffleMotion();
+
     try {
-      const nextDraw = await shuffleRecommendationDraw(recommendationDraw.drawId);
-      setRevealedRecommendations({});
+      const [nextDraw] = await Promise.all([
+        nextDrawPromise,
+        wait(SHUFFLE_DURATION_MS),
+      ]);
       setRecommendationDraw(nextDraw);
       setCardOrder(getCardOrder(nextDraw));
       setSelectedCardId(null);
-      startShuffleMotion();
     } catch (error) {
       console.error("[recommendation] 추천 카드를 섞지 못했어요.", error);
       setRevealedRecommendations(previousRevealedRecommendations);
@@ -410,6 +422,8 @@ export function RecommendPage() {
                       isBlockedByRevealedCard ||
                       (revealingCardId !== null && !isRevealing);
                     const cardLabel = `추천 카드 ${card?.position ?? slotIndex + 1}`;
+                    const shufflePath =
+                      SHUFFLE_PATHS[slotIndex % SHUFFLE_PATHS.length];
 
                     return (
                       <motion.div
@@ -436,17 +450,10 @@ export function RecommendPage() {
                           isCardDisabled ? "cursor-default" : "cursor-pointer"
                         }`}
                         animate={{
-                          x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
-                          y: isShuffling
-                            ? SHUFFLE_PATHS[slotIndex].y
-                            : 0,
+                          x: isShuffling ? shufflePath.x : "0%",
                         }}
                         transition={{
                           x: {
-                            duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
-                            ease: [0.28, 0, 0.22, 1],
-                          },
-                          y: {
                             duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
                             ease: [0.28, 0, 0.22, 1],
                           },
