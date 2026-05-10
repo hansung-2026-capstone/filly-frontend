@@ -11,6 +11,7 @@ import {
   formatDateKeyFromParts,
   getWeeksInMonth,
   MONTHS,
+  WEEK_DAYS_LONG,
   WEEK_DAYS_SHORT,
 } from "../lib/date";
 import type { DiaryItem } from "../types/diary";
@@ -51,14 +52,21 @@ function CalendarColumn({
   const widthClass = columnCount === 3 ? "w-[370px] pl-3 pr-4" : "w-[500px] pl-4 pr-[26px]";
   const gridClass = columnCount === 3 ? "grid-cols-3" : "grid-cols-4";
   const visibleDays = WEEK_DAYS_SHORT.slice(dayOffset, dayOffset + columnCount);
+  const visibleDayLabels = WEEK_DAYS_LONG.slice(dayOffset, dayOffset + columnCount);
 
   return (
     <div className={`${widthClass} flex flex-col pt-10 pb-8 shrink-0`}>
       <div className={`${gridClass} grid text-center pb-2 mb-2 border-b border-[var(--border-calendar)]`}>
         {visibleDays.map((day, index) => {
           const dayIndex = dayOffset + index;
+          const fullDayLabel = visibleDayLabels[index];
           return (
-            <span key={day} className={`text-[10px] tracking-[1.5px] ${getHeaderTextClass(dayIndex)}`}>
+            <span
+              key={day}
+              aria-label={fullDayLabel}
+              title={fullDayLabel}
+              className={`block rounded-md py-1 text-[13px] font-bold leading-none tracking-[1.5px] ${getHeaderTextClass(dayIndex)}`}
+            >
               {day}
             </span>
           );
@@ -134,7 +142,7 @@ export function HomePage() {
           </div>
 
           <div className="absolute bottom-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="text-[10px] text-[var(--text-control-muted)] font-bold tracking-widest">월 선택</span>
+            <span className="text-[11px] text-[var(--text-control-muted)] font-bold tracking-widest">월 선택</span>
           </div>
         </button>
 
