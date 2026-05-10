@@ -152,7 +152,7 @@ export function RecommendPage() {
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col justify-center gap-4 min-h-[320px]">
+            <div className="flex-1 flex flex-col justify-center gap-4 min-h-[400px]">
               <div className="flex h-[260px] w-full gap-3">
                 {cardOrder.map((cardIndex, slotIndex) => {
                   const isSelected = selectedCardIndex === cardIndex;
@@ -168,7 +168,12 @@ export function RecommendPage() {
                       className="group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none"
                       animate={{
                         x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
-                        y: isShuffling ? SHUFFLE_PATHS[slotIndex].y : 0,
+                        y: isShuffling
+                          ? SHUFFLE_PATHS[slotIndex].y
+                          : isSelected
+                            ? -18
+                            : 0,
+                        scale: isSelected && !isShuffling ? 1.26 : 1,
                       }}
                       transition={{
                         x: {
@@ -179,11 +184,17 @@ export function RecommendPage() {
                           duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
                           ease: [0.28, 0, 0.22, 1],
                         },
+                        scale: {
+                          type: "spring",
+                          stiffness: 210,
+                          damping: 17,
+                        },
                         layout: {
                           duration: 0.7,
                           ease: [0.4, 0, 0.2, 1],
                         },
                       }}
+                      style={{ zIndex: isSelected ? 10 : 1 }}
                     >
                       <div
                         className={`relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] ${
@@ -200,8 +211,15 @@ export function RecommendPage() {
                         </div>
 
                         <div
-                          className="absolute inset-0 rounded-lg border border-border-medium bg-bg-beige-subtle shadow-[var(--shadow-subtle)] [backface-visibility:hidden] [transform:rotateY(180deg)]"
-                        />
+                          className={`absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--archive-yellow)] [backface-visibility:hidden] [transform:rotateY(180deg)] ${
+                            isSelected
+                              ? "shadow-[0_22px_46px_rgba(0,0,0,0.24)]"
+                              : "shadow-[var(--shadow-subtle)]"
+                          }`}
+                        >
+                          <div className="absolute inset-0 opacity-20 paper-texture" />
+                          <div className="absolute inset-3 rounded-md border border-[rgba(80,60,40,0.16)]" />
+                        </div>
                       </div>
                     </motion.button>
                   );
