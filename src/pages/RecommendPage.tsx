@@ -1,7 +1,13 @@
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Download, Check } from "lucide-react";
 import { toPng } from "html-to-image";
+import {
+  getRecommendationHistory,
+  revealRecommendationCard,
+  shuffleRecommendationDraw,
+  startRecommendationDraw,
+} from "../api/recommendation";
 import { useIdCard } from "../hook/common/useIdCard";
 import { useReceipt } from "../hook/common/useReceipt";
 import { useMonthlyStat } from "../hook/common/useMonthlyStat";
@@ -9,23 +15,24 @@ import { IdCard, IdCardSkeleton } from "../components/IdCard";
 import { Receipt, ReceiptSkeleton } from "../components/Receipt";
 import { MonthPickerModal } from "../components/MonthPickerModal";
 import { KeywordCloud } from "../components/KeywordCloud";
+import type {
+  RecommendationDetail,
+  RecommendationDraw,
+} from "../types/recommendation";
 
 const CARD_COUNT = 3;
 const CARD_RESET_DURATION_MS = 700;
-const SHUFFLE_DURATION_MS = 950;
-const SHUFFLE_REORDER_DELAY_MS = 320;
+const SHUFFLE_DURATION_MS = 1300;
+const SHUFFLE_REORDER_DELAY_MS = 460;
 const SHUFFLE_PATHS = [
   {
-    x: ["0%", "66%", "134%", "72%", "116%", "28%", "0%"],
-    y: [0, -14, 10, -8, 12, -4, 0],
+    x: ["0%", "58%", "118%", "82%", "24%", "0%"],
   },
   {
-    x: ["0%", "-46%", "58%", "-66%", "62%", "-24%", "0%"],
-    y: [0, 12, -10, 14, -8, 6, 0],
+    x: ["0%", "-48%", "54%", "-36%", "38%", "0%"],
   },
   {
-    x: ["0%", "-66%", "-134%", "-72%", "-116%", "-28%", "0%"],
-    y: [0, -10, 12, -14, 8, -6, 0],
+    x: ["0%", "-58%", "-118%", "-82%", "-24%", "0%"],
   },
 ];
 import { Portal } from "../components/Portal";
@@ -44,14 +51,71 @@ const initialCaptureTargetSelection: Record<CaptureTarget, boolean> = {
   keywordCloud: false,
 };
 
+const contentTypeLabels: Record<RecommendationDetail["contentType"], string> = {
+  MOVIE: "영화",
+  BOOK: "책",
+  MUSIC: "음악",
+  FOOD: "음식",
+  PLACE: "장소",
+  ADVICE: "조언",
+};
+
+function getCardOrder(draw: RecommendationDraw | null) {
+  if (!draw) return Array.from({ length: CARD_COUNT }, (_, index) => index);
+
+  return [...draw.cards]
+    .sort((a, b) => a.position - b.position)
+    .map((card) => card.cardId);
+}
+
+function getShuffledCardOrder(currentOrder: number[]) {
+  const nextOrder = [...currentOrder].sort(() => Math.random() - 0.5);
+
+  if (nextOrder.every((cardId, index) => cardId === currentOrder[index])) {
+    nextOrder.push(nextOrder.shift() ?? 0);
+  }
+
+  return nextOrder;
+}
+
+function getCenteredCardOrder(currentOrder: number[], cardId: number) {
+  const currentIndex = currentOrder.indexOf(cardId);
+  if (currentIndex < 0 || currentIndex === 1) return currentOrder;
+
+  const nextOrder = [...currentOrder];
+  [nextOrder[currentIndex], nextOrder[1]] = [
+    nextOrder[1],
+    nextOrder[currentIndex],
+  ];
+
+  return nextOrder;
+}
+
+function wait(ms: number) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
 export function RecommendPage() {
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
-  const [cardOrder, setCardOrder] = useState(() =>
-    Array.from({ length: CARD_COUNT }, (_, index) => index),
+  const [recommendationDraw, setRecommendationDraw] =
+    useState<RecommendationDraw | null>(null);
+  const [recommendationHistory, setRecommendationHistory] = useState<
+    RecommendationDetail[]
+  >([]);
+  const [revealedRecommendations, setRevealedRecommendations] = useState<
+    Record<number, RecommendationDetail>
+  >({});
+  const [selectedCardId, setSelectedCardId] = useState<number | null>(null);
+  const [revealingCardId, setRevealingCardId] = useState<number | null>(null);
+  const [cardOrder, setCardOrder] = useState(() => getCardOrder(null));
+  const [recommendationLoading, setRecommendationLoading] = useState(true);
+  const [recommendationError, setRecommendationError] = useState<string | null>(
+    null,
   );
   const [isShuffling, setIsShuffling] = useState(false);
   const [isPreparingShuffle, setIsPreparingShuffle] = useState(false);
@@ -73,6 +137,54 @@ export function RecommendPage() {
   const receiptScrollRef = useRef<HTMLDivElement>(null);
   const receiptWrapRef = useRef<HTMLDivElement>(null);
   const keywordCloudRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let ignore = false;
+
+    async function loadRecommendations() {
+      setRecommendationLoading(true);
+      setRecommendationError(null);
+
+      try {
+        const [draw, history] = await Promise.all([
+          startRecommendationDraw(),
+          getRecommendationHistory(),
+        ]);
+
+        if (ignore) return;
+
+        const currentDrawDetails = history.filter(
+          (item) => item.drawId === draw.drawId,
+        );
+
+        setRecommendationDraw(draw);
+        setRecommendationHistory(history);
+        setRevealedRecommendations(
+          currentDrawDetails.reduce<Record<number, RecommendationDetail>>(
+            (details, item) => ({
+              ...details,
+              [item.cardId]: item,
+            }),
+            {},
+          ),
+        );
+        setCardOrder(getCardOrder(draw));
+      } catch (error) {
+        if (ignore) return;
+
+        console.error("[recommendation] 추천 정보를 불러오지 못했어요.", error);
+        setRecommendationError("추천 정보를 불러오지 못했어요.");
+      } finally {
+        if (!ignore) setRecommendationLoading(false);
+      }
+    }
+
+    loadRecommendations();
+
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   function downloadPng(dataUrl: string, filename: string) {
     const link = document.createElement("a");
@@ -162,38 +274,120 @@ export function RecommendPage() {
     setReceiptAtBottom(scrollHeight - scrollTop - clientHeight < 8);
   }
 
+  const currentRevealedCardId =
+    recommendationDraw?.cards.find(
+      (card) => card.revealed || revealedRecommendations[card.cardId],
+    )?.cardId ?? null;
+
   function startShuffleMotion() {
     setIsShuffling(true);
     window.setTimeout(() => {
-      setCardOrder((currentOrder) => {
-        const nextOrder = [...currentOrder].sort(() => Math.random() - 0.5);
-
-        if (
-          nextOrder.every((cardIndex, index) => cardIndex === currentOrder[index])
-        ) {
-          nextOrder.push(nextOrder.shift() ?? 0);
-        }
-
-        return nextOrder;
-      });
+      setCardOrder((currentOrder) => getShuffledCardOrder(currentOrder));
     }, SHUFFLE_REORDER_DELAY_MS);
     window.setTimeout(() => setIsShuffling(false), SHUFFLE_DURATION_MS);
   }
 
-  function handleShuffleCards() {
-    if (isShuffling || isPreparingShuffle) return;
-
-    if (selectedCardIndex === null) {
-      startShuffleMotion();
+  async function handleRecommendationCardClick(cardId: number) {
+    if (
+      !recommendationDraw ||
+      isShuffling ||
+      isPreparingShuffle ||
+      revealingCardId !== null
+    ) {
       return;
     }
 
-    setIsPreparingShuffle(true);
-    setSelectedCardIndex(null);
-    window.setTimeout(() => {
+    if (currentRevealedCardId !== null && currentRevealedCardId !== cardId) {
+      return;
+    }
+
+    if (revealedRecommendations[cardId]) {
+      setCardOrder((currentOrder) => getCenteredCardOrder(currentOrder, cardId));
+      setSelectedCardId(cardId);
+      return;
+    }
+
+    setCardOrder((currentOrder) => getCenteredCardOrder(currentOrder, cardId));
+    setSelectedCardId(cardId);
+    setRevealingCardId(cardId);
+    setRecommendationError(null);
+
+    try {
+      const detail = await revealRecommendationCard(
+        recommendationDraw.drawId,
+        cardId,
+      );
+
+      setRevealedRecommendations((currentDetails) => ({
+        ...currentDetails,
+        [cardId]: detail,
+      }));
+      setRecommendationHistory((currentHistory) => {
+        const filteredHistory = currentHistory.filter(
+          (item) =>
+            item.drawId !== detail.drawId || item.cardId !== detail.cardId,
+        );
+
+        return [detail, ...filteredHistory];
+      });
+    } catch (error) {
+      console.error("[recommendation] 추천 카드를 공개하지 못했어요.", error);
+      setSelectedCardId(null);
+      setRecommendationError("추천 카드를 공개하지 못했어요.");
+    } finally {
+      setRevealingCardId(null);
+    }
+  }
+
+  function handleRecommendationHistoryClick(item: RecommendationDetail) {
+    if (item.drawId !== recommendationDraw?.drawId) return;
+
+    setRevealedRecommendations((currentDetails) => ({
+      ...currentDetails,
+      [item.cardId]: item,
+    }));
+    setSelectedCardId(item.cardId);
+  }
+
+  async function handleShuffleCards() {
+    if (
+      !recommendationDraw ||
+      isShuffling ||
+      isPreparingShuffle ||
+      revealingCardId !== null
+    ) {
+      return;
+    }
+
+    setRecommendationError(null);
+    const previousRevealedRecommendations = revealedRecommendations;
+    const previousSelectedCardId = selectedCardId;
+    const nextDrawPromise = shuffleRecommendationDraw(recommendationDraw.drawId);
+
+    if (selectedCardId !== null) {
+      setIsPreparingShuffle(true);
+      setSelectedCardId(null);
+      await wait(CARD_RESET_DURATION_MS);
       setIsPreparingShuffle(false);
-      startShuffleMotion();
-    }, CARD_RESET_DURATION_MS);
+    }
+
+    setRevealedRecommendations({});
+    startShuffleMotion();
+
+    try {
+      const [nextDraw] = await Promise.all([
+        nextDrawPromise,
+        wait(SHUFFLE_DURATION_MS),
+      ]);
+      setRecommendationDraw(nextDraw);
+      setCardOrder(getCardOrder(nextDraw));
+      setSelectedCardId(null);
+    } catch (error) {
+      console.error("[recommendation] 추천 카드를 섞지 못했어요.", error);
+      setRevealedRecommendations(previousRevealedRecommendations);
+      setSelectedCardId(previousSelectedCardId);
+      setRecommendationError("추천 카드를 섞지 못했어요.");
+    }
   }
 
   const selectedTargets = captureTargetOptions
@@ -223,41 +417,60 @@ export function RecommendPage() {
             </div>
 
             <div className="flex-1 flex flex-col gap-4 min-h-0 pt-5">
-              <div className="flex flex-col gap-5 flex-shrink-0">
-                <div className="flex h-[232px] w-full gap-5 px-3">
-                  {cardOrder.map((cardIndex, slotIndex) => {
-                    const isSelected = selectedCardIndex === cardIndex;
+              <div className="flex flex-col gap-4 flex-shrink-0">
+                <div className="flex h-[232px] w-full gap-3 px-2">
+                  {cardOrder.map((cardId, slotIndex) => {
+                    const card = recommendationDraw?.cards.find(
+                      (item) => item.cardId === cardId,
+                    );
+                    const detail = revealedRecommendations[cardId];
+                    const isSelected = selectedCardId === cardId;
+                    const isRevealing = revealingCardId === cardId;
+                    const isBlockedByRevealedCard =
+                      currentRevealedCardId !== null &&
+                      currentRevealedCardId !== cardId;
+                    const isCardDisabled =
+                      recommendationLoading ||
+                      !recommendationDraw ||
+                      isShuffling ||
+                      isPreparingShuffle ||
+                      isBlockedByRevealedCard ||
+                      (revealingCardId !== null && !isRevealing);
+                    const cardLabel = `추천 카드 ${card?.position ?? slotIndex + 1}`;
+                    const shufflePath =
+                      SHUFFLE_PATHS[slotIndex % SHUFFLE_PATHS.length];
 
                     return (
-                      <motion.button
+                      <motion.div
                         layout
-                        key={cardIndex}
-                        type="button"
-                        onClick={() => setSelectedCardIndex(cardIndex)}
-                        disabled={isShuffling || isPreparingShuffle}
+                        key={cardId}
+                        role="button"
+                        tabIndex={isCardDisabled ? -1 : 0}
+                        onClick={() => {
+                          if (!isCardDisabled) handleRecommendationCardClick(cardId);
+                        }}
+                        onKeyDown={(event) => {
+                          if (isCardDisabled) return;
+                          if (event.key !== "Enter" && event.key !== " ") return;
+
+                          event.preventDefault();
+                          handleRecommendationCardClick(cardId);
+                        }}
                         aria-pressed={isSelected}
-                        aria-label={`추천 카드 ${cardIndex + 1}`}
-                        className="group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none disabled:cursor-default"
+                        aria-disabled={isCardDisabled}
+                        aria-label={cardLabel}
+                        className={`group h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
+                          isBlockedByRevealedCard ? "opacity-55" : ""
+                        } ${
+                          isCardDisabled ? "cursor-default" : "cursor-pointer"
+                        }`}
                         animate={{
-                          x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
-                          y: isShuffling
-                            ? SHUFFLE_PATHS[slotIndex].y
-                            : 0,
-                          scale: isSelected && !isShuffling ? 1.08 : 1,
+                          x: isShuffling ? shufflePath.x : "0%",
                         }}
                         transition={{
                           x: {
                             duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
                             ease: [0.28, 0, 0.22, 1],
-                          },
-                          y: {
-                            duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
-                            ease: [0.28, 0, 0.22, 1],
-                          },
-                          scale: {
-                            type: "spring",
-                            stiffness: 210,
-                            damping: 17,
                           },
                           layout: {
                             duration: 0.7,
@@ -267,9 +480,14 @@ export function RecommendPage() {
                         style={{ zIndex: isSelected ? 10 : 1 }}
                       >
                         <div
-                          className={`relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] ${
-                            isSelected ? "[transform:rotateY(180deg)]" : ""
+                          className={`relative left-1/2 top-1/2 transition-[height,width,transform] duration-700 [transform-style:preserve-3d] ${
+                            isSelected ? "h-[348px] w-[150%]" : "h-full w-full"
                           }`}
+                          style={{
+                            transform: isSelected
+                              ? "translate(-50%, -50%) rotateY(180deg)"
+                              : "translate(-50%, -50%)",
+                          }}
                         >
                           <div
                             className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
@@ -278,10 +496,15 @@ export function RecommendPage() {
                             <div className="absolute inset-3 rounded-md border border-[rgba(255,255,255,0.22)]" />
                             <div className="absolute inset-x-8 top-1/2 h-px bg-[rgba(255,255,255,0.24)]" />
                             <div className="absolute left-1/2 top-8 bottom-8 w-px bg-[rgba(255,255,255,0.18)]" />
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-[12px] tracking-[2px] text-[rgba(255,255,255,0.72)]">
+                                {recommendationLoading ? "LOADING" : cardLabel}
+                              </span>
+                            </div>
                           </div>
 
                           <div
-                            className={`absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--archive-yellow)] [backface-visibility:hidden] [transform:rotateY(180deg)] ${
+                            className={`absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--archive-yellow)] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
                               isSelected
                                 ? "shadow-[0_18px_34px_rgba(0,0,0,0.2)]"
                                 : "shadow-[var(--shadow-subtle)]"
@@ -289,23 +512,79 @@ export function RecommendPage() {
                           >
                             <div className="absolute inset-0 opacity-20 paper-texture" />
                             <div className="absolute inset-3 rounded-md border border-[rgba(80,60,40,0.16)]" />
+                            <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-hidden text-text-heading">
+                              {isRevealing ? (
+                                <div className="flex h-full items-center justify-center text-center text-[12px] leading-[1.7] text-text-muted">
+                                  추천을 펼치는 중...
+                                </div>
+                              ) : detail ? (
+                                <>
+                                  <div className="flex items-center justify-between gap-2 text-[8.5px] tracking-[1.4px] text-text-secondary">
+                                    <span className="truncate">
+                                      {detail.category}
+                                      {detail.subCategory
+                                        ? ` / ${detail.subCategory}`
+                                        : ""}
+                                    </span>
+                                    <span className="flex-shrink-0">
+                                      {contentTypeLabels[detail.contentType]}
+                                    </span>
+                                  </div>
+                                  <div className="line-clamp-2 text-[14px] font-bold leading-[1.35]">
+                                    {detail.title}
+                                  </div>
+                                  <div className="line-clamp-4 text-[10.5px] leading-[1.6] text-text-muted">
+                                    {detail.description}
+                                  </div>
+                                  <div className="mt-auto line-clamp-3 border-t border-[rgba(80,60,40,0.18)] pt-2 text-[9.5px] leading-[1.6] text-text-secondary">
+                                    {detail.reason}
+                                  </div>
+                                  {detail.searchKeyword && (
+                                    <div className="truncate text-[8px] text-text-secondary">
+                                      #{detail.searchKeyword}
+                                    </div>
+                                  )}
+                                  <button
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleShuffleCards();
+                                    }}
+                                    disabled={
+                                      isShuffling ||
+                                      isPreparingShuffle ||
+                                      revealingCardId !== null
+                                    }
+                                    className="mt-1 self-center rounded-full border border-border-medium px-3 py-1 text-[9.5px] text-text-muted transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
+                                  >
+                                    {isShuffling || isPreparingShuffle
+                                      ? "뽑는 중..."
+                                      : "다른 카드 뽑기"}
+                                  </button>
+                                </>
+                              ) : (
+                                <div className="flex h-full items-center justify-center text-center text-[12px] leading-[1.7] text-text-muted">
+                                  {isBlockedByRevealedCard ? (
+                                    <>
+                                      카드 섞기로
+                                      <br />
+                                      다음 추천을 만나보세요.
+                                    </>
+                                  ) : (
+                                    <>
+                                      카드를 선택하면
+                                      <br />
+                                      오늘의 추천이 열려요.
+                                    </>
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
-                      </motion.button>
+                      </motion.div>
                     );
                   })}
-                </div>
-
-                <div className="flex justify-center flex-shrink-0">
-                  <button
-                    type="button"
-                    onClick={handleShuffleCards}
-                    disabled={isShuffling || isPreparingShuffle}
-                    className="px-4 py-1.5 rounded-full border border-border-medium
-                    text-[10px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
-                  >
-                    카드 섞기
-                  </button>
                 </div>
               </div>
 
@@ -317,13 +596,59 @@ export function RecommendPage() {
                 </div>
 
                 <div className="flex-1 overflow-y-auto pr-1">
-                  <div className="h-full min-h-[116px] flex items-center justify-center rounded-lg border border-dashed border-border-dashed bg-bg-beige-subtle px-4 text-center">
-                    <span className="text-[11px] leading-[1.7] text-text-muted">
-                      아직 추천 기록이 없어요.
-                      <br />
-                      카드를 선택하면 히스토리가 이곳에 쌓일 예정이에요.
-                    </span>
-                  </div>
+                  {recommendationLoading ? (
+                    <div className="space-y-2">
+                      {Array.from({ length: 3 }).map((_, index) => (
+                        <div
+                          key={index}
+                          className="h-14 rounded-md border border-border-light bg-bg-beige-subtle animate-pulse"
+                        />
+                      ))}
+                    </div>
+                  ) : recommendationError && recommendationHistory.length === 0 ? (
+                    <div className="h-full min-h-[116px] flex items-center justify-center rounded-lg border border-dashed border-border-dashed bg-bg-beige-subtle px-4 text-center">
+                      <span className="text-[11px] leading-[1.7] text-text-muted">
+                        {recommendationError}
+                      </span>
+                    </div>
+                  ) : recommendationHistory.length === 0 ? (
+                    <div className="h-full min-h-[116px] flex items-center justify-center rounded-lg border border-dashed border-border-dashed bg-bg-beige-subtle px-4 text-center">
+                      <span className="text-[11px] leading-[1.7] text-text-muted">
+                        아직 추천 기록이 없어요.
+                        <br />
+                        카드를 선택하면 히스토리가 이곳에 쌓일 예정이에요.
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {recommendationError && (
+                        <div className="rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2 text-[11px] leading-[1.5] text-text-muted">
+                          {recommendationError}
+                        </div>
+                      )}
+                      {recommendationHistory.map((item) => (
+                        <button
+                          key={`${item.drawId}-${item.cardId}`}
+                          type="button"
+                          onClick={() => handleRecommendationHistoryClick(item)}
+                          className="w-full rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2 text-left transition-colors hover:bg-bg-hover disabled:cursor-default disabled:hover:bg-bg-beige-subtle"
+                          disabled={item.drawId !== recommendationDraw?.drawId}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0 flex-1 truncate text-[11px] font-bold text-text-heading">
+                              {item.title}
+                            </div>
+                            <div className="flex-shrink-0 text-[9px] text-text-secondary">
+                              {contentTypeLabels[item.contentType]}
+                            </div>
+                          </div>
+                          <div className="mt-1 line-clamp-2 text-[10px] leading-[1.45] text-text-muted">
+                            {item.reason}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
