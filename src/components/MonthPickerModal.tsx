@@ -100,7 +100,7 @@ export function MonthPickerModal({
                       }`}
                   >
                     <div className="text-[18px] leading-none">{String(month.num).padStart(2, "0")}</div>
-                    <div className="text-[9px] tracking-[0.5px] uppercase opacity-60">{month.name.slice(0, 3)}</div>
+                    <div className="text-[10px] tracking-[0.5px] uppercase opacity-75">{month.name.slice(0, 3)}</div>
                   </button>
                 );
               })}

@@ -5,6 +5,9 @@ import { useMonthlyStat } from "../hook/common/useMonthlyStat";
 import { MonthPickerModal } from "../components/MonthPickerModal";
 import { KeywordCloud } from "../components/KeywordCloud";
 
+const COLLAPSED_SUMMARY_LINE_COUNT = 2;
+const EXPANDABLE_SUMMARY_MIN_LENGTH = 80;
+
 const EMOTION_COLORS = [
   "var(--emotion-chart-1)",
   "var(--emotion-chart-2)",
@@ -30,12 +33,29 @@ function buildEmotionGradient(entries: [string, number][]) {
   return `conic-gradient(${stops.join(", ")})`;
 }
 
+function isPersonaSummaryExpandable(summary: string) {
+  return summary.trim().length > EXPANDABLE_SUMMARY_MIN_LENGTH;
+}
+
+function getCollapsedSummaryStyle(isExpanded: boolean) {
+  if (isExpanded) return undefined;
+
+  return {
+    display: "-webkit-box",
+    WebkitBoxOrient: "vertical",
+    WebkitLineClamp: COLLAPSED_SUMMARY_LINE_COUNT,
+  } as const;
+}
+
 export function StatsPage() {
   const { current, history, loading: personaLoading, error } = usePersona();
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [expandedPersonaIds, setExpandedPersonaIds] = useState<Set<number>>(
+    () => new Set(),
+  );
   const { stat, loading: statLoading } = useMonthlyStat(
     selectedYear,
     selectedMonth
@@ -43,6 +63,20 @@ export function StatsPage() {
   const emotionEntries = Object.entries(stat?.emotionDistribution ?? {})
     .filter(([, value]) => value > 0)
     .sort(([, a], [, b]) => b - a);
+  const togglePersonaHistorySummary = (personaId: number) => {
+    setExpandedPersonaIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+
+      if (nextIds.has(personaId)) {
+        nextIds.delete(personaId);
+      } else {
+        nextIds.add(personaId);
+      }
+
+      return nextIds;
+    });
+  };
+
   const dailyPatternEntries = Object.entries(stat?.dailyPattern ?? {})
     .flatMap(([day, times]) =>
       Object.entries(times).map(([time, count]) => ({
@@ -61,7 +95,7 @@ export function StatsPage() {
           {/* Current persona card */}
           <div className="flex-shrink-0 mb-3.5">
             <div className="py-4 px-4 bg-[var(--bg-stats-persona)] rounded-[10px] flex flex-col gap-2">
-              <div className="flex items-center gap-1 text-[10px] text-[var(--text-white-muted)] tracking-wide">
+              <div className="flex items-center gap-1 text-[11px] text-[var(--text-white-muted)] tracking-wide">
                 <Sparkles className="w-3.5 h-3.5 text-[var(--text-white-soft)]" />
                 <span>페르소나 리포트</span>
               </div>
@@ -86,7 +120,7 @@ export function StatsPage() {
 
           {/* History */}
           <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto">
-            <div className="text-[9px] tracking-[2px] text-[var(--text-page-label)] uppercase mb-0.5">
+            <div className="text-[11px] tracking-[2px] text-[var(--text-page-label)] uppercase mb-0.5">
               페르소나 히스토리
             </div>
 
@@ -112,29 +146,56 @@ export function StatsPage() {
                 아직 생성된 페르소나 기록이 없어요.
               </div>
             ) : (
-              history.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-2.5 py-2 px-2.5 rounded-md bg-[var(--bg-stats-row)]
-                    border border-[var(--border-faint)]"
-                >
+              history.map((item) => {
+                const isExpandable = isPersonaSummaryExpandable(item.summary);
+                const isExpanded = expandedPersonaIds.has(item.id);
+                const summaryId = `persona-summary-${item.id}`;
+
+                return (
                   <div
-                    className="w-2 h-9 rounded flex-shrink-0"
-                    style={{ background: item.color }}
-                  />
-                  <div className="flex flex-col gap-0.5">
-                    <div className="text-[11px] text-text-muted">
-                      {item.title}
-                    </div>
-                    <div className="text-[9px] text-text-secondary">
-                      {item.generatedAtLabel}
-                    </div>
-                    <div className="text-[9px] leading-[1.45] text-text-dark-muted max-h-[40px] overflow-hidden">
-                      {item.summary}
+                    key={item.id}
+                    className="flex items-start gap-2.5 py-2 px-2.5 rounded-md bg-[var(--bg-stats-row)]
+                      border border-[var(--border-faint)]"
+                  >
+                    <div
+                      className="w-2 h-9 rounded flex-shrink-0"
+                      style={{ background: item.color }}
+                    />
+                    <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1 text-[11px] text-text-muted truncate">
+                          {item.title}
+                        </div>
+                        {isExpandable && (
+                          <button
+                            type="button"
+                            aria-expanded={isExpanded}
+                            aria-controls={summaryId}
+                            onClick={() => togglePersonaHistorySummary(item.id)}
+                            className="flex-shrink-0 text-[10px] leading-none text-text-secondary hover:text-text-muted transition-colors"
+                          >
+                            {isExpanded ? "접기" : "더 보기"}
+                          </button>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-text-secondary">
+                        {item.generatedAtLabel}
+                      </div>
+                      <div
+                        id={summaryId}
+                        className="text-[11px] leading-[1.45] text-text-dark-muted overflow-hidden whitespace-pre-line"
+                        style={
+                          isExpandable
+                            ? getCollapsedSummaryStyle(isExpanded)
+                            : undefined
+                        }
+                      >
+                        {item.summary}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -150,7 +211,7 @@ export function StatsPage() {
           <button
             onClick={() => setShowMonthPicker(true)}
             className="px-2 py-0.5 rounded border border-border-light
-            text-[10px] text-text-muted hover:bg-bg-hover transition-colors"
+            text-[11px] text-text-muted hover:bg-bg-hover transition-colors"
           >
             {selectedYear}년 {selectedMonth}월
           </button>
@@ -158,7 +219,7 @@ export function StatsPage() {
         <div className="flex gap-5 flex-shrink-0">
           <div className="w-[110px] flex flex-col gap-3.5">
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
-              <span className="text-[9px] tracking-[1.5px] text-text-secondary">
+              <span className="text-[11px] tracking-[1.5px] text-text-secondary">
                 일기 개수
               </span>
               <span className="text-[22px] text-[var(--text-stats-primary)]">
@@ -167,7 +228,7 @@ export function StatsPage() {
             </div>
 
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
-              <span className="text-[9px] tracking-[1.5px] text-text-secondary">
+              <span className="text-[11px] tracking-[1.5px] text-text-secondary">
                 글자 수
               </span>
               <span className="text-[22px] text-[var(--text-stats-primary)]">
@@ -176,7 +237,7 @@ export function StatsPage() {
             </div>
 
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1 px-2">
-              <span className="text-[9px] tracking-[1.5px] text-text-secondary">
+              <span className="text-[11px] tracking-[1.5px] text-text-secondary">
                 자주 나온 사람
               </span>
               <span className="text-[18px] text-[var(--text-stats-primary)] text-center truncate max-w-full">
@@ -217,11 +278,11 @@ export function StatsPage() {
                             background: EMOTION_COLORS[index % EMOTION_COLORS.length],
                           }}
                         />
-                        <span className="text-[10px] text-[var(--text-stats-muted)] truncate">
+                        <span className="text-[11px] text-[var(--text-stats-muted)] truncate">
                           {emotion}
                         </span>
                       </div>
-                      <span className="text-[10px] text-text-primary">
+                      <span className="text-[11px] text-text-primary">
                         {value}%
                       </span>
                     </div>

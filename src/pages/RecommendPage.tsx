@@ -1,7 +1,6 @@
 import { useState, useRef } from "react";
-import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
-import { X, Download } from "lucide-react";
+import { X, Download, Check } from "lucide-react";
 import { toPng } from "html-to-image";
 import { useIdCard } from "../hook/common/useIdCard";
 import { useReceipt } from "../hook/common/useReceipt";
@@ -29,6 +28,21 @@ const SHUFFLE_PATHS = [
     y: [0, -10, 12, -14, 8, -6, 0],
   },
 ];
+import { Portal } from "../components/Portal";
+
+type CaptureTarget = "idCard" | "receipt" | "keywordCloud";
+
+const captureTargetOptions: { id: CaptureTarget; label: string; description: string }[] = [
+  { id: "idCard", label: "사원증", description: "ID Card" },
+  { id: "receipt", label: "영수증", description: "Receipt" },
+  { id: "keywordCloud", label: "키워드 클라우드", description: "Keyword Cloud" },
+];
+
+const initialCaptureTargetSelection: Record<CaptureTarget, boolean> = {
+  idCard: false,
+  receipt: false,
+  keywordCloud: false,
+};
 
 export function RecommendPage() {
   const now = new Date();
@@ -41,13 +55,17 @@ export function RecommendPage() {
   );
   const [isShuffling, setIsShuffling] = useState(false);
   const [isPreparingShuffle, setIsPreparingShuffle] = useState(false);
+  const [showCapturePicker, setShowCapturePicker] = useState(false);
+  const [selectedCaptureTargets, setSelectedCaptureTargets] = useState(
+    initialCaptureTargetSelection,
+  );
 
   const { idCard, loading: idCardLoading } = useIdCard();
   const { receipt, loading: receiptLoading } = useReceipt(
     selectedYear,
     selectedMonth,
   );
-  const { stat } = useMonthlyStat(selectedYear, selectedMonth);
+  const { stat, loading: statLoading } = useMonthlyStat(selectedYear, selectedMonth);
   const [receiptAtBottom, setReceiptAtBottom] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [capturing, setCapturing] = useState(false);
@@ -65,11 +83,34 @@ export function RecommendPage() {
     document.body.removeChild(link);
   }
 
-  async function handleCapture() {
+  function getCaptureTargetAvailability(target: CaptureTarget) {
+    if (target === "idCard") return !idCardLoading && !!idCard;
+    if (target === "receipt") return !receiptLoading && !!receipt;
+    return !statLoading;
+  }
+
+  function toggleCaptureTarget(target: CaptureTarget) {
+    if (!getCaptureTargetAvailability(target)) return;
+
+    setSelectedCaptureTargets((targets) => ({
+      ...targets,
+      [target]: !targets[target],
+    }));
+  }
+
+  function openCapturePicker() {
+    setSelectedCaptureTargets(initialCaptureTargetSelection);
+    setShowCapturePicker(true);
+  }
+
+  async function handleCapture(targets: CaptureTarget[]) {
+    if (targets.length === 0) return;
+
     setCapturing(true);
     const prefix = `filly-${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
 
-    const receiptEl = receiptScrollRef.current;
+    const shouldCaptureReceipt = targets.includes("receipt");
+    const receiptEl = shouldCaptureReceipt ? receiptScrollRef.current : null;
     const prevHeight = receiptEl?.style.height ?? "";
     const prevOverflow = receiptEl?.style.overflowY ?? "";
     if (receiptEl) {
@@ -80,26 +121,31 @@ export function RecommendPage() {
     try {
       // 사원증: 첫 번째 자식(IdCard div, rounded-2xl)을 직접 캡처 → 투명 배경으로 라운딩 살림
       const idCardEl = idCardRef.current?.firstElementChild as HTMLElement | null;
-      if (idCardEl)
+      if (targets.includes("idCard") && idCardEl)
         downloadPng(
           await toPng(idCardEl, { pixelRatio: 2 }),
           `${prefix}-사원증.png`,
         );
 
       // 영수증: 펼쳐진 스크롤 컨테이너 전체 캡처
-      if (receiptScrollRef.current)
+      if (shouldCaptureReceipt && receiptScrollRef.current)
         downloadPng(
-          await toPng(receiptScrollRef.current, { backgroundColor: "var(--receipt-barcode-light)", pixelRatio: 2 }),
+          await toPng(receiptScrollRef.current, {
+            backgroundColor: "var(--receipt-barcode-light)",
+            pixelRatio: 2,
+          }),
           `${prefix}-영수증.png`,
         );
 
       // 키워드 클라우드: 라운딩 영역만 캡처 → 투명 배경
       const cloudEl = keywordCloudRef.current?.firstElementChild as HTMLElement | null;
-      if (cloudEl)
+      if (targets.includes("keywordCloud") && cloudEl)
         downloadPng(
           await toPng(cloudEl, { pixelRatio: 2 }),
           `${prefix}-키워드클라우드.png`,
         );
+
+      setShowCapturePicker(false);
     } catch (e) {
       console.error("[capture] 실패", e);
     } finally {
@@ -149,6 +195,14 @@ export function RecommendPage() {
       startShuffleMotion();
     }, CARD_RESET_DURATION_MS);
   }
+
+  const selectedTargets = captureTargetOptions
+    .filter(({ id }) => selectedCaptureTargets[id] && getCaptureTargetAvailability(id))
+    .map(({ id }) => id);
+
+  const hasDownloadableContent = captureTargetOptions.some(({ id }) =>
+    getCaptureTargetAvailability(id),
+  );
 
   return (
     <>
@@ -286,7 +340,7 @@ export function RecommendPage() {
             <button
               onClick={() => setShowMonthPicker(true)}
               className="px-2 py-0.5 rounded border border-border-light
-              text-[10px] text-text-muted hover:bg-bg-hover transition-colors"
+              text-[11px] text-text-muted hover:bg-bg-hover transition-colors"
             >
               {selectedYear}년 {selectedMonth}월
             </button>
@@ -296,7 +350,7 @@ export function RecommendPage() {
           <div className="flex gap-2.5 flex-shrink-0">
             {/* 사원증 컬럼 */}
             <div className="flex-1 flex flex-col gap-1.5">
-              <span className="text-[9px] tracking-[1.5px] text-text-secondary uppercase">
+              <span className="text-[11px] tracking-[1.5px] text-text-secondary uppercase">
                 사원증 <span className="normal-case">(ID Card)</span>
               </span>
               <div ref={idCardRef} className="flex-1">
@@ -315,13 +369,13 @@ export function RecommendPage() {
             {/* 영수증 컬럼 */}
             <div className="flex-1 flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[9px] tracking-[1.5px] text-text-secondary uppercase">
+                <span className="text-[11px] tracking-[1.5px] text-text-secondary uppercase">
                   영수증 <span className="normal-case">(Receipt)</span>
                 </span>
                 {receipt && (
                   <button
                     onClick={() => setShowReceiptModal(true)}
-                    className="text-[9px] text-text-muted hover:text-text-strong transition-colors underline underline-offset-2"
+                    className="text-[11px] text-text-muted hover:text-text-strong transition-colors underline underline-offset-2"
                   >
                     전체보기
                   </button>
@@ -359,7 +413,7 @@ export function RecommendPage() {
 
           {/* 키워드 클라우드 */}
           <div className="flex flex-col gap-1.5 flex-shrink-0">
-            <span className="text-[9px] tracking-[1.5px] text-text-secondary uppercase">
+            <span className="text-[11px] tracking-[1.5px] text-text-secondary uppercase">
               키워드 클라우드{" "}
               <span className="normal-case">(Keyword Cloud)</span>
             </span>
@@ -371,10 +425,10 @@ export function RecommendPage() {
           {/* 캡처 버튼 */}
           <div className="flex justify-center flex-shrink-0">
             <button
-              onClick={handleCapture}
-              disabled={capturing}
+              onClick={openCapturePicker}
+              disabled={capturing || !hasDownloadableContent}
               className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-border-medium
-                text-[10px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
+                text-[11px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
             >
               <Download className="w-3 h-3" />
               {capturing ? "캡처 중..." : "이미지 저장"}
@@ -394,10 +448,106 @@ export function RecommendPage() {
         onClose={() => setShowMonthPicker(false)}
       />
 
+      {showCapturePicker && (
+        <Portal>
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-bg-overlay backdrop-blur-[2px]"
+            onClick={() => {
+              if (!capturing) setShowCapturePicker(false);
+            }}
+          >
+            <div
+              className="w-[320px] rounded-xl bg-notebook-page shadow-[var(--shadow-modal)]
+                overflow-hidden font-['Nanum_Myeongjo']"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border-light">
+                <div>
+                  <div className="text-[13px] text-text-heading tracking-wide">
+                    저장할 이미지 선택
+                  </div>
+                  <div className="mt-0.5 text-[10px] text-text-secondary">
+                    원하는 공유 컨텐츠만 다운로드돼요.
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowCapturePicker(false)}
+                  disabled={capturing}
+                  className="w-7 h-7 flex items-center justify-center rounded-md
+                    hover:bg-bg-hover transition-colors disabled:opacity-50"
+                >
+                  <X className="w-4 h-4 text-text-muted" />
+                </button>
+              </div>
+
+              <div className="p-4 space-y-2">
+                {captureTargetOptions.map((option) => {
+                  const checked = selectedCaptureTargets[option.id];
+                  const disabled = !getCaptureTargetAvailability(option.id);
+
+                  return (
+                    <button
+                      key={option.id}
+                      type="button"
+                      onClick={() => toggleCaptureTarget(option.id)}
+                      disabled={disabled || capturing}
+                      aria-pressed={checked}
+                      className={`w-full flex items-center justify-between rounded-lg border px-3 py-2.5
+                        text-left transition-colors disabled:cursor-not-allowed disabled:opacity-45
+                        ${checked
+                          ? "border-border-strong bg-bg-active text-text-heading"
+                          : "border-border-medium bg-transparent text-text-muted hover:bg-bg-hover"
+                        }`}
+                    >
+                      <span>
+                        <span className="block text-[12px]">{option.label}</span>
+                        <span className="block text-[10px] text-text-secondary">
+                          {disabled ? "아직 준비 중이에요" : option.description}
+                        </span>
+                      </span>
+                      <span
+                        className={`w-5 h-5 rounded-full border flex items-center justify-center
+                          ${checked
+                            ? "border-border-strong bg-bg-selected"
+                            : "border-border-medium bg-bg-beige-subtle"
+                          }`}
+                      >
+                        {checked && <Check className="w-3 h-3 text-text-heading" />}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex justify-end gap-2 px-4 py-3 border-t border-border-light">
+                <button
+                  type="button"
+                  onClick={() => setShowCapturePicker(false)}
+                  disabled={capturing}
+                  className="px-3 py-1.5 rounded-full border border-border-medium text-[11px]
+                    text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
+                >
+                  취소
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleCapture(selectedTargets)}
+                  disabled={capturing || selectedTargets.length === 0}
+                  className="px-3 py-1.5 rounded-full border border-border-strong text-[11px]
+                    text-text-heading bg-bg-active hover:bg-bg-active-hover transition-colors
+                    disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {capturing ? "저장 중..." : "선택 저장"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+
       {/* 영수증 전체보기 모달 */}
-      {showReceiptModal &&
-        receipt &&
-        createPortal(
+      {showReceiptModal && receipt && (
+        <Portal>
           <div
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-bg-overlay"
             onClick={() => setShowReceiptModal(false)}
@@ -422,9 +572,9 @@ export function RecommendPage() {
                 />
               </div>
             </div>
-          </div>,
-          document.body,
-        )}
+          </div>
+        </Portal>
+      )}
     </>
   );
 }

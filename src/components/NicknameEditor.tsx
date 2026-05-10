@@ -73,7 +73,7 @@ export function NicknameEditor() {
           />
 
           {error && (
-            <p className="text-[10px] font-bold text-[var(--text-error)] leading-none">
+            <p className="text-[11px] font-bold text-[var(--text-error)] leading-none">
               {error}
             </p>
           )}
