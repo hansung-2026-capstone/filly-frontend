@@ -5,6 +5,9 @@ import { useMonthlyStat } from "../hook/common/useMonthlyStat";
 import { MonthPickerModal } from "../components/MonthPickerModal";
 import { KeywordCloud } from "../components/KeywordCloud";
 
+const COLLAPSED_SUMMARY_LINE_COUNT = 2;
+const EXPANDABLE_SUMMARY_MIN_LENGTH = 80;
+
 const EMOTION_COLORS = [
   "var(--emotion-chart-1)",
   "var(--emotion-chart-2)",
@@ -30,12 +33,29 @@ function buildEmotionGradient(entries: [string, number][]) {
   return `conic-gradient(${stops.join(", ")})`;
 }
 
+function isPersonaSummaryExpandable(summary: string) {
+  return summary.trim().length > EXPANDABLE_SUMMARY_MIN_LENGTH;
+}
+
+function getCollapsedSummaryStyle(isExpanded: boolean) {
+  if (isExpanded) return undefined;
+
+  return {
+    display: "-webkit-box",
+    WebkitBoxOrient: "vertical",
+    WebkitLineClamp: COLLAPSED_SUMMARY_LINE_COUNT,
+  } as const;
+}
+
 export function StatsPage() {
   const { current, history, loading: personaLoading, error } = usePersona();
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [expandedPersonaIds, setExpandedPersonaIds] = useState<Set<number>>(
+    () => new Set(),
+  );
   const { stat, loading: statLoading } = useMonthlyStat(
     selectedYear,
     selectedMonth
@@ -43,6 +63,20 @@ export function StatsPage() {
   const emotionEntries = Object.entries(stat?.emotionDistribution ?? {})
     .filter(([, value]) => value > 0)
     .sort(([, a], [, b]) => b - a);
+  const togglePersonaHistorySummary = (personaId: number) => {
+    setExpandedPersonaIds((currentIds) => {
+      const nextIds = new Set(currentIds);
+
+      if (nextIds.has(personaId)) {
+        nextIds.delete(personaId);
+      } else {
+        nextIds.add(personaId);
+      }
+
+      return nextIds;
+    });
+  };
+
   const dailyPatternEntries = Object.entries(stat?.dailyPattern ?? {})
     .flatMap(([day, times]) =>
       Object.entries(times).map(([time, count]) => ({
@@ -112,29 +146,56 @@ export function StatsPage() {
                 아직 생성된 페르소나 기록이 없어요.
               </div>
             ) : (
-              history.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-2.5 py-2 px-2.5 rounded-md bg-[var(--bg-stats-row)]
-                    border border-[var(--border-faint)]"
-                >
+              history.map((item) => {
+                const isExpandable = isPersonaSummaryExpandable(item.summary);
+                const isExpanded = expandedPersonaIds.has(item.id);
+                const summaryId = `persona-summary-${item.id}`;
+
+                return (
                   <div
-                    className="w-2 h-9 rounded flex-shrink-0"
-                    style={{ background: item.color }}
-                  />
-                  <div className="flex flex-col gap-0.5">
-                    <div className="text-[11px] text-text-muted">
-                      {item.title}
-                    </div>
-                    <div className="text-[11px] text-text-secondary">
-                      {item.generatedAtLabel}
-                    </div>
-                    <div className="text-[11px] leading-[1.45] text-text-dark-muted max-h-[40px] overflow-hidden">
-                      {item.summary}
+                    key={item.id}
+                    className="flex items-start gap-2.5 py-2 px-2.5 rounded-md bg-[var(--bg-stats-row)]
+                      border border-[var(--border-faint)]"
+                  >
+                    <div
+                      className="w-2 h-9 rounded flex-shrink-0"
+                      style={{ background: item.color }}
+                    />
+                    <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1 text-[11px] text-text-muted truncate">
+                          {item.title}
+                        </div>
+                        {isExpandable && (
+                          <button
+                            type="button"
+                            aria-expanded={isExpanded}
+                            aria-controls={summaryId}
+                            onClick={() => togglePersonaHistorySummary(item.id)}
+                            className="flex-shrink-0 text-[10px] leading-none text-text-secondary hover:text-text-muted transition-colors"
+                          >
+                            {isExpanded ? "접기" : "더 보기"}
+                          </button>
+                        )}
+                      </div>
+                      <div className="text-[11px] text-text-secondary">
+                        {item.generatedAtLabel}
+                      </div>
+                      <div
+                        id={summaryId}
+                        className="text-[11px] leading-[1.45] text-text-dark-muted overflow-hidden whitespace-pre-line"
+                        style={
+                          isExpandable
+                            ? getCollapsedSummaryStyle(isExpanded)
+                            : undefined
+                        }
+                      >
+                        {item.summary}
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
