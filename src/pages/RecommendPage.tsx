@@ -168,8 +168,8 @@ export function RecommendPage() {
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col justify-center gap-4 min-h-[400px]">
-              <div className="flex h-[260px] w-full gap-3">
+            <div className="flex-1 flex flex-col justify-center gap-8 min-h-[400px]">
+              <div className="flex h-[260px] w-full gap-5">
                 {cardOrder.map((cardIndex, slotIndex) => {
                   const isSelected = selectedCardIndex === cardIndex;
 
@@ -187,10 +187,8 @@ export function RecommendPage() {
                         x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
                         y: isShuffling
                           ? SHUFFLE_PATHS[slotIndex].y
-                          : isSelected
-                            ? -18
-                            : 0,
-                        scale: isSelected && !isShuffling ? 1.26 : 1,
+                          : 0,
+                        scale: isSelected && !isShuffling ? 1.12 : 1,
                       }}
                       transition={{
                         x: {
