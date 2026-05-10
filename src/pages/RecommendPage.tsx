@@ -168,89 +168,109 @@ export function RecommendPage() {
               </div>
             </div>
 
-            <div className="flex-1 flex flex-col justify-center gap-8 min-h-[400px]">
-              <div className="flex h-[260px] w-full gap-5">
-                {cardOrder.map((cardIndex, slotIndex) => {
-                  const isSelected = selectedCardIndex === cardIndex;
+            <div className="flex-1 flex flex-col gap-4 min-h-0 pt-5">
+              <div className="flex flex-col gap-5 flex-shrink-0">
+                <div className="flex h-[232px] w-full gap-5 px-3">
+                  {cardOrder.map((cardIndex, slotIndex) => {
+                    const isSelected = selectedCardIndex === cardIndex;
 
-                  return (
-                    <motion.button
-                      layout
-                      key={cardIndex}
-                      type="button"
-                      onClick={() => setSelectedCardIndex(cardIndex)}
-                      disabled={isShuffling || isPreparingShuffle}
-                      aria-pressed={isSelected}
-                      aria-label={`추천 카드 ${cardIndex + 1}`}
-                      className="group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none disabled:cursor-default"
-                      animate={{
-                        x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
-                        y: isShuffling
-                          ? SHUFFLE_PATHS[slotIndex].y
-                          : 0,
-                        scale: isSelected && !isShuffling ? 1.12 : 1,
-                      }}
-                      transition={{
-                        x: {
-                          duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
-                          ease: [0.28, 0, 0.22, 1],
-                        },
-                        y: {
-                          duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
-                          ease: [0.28, 0, 0.22, 1],
-                        },
-                        scale: {
-                          type: "spring",
-                          stiffness: 210,
-                          damping: 17,
-                        },
-                        layout: {
-                          duration: 0.7,
-                          ease: [0.4, 0, 0.2, 1],
-                        },
-                      }}
-                      style={{ zIndex: isSelected ? 10 : 1 }}
-                    >
-                      <div
-                        className={`relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] ${
-                          isSelected ? "[transform:rotateY(180deg)]" : ""
-                        }`}
+                    return (
+                      <motion.button
+                        layout
+                        key={cardIndex}
+                        type="button"
+                        onClick={() => setSelectedCardIndex(cardIndex)}
+                        disabled={isShuffling || isPreparingShuffle}
+                        aria-pressed={isSelected}
+                        aria-label={`추천 카드 ${cardIndex + 1}`}
+                        className="group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none disabled:cursor-default"
+                        animate={{
+                          x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
+                          y: isShuffling
+                            ? SHUFFLE_PATHS[slotIndex].y
+                            : 0,
+                          scale: isSelected && !isShuffling ? 1.08 : 1,
+                        }}
+                        transition={{
+                          x: {
+                            duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
+                            ease: [0.28, 0, 0.22, 1],
+                          },
+                          y: {
+                            duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
+                            ease: [0.28, 0, 0.22, 1],
+                          },
+                          scale: {
+                            type: "spring",
+                            stiffness: 210,
+                            damping: 17,
+                          },
+                          layout: {
+                            duration: 0.7,
+                            ease: [0.4, 0, 0.2, 1],
+                          },
+                        }}
+                        style={{ zIndex: isSelected ? 10 : 1 }}
                       >
                         <div
-                          className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
-                        >
-                          <div className="absolute inset-0 opacity-25 paper-texture" />
-                          <div className="absolute inset-3 rounded-md border border-[rgba(255,255,255,0.22)]" />
-                          <div className="absolute inset-x-8 top-1/2 h-px bg-[rgba(255,255,255,0.24)]" />
-                          <div className="absolute left-1/2 top-8 bottom-8 w-px bg-[rgba(255,255,255,0.18)]" />
-                        </div>
-
-                        <div
-                          className={`absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--archive-yellow)] [backface-visibility:hidden] [transform:rotateY(180deg)] ${
-                            isSelected
-                              ? "shadow-[0_22px_46px_rgba(0,0,0,0.24)]"
-                              : "shadow-[var(--shadow-subtle)]"
+                          className={`relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] ${
+                            isSelected ? "[transform:rotateY(180deg)]" : ""
                           }`}
                         >
-                          <div className="absolute inset-0 opacity-20 paper-texture" />
-                          <div className="absolute inset-3 rounded-md border border-[rgba(80,60,40,0.16)]" />
+                          <div
+                            className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
+                          >
+                            <div className="absolute inset-0 opacity-25 paper-texture" />
+                            <div className="absolute inset-3 rounded-md border border-[rgba(255,255,255,0.22)]" />
+                            <div className="absolute inset-x-8 top-1/2 h-px bg-[rgba(255,255,255,0.24)]" />
+                            <div className="absolute left-1/2 top-8 bottom-8 w-px bg-[rgba(255,255,255,0.18)]" />
+                          </div>
+
+                          <div
+                            className={`absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--archive-yellow)] [backface-visibility:hidden] [transform:rotateY(180deg)] ${
+                              isSelected
+                                ? "shadow-[0_18px_34px_rgba(0,0,0,0.2)]"
+                                : "shadow-[var(--shadow-subtle)]"
+                            }`}
+                          >
+                            <div className="absolute inset-0 opacity-20 paper-texture" />
+                            <div className="absolute inset-3 rounded-md border border-[rgba(80,60,40,0.16)]" />
+                          </div>
                         </div>
-                      </div>
-                    </motion.button>
-                  );
-                })}
+                      </motion.button>
+                    );
+                  })}
+                </div>
+
+                <div className="flex justify-center flex-shrink-0">
+                  <button
+                    type="button"
+                    onClick={handleShuffleCards}
+                    disabled={isShuffling || isPreparingShuffle}
+                    className="px-4 py-1.5 rounded-full border border-border-medium
+                    text-[10px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
+                  >
+                    카드 섞기
+                  </button>
+                </div>
               </div>
 
-              <div className="flex justify-center flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={handleShuffleCards}
-                  disabled={isShuffling || isPreparingShuffle}
-                  className="px-4 py-1.5 rounded-full border border-border-medium
-                  text-[10px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
-                >
-                  카드 섞기
-                </button>
+              <div className="flex-1 min-h-[180px] flex flex-col overflow-hidden pt-2 border-t border-border-light">
+                <div className="flex items-center justify-between mb-2 flex-shrink-0">
+                  <div className="text-[9px] tracking-[2px] text-[var(--text-page-label)] uppercase">
+                    추천 히스토리
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto pr-1">
+                  <div className="h-full min-h-[116px] flex items-center justify-center rounded-lg border border-dashed border-border-dashed bg-bg-beige-subtle px-4 text-center">
+                    <span className="text-[11px] leading-[1.7] text-text-muted">
+                      아직 추천 기록이 없어요.
+                      <br />
+                      카드를 선택하면 히스토리가 이곳에 쌓일 예정이에요.
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
