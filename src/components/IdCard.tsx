@@ -18,7 +18,7 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
         <span className="text-[14px] font-black tracking-[3px] text-tab-recommend-text">
           FILLY
         </span>
-        <span className="text-[7px] font-bold tracking-[1.5px] text-tab-recommend-text opacity-60 uppercase">
+        <span className="text-[9px] font-bold tracking-[1.5px] text-tab-recommend-text opacity-70 uppercase">
           ID Card
         </span>
       </div>
@@ -44,7 +44,7 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
           <div className="text-[13px] font-bold text-text-strong leading-tight">
             {nickname}
           </div>
-          <div className="text-[7px] tracking-[2px] text-text-secondary uppercase mt-1">
+          <div className="text-[9px] tracking-[2px] text-text-secondary uppercase mt-1">
             Member
           </div>
         </div>
@@ -55,14 +55,14 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
         {/* 취향 키워드 */}
         {keywords.length > 0 ? (
           <div className="w-full flex flex-col gap-1.5">
-            <span className="text-[7px] tracking-[2px] text-text-secondary uppercase">
+            <span className="text-[9px] tracking-[2px] text-text-secondary uppercase">
               취향 키워드
             </span>
             <div className="flex flex-wrap gap-1">
               {keywords.map((kw, i) => (
                 <span
                   key={i}
-                  className="text-[8px] px-2 py-0.5 rounded-full border border-border-light text-text-muted bg-bg-beige-subtle"
+                  className="text-[10px] px-2 py-0.5 rounded-full border border-border-light text-text-muted bg-bg-beige-subtle"
                 >
                   {kw}
                 </span>
@@ -70,7 +70,7 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
             </div>
           </div>
         ) : (
-          <span className="text-[10px] text-text-secondary italic">
+          <span className="text-[11px] text-text-secondary italic">
             신입 사원
           </span>
         )}
@@ -90,7 +90,7 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
             />
           ))}
         </div>
-        <span className="text-[7px] tracking-[2px] text-text-secondary">
+        <span className="text-[9px] tracking-[2px] text-text-secondary">
           FL-2026-FILLY
         </span>
       </div>

@@ -106,7 +106,7 @@ export function RecommendPage() {
             <button
               onClick={() => setShowMonthPicker(true)}
               className="px-2 py-0.5 rounded border border-border-light
-              text-[10px] text-text-muted hover:bg-bg-hover transition-colors"
+              text-[11px] text-text-muted hover:bg-bg-hover transition-colors"
             >
               {selectedYear}년 {selectedMonth}월
             </button>
@@ -116,7 +116,7 @@ export function RecommendPage() {
           <div className="flex gap-2.5 flex-shrink-0">
             {/* 사원증 컬럼 */}
             <div className="flex-1 flex flex-col gap-1.5">
-              <span className="text-[9px] tracking-[1.5px] text-text-secondary uppercase">
+              <span className="text-[11px] tracking-[1.5px] text-text-secondary uppercase">
                 사원증 <span className="normal-case">(ID Card)</span>
               </span>
               <div ref={idCardRef} className="flex-1">
@@ -135,13 +135,13 @@ export function RecommendPage() {
             {/* 영수증 컬럼 */}
             <div className="flex-1 flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <span className="text-[9px] tracking-[1.5px] text-text-secondary uppercase">
+                <span className="text-[11px] tracking-[1.5px] text-text-secondary uppercase">
                   영수증 <span className="normal-case">(Receipt)</span>
                 </span>
                 {receipt && (
                   <button
                     onClick={() => setShowReceiptModal(true)}
-                    className="text-[9px] text-text-muted hover:text-text-strong transition-colors underline underline-offset-2"
+                    className="text-[11px] text-text-muted hover:text-text-strong transition-colors underline underline-offset-2"
                   >
                     전체보기
                   </button>
@@ -179,7 +179,7 @@ export function RecommendPage() {
 
           {/* 키워드 클라우드 */}
           <div className="flex flex-col gap-1.5 flex-shrink-0">
-            <span className="text-[9px] tracking-[1.5px] text-text-secondary uppercase">
+            <span className="text-[11px] tracking-[1.5px] text-text-secondary uppercase">
               키워드 클라우드{" "}
               <span className="normal-case">(Keyword Cloud)</span>
             </span>
@@ -194,7 +194,7 @@ export function RecommendPage() {
               onClick={handleCapture}
               disabled={capturing}
               className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-border-medium
-                text-[10px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
+                text-[11px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
             >
               <Download className="w-3 h-3" />
               {capturing ? "캡처 중..." : "이미지 저장"}

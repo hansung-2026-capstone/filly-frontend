@@ -61,7 +61,7 @@ export function StatsPage() {
           {/* Current persona card */}
           <div className="flex-shrink-0 mb-3.5">
             <div className="py-4 px-4 bg-[var(--bg-stats-persona)] rounded-[10px] flex flex-col gap-2">
-              <div className="flex items-center gap-1 text-[10px] text-[var(--text-white-muted)] tracking-wide">
+              <div className="flex items-center gap-1 text-[11px] text-[var(--text-white-muted)] tracking-wide">
                 <Sparkles className="w-3.5 h-3.5 text-[var(--text-white-soft)]" />
                 <span>페르소나 리포트</span>
               </div>
@@ -86,7 +86,7 @@ export function StatsPage() {
 
           {/* History */}
           <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto">
-            <div className="text-[9px] tracking-[2px] text-[var(--text-page-label)] uppercase mb-0.5">
+            <div className="text-[11px] tracking-[2px] text-[var(--text-page-label)] uppercase mb-0.5">
               페르소나 히스토리
             </div>
 
@@ -126,10 +126,10 @@ export function StatsPage() {
                     <div className="text-[11px] text-text-muted">
                       {item.title}
                     </div>
-                    <div className="text-[9px] text-text-secondary">
+                    <div className="text-[11px] text-text-secondary">
                       {item.generatedAtLabel}
                     </div>
-                    <div className="text-[9px] leading-[1.45] text-text-dark-muted max-h-[40px] overflow-hidden">
+                    <div className="text-[11px] leading-[1.45] text-text-dark-muted max-h-[40px] overflow-hidden">
                       {item.summary}
                     </div>
                   </div>
@@ -150,7 +150,7 @@ export function StatsPage() {
           <button
             onClick={() => setShowMonthPicker(true)}
             className="px-2 py-0.5 rounded border border-border-light
-            text-[10px] text-text-muted hover:bg-bg-hover transition-colors"
+            text-[11px] text-text-muted hover:bg-bg-hover transition-colors"
           >
             {selectedYear}년 {selectedMonth}월
           </button>
@@ -158,7 +158,7 @@ export function StatsPage() {
         <div className="flex gap-5 flex-shrink-0">
           <div className="w-[110px] flex flex-col gap-3.5">
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
-              <span className="text-[9px] tracking-[1.5px] text-text-secondary">
+              <span className="text-[11px] tracking-[1.5px] text-text-secondary">
                 일기 개수
               </span>
               <span className="text-[22px] text-[var(--text-stats-primary)]">
@@ -167,7 +167,7 @@ export function StatsPage() {
             </div>
 
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
-              <span className="text-[9px] tracking-[1.5px] text-text-secondary">
+              <span className="text-[11px] tracking-[1.5px] text-text-secondary">
                 글자 수
               </span>
               <span className="text-[22px] text-[var(--text-stats-primary)]">
@@ -176,7 +176,7 @@ export function StatsPage() {
             </div>
 
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1 px-2">
-              <span className="text-[9px] tracking-[1.5px] text-text-secondary">
+              <span className="text-[11px] tracking-[1.5px] text-text-secondary">
                 자주 나온 사람
               </span>
               <span className="text-[18px] text-[var(--text-stats-primary)] text-center truncate max-w-full">
@@ -217,11 +217,11 @@ export function StatsPage() {
                             background: EMOTION_COLORS[index % EMOTION_COLORS.length],
                           }}
                         />
-                        <span className="text-[10px] text-[var(--text-stats-muted)] truncate">
+                        <span className="text-[11px] text-[var(--text-stats-muted)] truncate">
                           {emotion}
                         </span>
                       </div>
-                      <span className="text-[10px] text-text-primary">
+                      <span className="text-[11px] text-text-primary">
                         {value}%
                       </span>
                     </div>
