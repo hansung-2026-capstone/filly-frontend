@@ -179,9 +179,10 @@ export function RecommendPage() {
                       key={cardIndex}
                       type="button"
                       onClick={() => setSelectedCardIndex(cardIndex)}
+                      disabled={isShuffling || isPreparingShuffle}
                       aria-pressed={isSelected}
                       aria-label={`추천 카드 ${cardIndex + 1}`}
-                      className="group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none"
+                      className="group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none disabled:cursor-default"
                       animate={{
                         x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
                         y: isShuffling
