@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "framer-motion";
 import { X, Download } from "lucide-react";
 import { toPng } from "html-to-image";
 import { useIdCard } from "../hook/common/useIdCard";
@@ -13,6 +14,20 @@ import { KeywordCloud } from "../components/KeywordCloud";
 const CARD_COUNT = 3;
 const SHUFFLE_DURATION_MS = 950;
 const SHUFFLE_REORDER_DELAY_MS = 320;
+const SHUFFLE_PATHS = [
+  {
+    x: ["0%", "66%", "134%", "72%", "116%", "28%", "0%"],
+    y: [0, -14, 10, -8, 12, -4, 0],
+  },
+  {
+    x: ["0%", "-46%", "58%", "-66%", "62%", "-24%", "0%"],
+    y: [0, 12, -10, 14, -8, 6, 0],
+  },
+  {
+    x: ["0%", "-66%", "-134%", "-72%", "-116%", "-28%", "0%"],
+    y: [0, -10, 12, -14, 8, -6, 0],
+  },
+];
 
 export function RecommendPage() {
   const now = new Date();
@@ -138,25 +153,36 @@ export function RecommendPage() {
             </div>
 
             <div className="flex-1 flex flex-col justify-center gap-4 min-h-[320px]">
-              <div
-                className={`recommend-card-stage relative h-[260px] w-full ${
-                  isShuffling ? "is-shuffling" : ""
-                }`}
-              >
+              <div className="flex h-[260px] w-full gap-3">
                 {cardOrder.map((cardIndex, slotIndex) => {
                   const isSelected = selectedCardIndex === cardIndex;
 
                   return (
-                    <button
+                    <motion.button
+                      layout
                       key={cardIndex}
                       type="button"
                       onClick={() => setSelectedCardIndex(cardIndex)}
                       aria-pressed={isSelected}
                       aria-label={`추천 카드 ${cardIndex + 1}`}
-                      className="recommend-card-shell group absolute top-0 h-full text-left transition-[left] duration-700 ease-in-out [perspective:1000px] focus:outline-none"
-                      style={{
-                        left: `calc(${slotIndex} * ((100% - 1.5rem) / ${CARD_COUNT} + 0.75rem))`,
-                        width: `calc((100% - 1.5rem) / ${CARD_COUNT})`,
+                      className="group h-full flex-1 min-w-0 text-left [perspective:1000px] focus:outline-none"
+                      animate={{
+                        x: isShuffling ? SHUFFLE_PATHS[slotIndex].x : "0%",
+                        y: isShuffling ? SHUFFLE_PATHS[slotIndex].y : 0,
+                      }}
+                      transition={{
+                        x: {
+                          duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
+                          ease: [0.28, 0, 0.22, 1],
+                        },
+                        y: {
+                          duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
+                          ease: [0.28, 0, 0.22, 1],
+                        },
+                        layout: {
+                          duration: 0.7,
+                          ease: [0.4, 0, 0.2, 1],
+                        },
                       }}
                     >
                       <div
@@ -165,7 +191,7 @@ export function RecommendPage() {
                         }`}
                       >
                         <div
-                          className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-colors duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
+                          className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
                         >
                           <div className="absolute inset-0 opacity-25 paper-texture" />
                           <div className="absolute inset-3 rounded-md border border-[rgba(255,255,255,0.22)]" />
@@ -177,7 +203,7 @@ export function RecommendPage() {
                           className="absolute inset-0 rounded-lg border border-border-medium bg-bg-beige-subtle shadow-[var(--shadow-subtle)] [backface-visibility:hidden] [transform:rotateY(180deg)]"
                         />
                       </div>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
