@@ -70,16 +70,6 @@ function getCardOrder(draw: RecommendationDraw | null) {
     .map((card) => card.cardId);
 }
 
-function getShuffledCardOrder(currentOrder: number[]) {
-  const nextOrder = [...currentOrder].sort(() => Math.random() - 0.5);
-
-  if (nextOrder.every((cardId, index) => cardId === currentOrder[index])) {
-    nextOrder.push(nextOrder.shift() ?? 0);
-  }
-
-  return nextOrder;
-}
-
 function getCenteredCardOrder(currentOrder: number[], cardId: number) {
   const currentIndex = currentOrder.indexOf(cardId);
   if (currentIndex < 0 || currentIndex === 1) return currentOrder;
@@ -89,6 +79,16 @@ function getCenteredCardOrder(currentOrder: number[], cardId: number) {
     nextOrder[1],
     nextOrder[currentIndex],
   ];
+
+  return nextOrder;
+}
+
+function getShuffledCardOrder(currentOrder: number[]) {
+  const nextOrder = [...currentOrder].sort(() => Math.random() - 0.5);
+
+  if (nextOrder.every((cardId, index) => cardId === currentOrder[index])) {
+    nextOrder.push(nextOrder.shift() ?? 0);
+  }
 
   return nextOrder;
 }
@@ -287,7 +287,6 @@ export function RecommendPage() {
     window.setTimeout(() => {
       setCardOrder((currentOrder) => getShuffledCardOrder(currentOrder));
     }, SHUFFLE_REORDER_DELAY_MS);
-    window.setTimeout(() => setIsShuffling(false), SHUFFLE_DURATION_MS);
   }
 
   async function handleRecommendationCardClick(cardId: number) {
@@ -389,10 +388,7 @@ export function RecommendPage() {
     startShuffleMotion();
 
     try {
-      const [nextDraw] = await Promise.all([
-        nextDrawPromise,
-        wait(SHUFFLE_DURATION_MS),
-      ]);
+      const nextDraw = await nextDrawPromise;
       setRecommendationDraw(nextDraw);
       setCardOrder(getCardOrder(nextDraw));
       setSelectedCardId(null);
@@ -402,6 +398,7 @@ export function RecommendPage() {
       setSelectedCardId(previousSelectedCardId);
       setRecommendationError("추천 카드를 섞지 못했어요.");
     } finally {
+      setIsShuffling(false);
       setIsShuffleLocked(false);
     }
   }
@@ -461,7 +458,6 @@ export function RecommendPage() {
                     const cardLabel = `추천 카드 ${card?.position ?? slotIndex + 1}`;
                     const shufflePath =
                       SHUFFLE_PATHS[slotIndex % SHUFFLE_PATHS.length];
-
                     return (
                       <motion.div
                         layout
@@ -493,6 +489,8 @@ export function RecommendPage() {
                           x: {
                             duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
                             ease: [0.28, 0, 0.22, 1],
+                            repeat: isShuffling ? Infinity : 0,
+                            repeatType: "loop",
                           },
                           layout: {
                             duration: 0.7,
