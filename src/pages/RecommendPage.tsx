@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Download, Check } from "lucide-react";
 import { toPng } from "html-to-image";
+import tarotCardImage from "../assets/tarot/card.png";
 import {
   getRecommendationHistory,
   revealRecommendationCard,
@@ -418,7 +419,7 @@ export function RecommendPage() {
 
             <div className="flex-1 flex flex-col gap-4 min-h-0 pt-5">
               <div className="flex flex-col gap-4 flex-shrink-0">
-                <div className="flex h-[232px] w-full gap-3 px-2">
+                <div className="relative flex h-[232px] w-full gap-3 px-2">
                   {cardOrder.map((cardId, slotIndex) => {
                     const card = recommendationDraw?.cards.find(
                       (item) => item.cardId === cardId,
@@ -459,7 +460,7 @@ export function RecommendPage() {
                         aria-pressed={isSelected}
                         aria-disabled={isCardDisabled}
                         aria-label={cardLabel}
-                        className={`group h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
+                        className={`group relative z-[1] h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
                           isBlockedByRevealedCard ? "opacity-55" : ""
                         } ${
                           isCardDisabled ? "cursor-default" : "cursor-pointer"
@@ -480,8 +481,8 @@ export function RecommendPage() {
                         style={{ zIndex: isSelected ? 10 : 1 }}
                       >
                         <div
-                          className={`relative left-1/2 top-1/2 transition-[height,width,transform] duration-700 [transform-style:preserve-3d] ${
-                            isSelected ? "h-[348px] w-[150%]" : "h-full w-full"
+                          className={`relative left-1/2 top-1/2 aspect-[1023/1537] transition-[height,transform] duration-700 [transform-style:preserve-3d] ${
+                            isSelected ? "h-[348px]" : "h-full"
                           }`}
                           style={{
                             transform: isSelected
@@ -490,21 +491,17 @@ export function RecommendPage() {
                           }}
                         >
                           <div
-                            className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
+                            className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
                           >
-                            <div className="absolute inset-0 opacity-25 paper-texture" />
-                            <div className="absolute inset-3 rounded-md border border-[rgba(255,255,255,0.22)]" />
-                            <div className="absolute inset-x-8 top-1/2 h-px bg-[rgba(255,255,255,0.24)]" />
-                            <div className="absolute left-1/2 top-8 bottom-8 w-px bg-[rgba(255,255,255,0.18)]" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-[12px] tracking-[2px] text-[rgba(255,255,255,0.72)]">
-                                {recommendationLoading ? "LOADING" : cardLabel}
-                              </span>
-                            </div>
+                            <img
+                              src={tarotCardImage}
+                              alt={recommendationLoading ? "LOADING" : cardLabel}
+                              className="h-full w-full object-cover"
+                            />
                           </div>
 
                           <div
-                            className={`absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--archive-yellow)] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
+                            className={`absolute inset-0 overflow-hidden rounded-md bg-[var(--archive-yellow)] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
                               isSelected
                                 ? "shadow-[0_18px_34px_rgba(0,0,0,0.2)]"
                                 : "shadow-[var(--shadow-subtle)]"
