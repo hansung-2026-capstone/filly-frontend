@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Download, Check } from "lucide-react";
 import { toPng } from "html-to-image";
+import tarotCardImage from "../assets/tarot/card.png";
 import {
   getRecommendationHistory,
   revealRecommendationCard,
@@ -22,6 +23,7 @@ import type {
 
 const CARD_COUNT = 3;
 const CARD_RESET_DURATION_MS = 700;
+const CARD_RESET_SETTLE_BUFFER_MS = 120;
 const SHUFFLE_DURATION_MS = 1300;
 const SHUFFLE_REORDER_DELAY_MS = 460;
 const SHUFFLE_PATHS = [
@@ -68,16 +70,6 @@ function getCardOrder(draw: RecommendationDraw | null) {
     .map((card) => card.cardId);
 }
 
-function getShuffledCardOrder(currentOrder: number[]) {
-  const nextOrder = [...currentOrder].sort(() => Math.random() - 0.5);
-
-  if (nextOrder.every((cardId, index) => cardId === currentOrder[index])) {
-    nextOrder.push(nextOrder.shift() ?? 0);
-  }
-
-  return nextOrder;
-}
-
 function getCenteredCardOrder(currentOrder: number[], cardId: number) {
   const currentIndex = currentOrder.indexOf(cardId);
   if (currentIndex < 0 || currentIndex === 1) return currentOrder;
@@ -87,6 +79,16 @@ function getCenteredCardOrder(currentOrder: number[], cardId: number) {
     nextOrder[1],
     nextOrder[currentIndex],
   ];
+
+  return nextOrder;
+}
+
+function getShuffledCardOrder(currentOrder: number[]) {
+  const nextOrder = [...currentOrder].sort(() => Math.random() - 0.5);
+
+  if (nextOrder.every((cardId, index) => cardId === currentOrder[index])) {
+    nextOrder.push(nextOrder.shift() ?? 0);
+  }
 
   return nextOrder;
 }
@@ -119,6 +121,7 @@ export function RecommendPage() {
   );
   const [isShuffling, setIsShuffling] = useState(false);
   const [isPreparingShuffle, setIsPreparingShuffle] = useState(false);
+  const [isShuffleLocked, setIsShuffleLocked] = useState(false);
   const [showCapturePicker, setShowCapturePicker] = useState(false);
   const [selectedCaptureTargets, setSelectedCaptureTargets] = useState(
     initialCaptureTargetSelection,
@@ -284,13 +287,13 @@ export function RecommendPage() {
     window.setTimeout(() => {
       setCardOrder((currentOrder) => getShuffledCardOrder(currentOrder));
     }, SHUFFLE_REORDER_DELAY_MS);
-    window.setTimeout(() => setIsShuffling(false), SHUFFLE_DURATION_MS);
   }
 
   async function handleRecommendationCardClick(cardId: number) {
     if (
       !recommendationDraw ||
       isShuffling ||
+      isShuffleLocked ||
       isPreparingShuffle ||
       revealingCardId !== null
     ) {
@@ -339,6 +342,13 @@ export function RecommendPage() {
     }
   }
 
+  function handleCloseSelectedCard() {
+    if (!recommendationDraw || revealingCardId !== null) return;
+
+    setSelectedCardId(null);
+    setCardOrder(getCardOrder(recommendationDraw));
+  }
+
   function handleRecommendationHistoryClick(item: RecommendationDetail) {
     if (item.drawId !== recommendationDraw?.drawId) return;
 
@@ -353,12 +363,14 @@ export function RecommendPage() {
     if (
       !recommendationDraw ||
       isShuffling ||
+      isShuffleLocked ||
       isPreparingShuffle ||
       revealingCardId !== null
     ) {
       return;
     }
 
+    setIsShuffleLocked(true);
     setRecommendationError(null);
     const previousRevealedRecommendations = revealedRecommendations;
     const previousSelectedCardId = selectedCardId;
@@ -367,7 +379,8 @@ export function RecommendPage() {
     if (selectedCardId !== null) {
       setIsPreparingShuffle(true);
       setSelectedCardId(null);
-      await wait(CARD_RESET_DURATION_MS);
+      setCardOrder(getCardOrder(recommendationDraw));
+      await wait(CARD_RESET_DURATION_MS + CARD_RESET_SETTLE_BUFFER_MS);
       setIsPreparingShuffle(false);
     }
 
@@ -375,10 +388,7 @@ export function RecommendPage() {
     startShuffleMotion();
 
     try {
-      const [nextDraw] = await Promise.all([
-        nextDrawPromise,
-        wait(SHUFFLE_DURATION_MS),
-      ]);
+      const nextDraw = await nextDrawPromise;
       setRecommendationDraw(nextDraw);
       setCardOrder(getCardOrder(nextDraw));
       setSelectedCardId(null);
@@ -387,6 +397,9 @@ export function RecommendPage() {
       setRevealedRecommendations(previousRevealedRecommendations);
       setSelectedCardId(previousSelectedCardId);
       setRecommendationError("추천 카드를 섞지 못했어요.");
+    } finally {
+      setIsShuffling(false);
+      setIsShuffleLocked(false);
     }
   }
 
@@ -418,13 +431,18 @@ export function RecommendPage() {
 
             <div className="flex-1 flex flex-col gap-4 min-h-0 pt-5">
               <div className="flex flex-col gap-4 flex-shrink-0">
-                <div className="flex h-[232px] w-full gap-3 px-2">
+                <div className="relative flex h-[232px] w-full gap-3 px-2">
                   {cardOrder.map((cardId, slotIndex) => {
                     const card = recommendationDraw?.cards.find(
                       (item) => item.cardId === cardId,
                     );
                     const detail = revealedRecommendations[cardId];
                     const isSelected = selectedCardId === cardId;
+                    const showSelectedFront =
+                      isSelected &&
+                      !isPreparingShuffle &&
+                      !isShuffling &&
+                      !isShuffleLocked;
                     const isRevealing = revealingCardId === cardId;
                     const isBlockedByRevealedCard =
                       currentRevealedCardId !== null &&
@@ -433,13 +451,13 @@ export function RecommendPage() {
                       recommendationLoading ||
                       !recommendationDraw ||
                       isShuffling ||
+                      isShuffleLocked ||
                       isPreparingShuffle ||
                       isBlockedByRevealedCard ||
                       (revealingCardId !== null && !isRevealing);
                     const cardLabel = `추천 카드 ${card?.position ?? slotIndex + 1}`;
                     const shufflePath =
                       SHUFFLE_PATHS[slotIndex % SHUFFLE_PATHS.length];
-
                     return (
                       <motion.div
                         layout
@@ -459,7 +477,7 @@ export function RecommendPage() {
                         aria-pressed={isSelected}
                         aria-disabled={isCardDisabled}
                         aria-label={cardLabel}
-                        className={`group h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
+                        className={`group relative z-[1] h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
                           isBlockedByRevealedCard ? "opacity-55" : ""
                         } ${
                           isCardDisabled ? "cursor-default" : "cursor-pointer"
@@ -471,47 +489,60 @@ export function RecommendPage() {
                           x: {
                             duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
                             ease: [0.28, 0, 0.22, 1],
+                            repeat: isShuffling ? Infinity : 0,
+                            repeatType: "loop",
                           },
                           layout: {
                             duration: 0.7,
                             ease: [0.4, 0, 0.2, 1],
                           },
                         }}
-                        style={{ zIndex: isSelected ? 10 : 1 }}
+                        style={{ zIndex: showSelectedFront ? 10 : 1 }}
                       >
                         <div
-                          className={`relative left-1/2 top-1/2 transition-[height,width,transform] duration-700 [transform-style:preserve-3d] ${
-                            isSelected ? "h-[348px] w-[150%]" : "h-full w-full"
+                          className={`relative left-1/2 top-1/2 aspect-[1023/1537] transition-[height,transform] duration-700 [transform-style:preserve-3d] ${
+                            showSelectedFront ? "h-[348px]" : "h-full"
                           }`}
                           style={{
-                            transform: isSelected
+                            transform: showSelectedFront
                               ? "translate(-50%, -50%) rotateY(180deg)"
                               : "translate(-50%, -50%)",
                           }}
                         >
                           <div
-                            className="absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
+                            className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
                           >
-                            <div className="absolute inset-0 opacity-25 paper-texture" />
-                            <div className="absolute inset-3 rounded-md border border-[rgba(255,255,255,0.22)]" />
-                            <div className="absolute inset-x-8 top-1/2 h-px bg-[rgba(255,255,255,0.24)]" />
-                            <div className="absolute left-1/2 top-8 bottom-8 w-px bg-[rgba(255,255,255,0.18)]" />
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-[12px] tracking-[2px] text-[rgba(255,255,255,0.72)]">
-                                {recommendationLoading ? "LOADING" : cardLabel}
-                              </span>
-                            </div>
+                            <img
+                              src={tarotCardImage}
+                              alt={recommendationLoading ? "LOADING" : cardLabel}
+                              className="h-full w-full object-cover"
+                            />
                           </div>
 
                           <div
-                            className={`absolute inset-0 overflow-hidden rounded-lg border border-border-medium bg-[var(--archive-yellow)] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
-                              isSelected
+                            className={`absolute inset-0 overflow-hidden rounded-md bg-[var(--archive-yellow)] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
+                              showSelectedFront
                                 ? "shadow-[0_18px_34px_rgba(0,0,0,0.2)]"
                                 : "shadow-[var(--shadow-subtle)]"
                             }`}
                           >
                             <div className="absolute inset-0 opacity-20 paper-texture" />
                             <div className="absolute inset-3 rounded-md border border-[rgba(80,60,40,0.16)]" />
+                            {showSelectedFront && (
+                              <div className="pointer-events-none absolute inset-3 z-[2]">
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    handleCloseSelectedCard();
+                                  }}
+                                  aria-label="카드 닫기"
+                                  className="pointer-events-auto absolute right-1 top-1 p-1 text-[rgba(80,60,40,0.72)] transition-colors hover:text-[rgba(80,60,40,0.95)]"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            )}
                             <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-hidden text-text-heading">
                               {isRevealing ? (
                                 <div className="flex h-full items-center justify-center text-center text-[12px] leading-[1.7] text-text-muted">
@@ -519,15 +550,12 @@ export function RecommendPage() {
                                 </div>
                               ) : detail ? (
                                 <>
-                                  <div className="flex items-center justify-between gap-2 text-[8.5px] tracking-[1.4px] text-text-secondary">
+                                  <div className="flex items-center gap-2 text-[8.5px] tracking-[1.4px] text-text-secondary">
                                     <span className="truncate">
                                       {detail.category}
                                       {detail.subCategory
                                         ? ` / ${detail.subCategory}`
                                         : ""}
-                                    </span>
-                                    <span className="flex-shrink-0">
-                                      {contentTypeLabels[detail.contentType]}
                                     </span>
                                   </div>
                                   <div className="line-clamp-2 text-[14px] font-bold leading-[1.35]">
@@ -552,6 +580,7 @@ export function RecommendPage() {
                                     }}
                                     disabled={
                                       isShuffling ||
+                                      isShuffleLocked ||
                                       isPreparingShuffle ||
                                       revealingCardId !== null
                                     }
