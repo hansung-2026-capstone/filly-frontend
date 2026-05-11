@@ -23,6 +23,7 @@ import type {
 
 const CARD_COUNT = 3;
 const CARD_RESET_DURATION_MS = 700;
+const CARD_RESET_SETTLE_BUFFER_MS = 120;
 const SHUFFLE_DURATION_MS = 1300;
 const SHUFFLE_REORDER_DELAY_MS = 460;
 const SHUFFLE_PATHS = [
@@ -120,6 +121,7 @@ export function RecommendPage() {
   );
   const [isShuffling, setIsShuffling] = useState(false);
   const [isPreparingShuffle, setIsPreparingShuffle] = useState(false);
+  const [isShuffleLocked, setIsShuffleLocked] = useState(false);
   const [showCapturePicker, setShowCapturePicker] = useState(false);
   const [selectedCaptureTargets, setSelectedCaptureTargets] = useState(
     initialCaptureTargetSelection,
@@ -292,6 +294,7 @@ export function RecommendPage() {
     if (
       !recommendationDraw ||
       isShuffling ||
+      isShuffleLocked ||
       isPreparingShuffle ||
       revealingCardId !== null
     ) {
@@ -361,12 +364,14 @@ export function RecommendPage() {
     if (
       !recommendationDraw ||
       isShuffling ||
+      isShuffleLocked ||
       isPreparingShuffle ||
       revealingCardId !== null
     ) {
       return;
     }
 
+    setIsShuffleLocked(true);
     setRecommendationError(null);
     const previousRevealedRecommendations = revealedRecommendations;
     const previousSelectedCardId = selectedCardId;
@@ -375,7 +380,8 @@ export function RecommendPage() {
     if (selectedCardId !== null) {
       setIsPreparingShuffle(true);
       setSelectedCardId(null);
-      await wait(CARD_RESET_DURATION_MS);
+      setCardOrder(getCardOrder(recommendationDraw));
+      await wait(CARD_RESET_DURATION_MS + CARD_RESET_SETTLE_BUFFER_MS);
       setIsPreparingShuffle(false);
     }
 
@@ -395,6 +401,8 @@ export function RecommendPage() {
       setRevealedRecommendations(previousRevealedRecommendations);
       setSelectedCardId(previousSelectedCardId);
       setRecommendationError("추천 카드를 섞지 못했어요.");
+    } finally {
+      setIsShuffleLocked(false);
     }
   }
 
@@ -433,6 +441,11 @@ export function RecommendPage() {
                     );
                     const detail = revealedRecommendations[cardId];
                     const isSelected = selectedCardId === cardId;
+                    const showSelectedFront =
+                      isSelected &&
+                      !isPreparingShuffle &&
+                      !isShuffling &&
+                      !isShuffleLocked;
                     const isRevealing = revealingCardId === cardId;
                     const isBlockedByRevealedCard =
                       currentRevealedCardId !== null &&
@@ -441,6 +454,7 @@ export function RecommendPage() {
                       recommendationLoading ||
                       !recommendationDraw ||
                       isShuffling ||
+                      isShuffleLocked ||
                       isPreparingShuffle ||
                       isBlockedByRevealedCard ||
                       (revealingCardId !== null && !isRevealing);
@@ -485,14 +499,14 @@ export function RecommendPage() {
                             ease: [0.4, 0, 0.2, 1],
                           },
                         }}
-                        style={{ zIndex: isSelected ? 10 : 1 }}
+                        style={{ zIndex: showSelectedFront ? 10 : 1 }}
                       >
                         <div
                           className={`relative left-1/2 top-1/2 aspect-[1023/1537] transition-[height,transform] duration-700 [transform-style:preserve-3d] ${
-                            isSelected ? "h-[348px]" : "h-full"
+                            showSelectedFront ? "h-[348px]" : "h-full"
                           }`}
                           style={{
-                            transform: isSelected
+                            transform: showSelectedFront
                               ? "translate(-50%, -50%) rotateY(180deg)"
                               : "translate(-50%, -50%)",
                           }}
@@ -509,14 +523,14 @@ export function RecommendPage() {
 
                           <div
                             className={`absolute inset-0 overflow-hidden rounded-md bg-[var(--archive-yellow)] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
-                              isSelected
+                              showSelectedFront
                                 ? "shadow-[0_18px_34px_rgba(0,0,0,0.2)]"
                                 : "shadow-[var(--shadow-subtle)]"
                             }`}
                           >
                             <div className="absolute inset-0 opacity-20 paper-texture" />
                             <div className="absolute inset-3 rounded-md border border-[rgba(80,60,40,0.16)]" />
-                            {isSelected && (
+                            {showSelectedFront && (
                               <div className="pointer-events-none absolute inset-3 z-[2]">
                                 <button
                                   type="button"
@@ -568,6 +582,7 @@ export function RecommendPage() {
                                     }}
                                     disabled={
                                       isShuffling ||
+                                      isShuffleLocked ||
                                       isPreparingShuffle ||
                                       revealingCardId !== null
                                     }
