@@ -531,7 +531,7 @@ export function RecommendPage() {
                                 </button>
                               </div>
                             )}
-                            <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-hidden pr-6 text-text-heading">
+                            <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-hidden text-text-heading">
                               {isRevealing ? (
                                 <div className="flex h-full items-center justify-center text-center text-[12px] leading-[1.7] text-text-muted">
                                   추천을 펼치는 중...
