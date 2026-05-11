@@ -340,6 +340,13 @@ export function RecommendPage() {
     }
   }
 
+  function handleCloseSelectedCard() {
+    if (!recommendationDraw || revealingCardId !== null) return;
+
+    setSelectedCardId(null);
+    setCardOrder(getCardOrder(recommendationDraw));
+  }
+
   function handleRecommendationHistoryClick(item: RecommendationDetail) {
     if (item.drawId !== recommendationDraw?.drawId) return;
 
@@ -509,22 +516,34 @@ export function RecommendPage() {
                           >
                             <div className="absolute inset-0 opacity-20 paper-texture" />
                             <div className="absolute inset-3 rounded-md border border-[rgba(80,60,40,0.16)]" />
-                            <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-hidden text-text-heading">
+                            {isSelected && (
+                              <div className="pointer-events-none absolute inset-3 z-[2]">
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    handleCloseSelectedCard();
+                                  }}
+                                  aria-label="카드 닫기"
+                                  className="pointer-events-auto absolute right-1 top-1 p-1 text-[rgba(80,60,40,0.72)] transition-colors hover:text-[rgba(80,60,40,0.95)]"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                </button>
+                              </div>
+                            )}
+                            <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-hidden pr-6 text-text-heading">
                               {isRevealing ? (
                                 <div className="flex h-full items-center justify-center text-center text-[12px] leading-[1.7] text-text-muted">
                                   추천을 펼치는 중...
                                 </div>
                               ) : detail ? (
                                 <>
-                                  <div className="flex items-center justify-between gap-2 text-[8.5px] tracking-[1.4px] text-text-secondary">
+                                  <div className="flex items-center gap-2 text-[8.5px] tracking-[1.4px] text-text-secondary">
                                     <span className="truncate">
                                       {detail.category}
                                       {detail.subCategory
                                         ? ` / ${detail.subCategory}`
                                         : ""}
-                                    </span>
-                                    <span className="flex-shrink-0">
-                                      {contentTypeLabels[detail.contentType]}
                                     </span>
                                   </div>
                                   <div className="line-clamp-2 text-[14px] font-bold leading-[1.35]">
