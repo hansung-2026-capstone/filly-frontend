@@ -520,7 +520,7 @@ export function RecommendPage() {
                           </div>
 
                           <div
-                            className={`absolute inset-0 overflow-hidden rounded-md bg-[var(--archive-yellow)] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
+                            className={`absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
                               showSelectedFront
                                 ? "shadow-[0_18px_34px_rgba(0,0,0,0.2)]"
                                 : "shadow-[var(--shadow-subtle)]"
