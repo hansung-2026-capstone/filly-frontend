@@ -12,6 +12,7 @@ import {
 import { useIdCard } from "../hook/common/useIdCard";
 import { useReceipt } from "../hook/common/useReceipt";
 import { useMonthlyStat } from "../hook/common/useMonthlyStat";
+import { isFutureMonth } from "../lib/date";
 import { IdCard, IdCardSkeleton } from "../components/IdCard";
 import { Receipt, ReceiptSkeleton } from "../components/Receipt";
 import { MonthPickerModal } from "../components/MonthPickerModal";
@@ -97,6 +98,14 @@ function wait(ms: number) {
   return new Promise((resolve) => {
     window.setTimeout(resolve, ms);
   });
+}
+
+function moveMonth(year: number, month: number, delta: number) {
+  const nextDate = new Date(year, month - 1 + delta, 1);
+  return {
+    year: nextDate.getFullYear(),
+    month: nextDate.getMonth() + 1,
+  };
 }
 
 export function RecommendPage() {
@@ -216,6 +225,23 @@ export function RecommendPage() {
   function openCapturePicker() {
     setSelectedCaptureTargets(initialCaptureTargetSelection);
     setShowCapturePicker(true);
+  }
+
+  function handlePreviousMonth() {
+    const next = moveMonth(selectedYear, selectedMonth, -1);
+    setSelectedYear(next.year);
+    setSelectedMonth(next.month);
+  }
+
+  const nextMonth = moveMonth(selectedYear, selectedMonth, 1);
+
+  function handleNextMonth() {
+    if (isFutureMonth(nextMonth.year, nextMonth.month)) {
+      return;
+    }
+
+    setSelectedYear(nextMonth.year);
+    setSelectedMonth(nextMonth.month);
   }
 
   async function handleCapture(targets: CaptureTarget[]) {
@@ -691,13 +717,32 @@ export function RecommendPage() {
             <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
               공유용 컨텐츠 (Shared Content)
             </div>
-            <button
-              onClick={() => setShowMonthPicker(true)}
-              className="px-2 py-0.5 rounded border border-border-light
-              text-[11px] text-text-muted hover:bg-bg-hover transition-colors"
-            >
-              {selectedYear}년 {selectedMonth}월
-            </button>
+            <div className="flex items-center rounded-md border border-border-light overflow-hidden">
+              <button
+                type="button"
+                onClick={handlePreviousMonth}
+                className="w-7 h-7 border-none text-[13px] text-text-muted hover:bg-bg-hover transition-colors"
+                aria-label="이전 달"
+              >
+                &lt;
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowMonthPicker(true)}
+                className="px-2 py-0.5 border-x border-border-light text-[11px] text-text-muted hover:bg-bg-hover transition-colors"
+              >
+                {selectedYear}년 {selectedMonth}월
+              </button>
+              <button
+                type="button"
+                onClick={handleNextMonth}
+                disabled={isFutureMonth(nextMonth.year, nextMonth.month)}
+                className="w-7 h-7 border-none text-[13px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-35 disabled:cursor-not-allowed"
+                aria-label="다음 달"
+              >
+                &gt;
+              </button>
+            </div>
           </div>
 
           {/* 사원증 + 영수증 */}

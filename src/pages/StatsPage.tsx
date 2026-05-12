@@ -4,6 +4,7 @@ import { usePersona } from "../hook/common/usePersona";
 import { useMonthlyStat } from "../hook/common/useMonthlyStat";
 import { MonthPickerModal } from "../components/MonthPickerModal";
 import { KeywordCloud } from "../components/KeywordCloud";
+import { isFutureMonth } from "../lib/date";
 
 const COLLAPSED_SUMMARY_LINE_COUNT = 2;
 const EXPANDABLE_SUMMARY_MIN_LENGTH = 80;
@@ -47,6 +48,14 @@ function getCollapsedSummaryStyle(isExpanded: boolean) {
   } as const;
 }
 
+function moveMonth(year: number, month: number, delta: number) {
+  const nextDate = new Date(year, month - 1 + delta, 1);
+  return {
+    year: nextDate.getFullYear(),
+    month: nextDate.getMonth() + 1,
+  };
+}
+
 export function StatsPage() {
   const { current, history, loading: personaLoading, error } = usePersona();
   const now = new Date();
@@ -86,6 +95,18 @@ export function StatsPage() {
     )
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
+  const nextMonth = moveMonth(selectedYear, selectedMonth, 1);
+  const handlePreviousMonth = () => {
+    const previous = moveMonth(selectedYear, selectedMonth, -1);
+    setSelectedYear(previous.year);
+    setSelectedMonth(previous.month);
+  };
+  const handleNextMonth = () => {
+    if (isFutureMonth(nextMonth.year, nextMonth.month)) return;
+
+    setSelectedYear(nextMonth.year);
+    setSelectedMonth(nextMonth.month);
+  };
 
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">
@@ -208,13 +229,32 @@ export function StatsPage() {
           <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
             월간 리포트
           </div>
-          <button
-            onClick={() => setShowMonthPicker(true)}
-            className="px-2 py-0.5 rounded border border-border-light
-            text-[11px] text-text-muted hover:bg-bg-hover transition-colors"
-          >
-            {selectedYear}년 {selectedMonth}월
-          </button>
+          <div className="flex items-center rounded-md border border-border-light overflow-hidden">
+            <button
+              type="button"
+              onClick={handlePreviousMonth}
+              className="w-7 h-7 border-none text-[13px] text-text-muted hover:bg-bg-hover transition-colors"
+              aria-label="이전 달"
+            >
+              &lt;
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowMonthPicker(true)}
+              className="px-2 py-0.5 border-x border-border-light text-[11px] text-text-muted hover:bg-bg-hover transition-colors"
+            >
+              {selectedYear}년 {selectedMonth}월
+            </button>
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              disabled={isFutureMonth(nextMonth.year, nextMonth.month)}
+              className="w-7 h-7 border-none text-[13px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-35 disabled:cursor-not-allowed"
+              aria-label="다음 달"
+            >
+              &gt;
+            </button>
+          </div>
         </div>
         <div className="flex gap-5 flex-shrink-0">
           <div className="w-[110px] flex flex-col gap-3.5">
