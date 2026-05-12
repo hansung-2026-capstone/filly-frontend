@@ -10,6 +10,7 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
   const [profileImageUrl, setProfileImageUrl] = useState<string | null>(
     avatarUrl,
   );
+  const visibleKeywords = keywords.slice(0, 3);
 
   return (
     <div className="w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium">
@@ -53,13 +54,13 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
         <div className="w-full border-t border-border-light" />
 
         {/* 취향 키워드 */}
-        {keywords.length > 0 ? (
+        {visibleKeywords.length > 0 ? (
           <div className="w-full flex flex-col gap-1.5">
             <span className="text-[9px] tracking-[2px] text-text-secondary uppercase">
               취향 키워드
             </span>
             <div className="flex flex-wrap gap-1">
-              {keywords.map((kw, i) => (
+              {visibleKeywords.map((kw, i) => (
                 <span
                   key={i}
                   className="text-[10px] px-2 py-0.5 rounded-full border border-border-light text-text-muted bg-bg-beige-subtle"
