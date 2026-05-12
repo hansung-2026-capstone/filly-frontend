@@ -195,9 +195,14 @@ export function WritePage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto relative">
+      <div
+        className={`flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto relative ${
+          isDraftGenerating ? "pointer-events-none select-none" : ""
+        }`}
+        aria-busy={isDraftGenerating}
+      >
         {isDraftGenerating && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-page-loading-soft)] z-10 gap-3 rounded-r-md">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-page-loading-soft)] z-10 gap-3 rounded-r-md pointer-events-auto">
             <div className="w-6 h-6 border-2 border-[var(--border-spinner)] border-t-[var(--border-spinner-active)] rounded-full animate-spin" />
             <span className="text-sm text-text-primary tracking-wide">
               AI 초안 만드는 중...
