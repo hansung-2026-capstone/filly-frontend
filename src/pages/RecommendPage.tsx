@@ -410,6 +410,8 @@ export function RecommendPage() {
   const hasDownloadableContent = captureTargetOptions.some(({ id }) =>
     getCaptureTargetAvailability(id),
   );
+  const isWaitingForInitialRecommendation =
+    recommendationLoading || !recommendationDraw;
 
   return (
     <>
@@ -478,6 +480,8 @@ export function RecommendPage() {
                         aria-disabled={isCardDisabled}
                         aria-label={cardLabel}
                         className={`group relative z-[1] h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
+                          isWaitingForInitialRecommendation ? "opacity-55" : ""
+                        } ${
                           isBlockedByRevealedCard ? "opacity-55" : ""
                         } ${
                           isCardDisabled ? "cursor-default" : "cursor-pointer"
