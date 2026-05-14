@@ -1,4 +1,4 @@
-import { ChevronDown, Pencil } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CalendarCell } from "../components/CalendarCell";
@@ -100,6 +100,7 @@ function CalendarColumn({
 export function HomePage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
+  const today = new Date().getDate();
   const [showMonthModal, setShowMonthModal] = useState(false);
   const [selectedDiary, setSelectedDiary] = useState<DiaryItem | null>(null);
   const navigate = useNavigate();
@@ -112,38 +113,71 @@ export function HomePage() {
     setCurrentMonth(month);
   };
 
+  const handlePrevMonth = () => {
+    if (currentMonth === 1) {
+      setCurrentMonth(12);
+      setCurrentYear(currentYear - 1);
+    } else {
+      setCurrentMonth(currentMonth - 1);
+    }
+  };
+
+  const handleNextMonth = () => {
+    if (currentMonth === 12) {
+      setCurrentMonth(1);
+      setCurrentYear(currentYear + 1);
+    } else {
+      setCurrentMonth(currentMonth + 1);
+    }
+  };
+
   return (
     <div className="w-full h-full flex font-['Nanum_Myeongjo'] bg-transparent overflow-hidden">
       <div className="w-[129px] h-full flex flex-col border-r border-[var(--border-subtle)]">
-        <button
-          onClick={() => setShowMonthModal(true)}
-          className="h-[30%] w-full flex flex-col items-center justify-center gap-1 border-b border-[var(--border-subtle)]
-            bg-transparent cursor-pointer transition-all duration-300 hover:bg-bg-hover group relative"
-        >
-          <div className="text-[11px] font-medium tracking-[3px] pl-[3px] text-text-soft uppercase">
-            {currentYear}
-          </div>
-
-          <div className="text-[46px] font-light tracking-tighter text-text-stronger leading-none my-1">
-            {String(currentMonth).padStart(2, "0")}
-          </div>
-
-          <div className="flex flex-col items-center gap-1 mt-1">
-            <div className="text-[12px] font-bold tracking-[2px] text-text-control uppercase transition-colors group-hover:text-[var(--text-dark)]">
-              {MONTHS[currentMonth - 1].name}
+        <div className="h-[30%] w-full flex flex-col items-center justify-center gap-2 border-b border-[var(--border-subtle)] px-2">
+          <button
+            onClick={() => setShowMonthModal(true)}
+            className="w-full rounded-xl overflow-hidden bg-[var(--bg-hover-soft)] p-0 flex flex-col items-stretch
+              border-none cursor-pointer transition-all duration-300 hover:shadow-sm group"
+          >
+            <div className="relative w-full bg-[var(--login-logo-bg)] py-2.5 flex items-center justify-center">
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/35" />
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/35" />
+              <span className="text-[12px] font-bold tracking-[2px] text-white/95 uppercase">
+                {MONTHS[currentMonth - 1].name}
+              </span>
             </div>
-            <div className="bg-[var(--bg-hover-soft)] rounded-full p-1 group-hover:bg-bg-control-hover transition-all duration-300">
+            <div className="relative w-full flex flex-col items-center justify-center min-h-[72px] pt-0 pb-2">
+              <span className="text-[28px] font-light leading-none tracking-tighter text-text-stronger">
+                {String(today).padStart(2, "0")}
+              </span>
               <ChevronDown
-                className="w-5 h-5 text-[var(--text-control-muted)] transition-all duration-300
-                  group-hover:text-[var(--text-dark)] group-hover:translate-y-0.5"
+                className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 text-[var(--text-control-muted)] group-hover:text-[var(--text-dark)] transition-colors duration-300"
               />
             </div>
-          </div>
+          </button>
 
-          <div className="absolute bottom-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <span className="text-[11px] text-[var(--text-control-muted)] font-bold tracking-widest">월 선택</span>
+          <div className="w-full flex gap-1.5">
+            <button
+              onClick={handlePrevMonth}
+              className="flex-1 rounded-lg bg-[var(--bg-hover-soft)] py-2 flex items-center justify-center gap-1
+                border-none cursor-pointer text-[10px] tracking-[1px] text-[var(--text-control-muted)]
+                hover:bg-bg-control-hover hover:text-[var(--text-dark)] transition-all"
+            >
+              <ChevronLeft className="w-3 h-3" />
+              <span>이전</span>
+            </button>
+            <button
+              onClick={handleNextMonth}
+              className="flex-1 rounded-lg bg-[var(--bg-hover-soft)] py-2 flex items-center justify-center gap-1
+                border-none cursor-pointer text-[10px] tracking-[1px] text-[var(--text-control-muted)]
+                hover:bg-bg-control-hover hover:text-[var(--text-dark)] transition-all"
+            >
+              <span>다음</span>
+              <ChevronRight className="w-3 h-3" />
+            </button>
           </div>
-        </button>
+        </div>
 
         <div className="flex flex-col items-center justify-center py-5 px-2 gap-2 border-b border-border-light">
           <UserAvatar avatarUrl={user?.currentAvatarUrl ?? null} />
