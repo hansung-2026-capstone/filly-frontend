@@ -24,6 +24,10 @@ export interface UserPreferencesUpdateRequest {
   aiDraftTone: AiDraftTonePreference
 }
 
+export interface BackgroundThemeUpdateRequest {
+  backgroundTheme: string
+}
+
 export interface User {
   id: number
   nickname: string

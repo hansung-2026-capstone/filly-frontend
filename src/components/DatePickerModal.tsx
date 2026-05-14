@@ -93,7 +93,7 @@ export function DatePickerModal({
             {WEEK_DAYS_SHORT.map((day) => (
               <div
                 key={day}
-                className="text-center text-[11px] font-medium text-text-soft py-1"
+                className="text-center text-[12px] font-medium text-text-soft py-1"
               >
                 {day}
               </div>

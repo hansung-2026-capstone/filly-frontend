@@ -17,7 +17,7 @@ export function CalendarCell({ day, diary, loading, dayTextClass, onClick }: Cal
         ${clickable ? 'cursor-pointer hover:bg-[var(--bg-editor-panel)] hover:border-[var(--border-calendar-hover)] hover:shadow-sm' : ''}`}
       onClick={() => clickable && onClick(diary)}
     >
-      <span className={`text-[11px] leading-none ${dayTextClass}`}>{day}</span>
+      <span className={`text-[12px] leading-none ${dayTextClass}`}>{day}</span>
       {diary && (
         <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden">
           {diary.mediaUrls?.[0] ? (

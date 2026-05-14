@@ -11,6 +11,7 @@ import { useCurrentUser } from "../hook/common/useCurrentUser";
 import {
   formatDateKeyFromParts,
   getWeeksInMonth,
+  isFutureMonth,
   MONTHS,
   WEEK_DAYS_LONG,
   WEEK_DAYS_SHORT,
@@ -66,7 +67,7 @@ function CalendarColumn({
               key={day}
               aria-label={fullDayLabel}
               title={fullDayLabel}
-              className={`block rounded-md py-1 text-[13px] font-bold leading-none tracking-[1.5px] ${getHeaderTextClass(dayIndex)}`}
+              className={`block rounded-md py-1 text-[14px] font-bold leading-none tracking-[1.5px] ${getHeaderTextClass(dayIndex)}`}
             >
               {day}
             </span>
@@ -107,6 +108,10 @@ export function HomePage() {
   const [selectedDiary, setSelectedDiary] = useState<DiaryItem | null>(null);
   const navigate = useNavigate();
   const weeks = getWeeksInMonth(currentYear, currentMonth);
+  const nextMonth = currentMonth === 12
+    ? { year: currentYear + 1, month: 1 }
+    : { year: currentYear, month: currentMonth + 1 };
+  const nextMonthDisabled = isFutureMonth(nextMonth.year, nextMonth.month);
   const { diaries, loading, refetch } = useMonthlyDiaries(currentYear, currentMonth);
   const { data: user, isLoading: userLoading } = useCurrentUser();
 
@@ -125,12 +130,10 @@ export function HomePage() {
   };
 
   const handleNextMonth = () => {
-    if (currentMonth === 12) {
-      setCurrentMonth(1);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
+    if (nextMonthDisabled) return;
+
+    setCurrentYear(nextMonth.year);
+    setCurrentMonth(nextMonth.month);
   };
 
   return (
@@ -145,7 +148,7 @@ export function HomePage() {
             <div className="relative w-full bg-[var(--login-logo-bg)] py-2.5 flex items-center justify-center">
               <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/35" />
               <span className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/35" />
-              <span className="text-[12px] font-bold tracking-[2px] text-white/95 uppercase">
+              <span className="text-[13px] font-bold tracking-[2px] text-white/95 uppercase">
                 {MONTHS[currentMonth - 1].name}
               </span>
             </div>
@@ -163,7 +166,7 @@ export function HomePage() {
             <button
               onClick={handlePrevMonth}
               className="flex-1 rounded-lg bg-[var(--bg-hover-soft)] py-2 flex items-center justify-center gap-1
-                border-none cursor-pointer text-[10px] tracking-[1px] text-[var(--text-control-muted)]
+                border-none cursor-pointer text-[11px] tracking-[1px] text-[var(--text-control-muted)]
                 hover:bg-bg-control-hover hover:text-[var(--text-dark)] transition-all"
             >
               <ChevronLeft className="w-3 h-3" />
@@ -171,9 +174,12 @@ export function HomePage() {
             </button>
             <button
               onClick={handleNextMonth}
+              disabled={nextMonthDisabled}
+              aria-disabled={nextMonthDisabled}
               className="flex-1 rounded-lg bg-[var(--bg-hover-soft)] py-2 flex items-center justify-center gap-1
-                border-none cursor-pointer text-[10px] tracking-[1px] text-[var(--text-control-muted)]
-                hover:bg-bg-control-hover hover:text-[var(--text-dark)] transition-all"
+                border-none cursor-pointer text-[11px] tracking-[1px] text-[var(--text-control-muted)]
+                hover:bg-bg-control-hover hover:text-[var(--text-dark)] transition-all
+                disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--bg-hover-soft)] disabled:hover:text-[var(--text-control-muted)]"
             >
               <span>다음</span>
               <ChevronRight className="w-3 h-3" />
@@ -188,7 +194,7 @@ export function HomePage() {
           >
             <UserAvatar avatarUrl={user?.currentAvatarUrl ?? null} className="w-25 h-25" />
           </button>
-          <div className="w-full px-2 py-2 text-center text-[15px] font-bold tracking-[1px] text-text-stronger font-['Nanum_Myeongjo']">
+          <div className="w-full px-2 py-2 text-center text-[16px] font-bold tracking-[1px] text-text-stronger font-['Nanum_Myeongjo']">
             {userLoading ? "···" : user?.nickname ?? "이름 없음"}
           </div>
         </div>
@@ -197,7 +203,7 @@ export function HomePage() {
           <button
             onClick={() => navigate("/write")}
             className="mt-auto flex items-center justify-center gap-1.5 py-2 px-2.5 border-none bg-bg-hover rounded-lg
-              cursor-pointer text-[11px] text-text-muted hover:bg-[var(--bg-hover-medium)] transition-all"
+              cursor-pointer text-[12px] text-text-muted hover:bg-[var(--bg-hover-medium)] transition-all"
           >
             <Pencil className="w-[15px] h-[15px] text-[var(--text-pencil-muted)]" />
             <span>일기 작성</span>

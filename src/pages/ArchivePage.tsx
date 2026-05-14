@@ -76,29 +76,35 @@ export function ArchivePage() {
 
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">
-      <div className="flex-1 flex flex-col py-3 px-4 pl-5 overflow-y-auto">
-        <div className="text-[11px] tracking-[2px] text-[var(--text-page-label)] uppercase text-center py-1 pb-2.5 flex-shrink-0">
-          아카이브
+      <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-5 gap-2 overflow-hidden">
+        <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
+          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+            아카이브
+          </div>
+          <div
+            aria-hidden="true"
+            className="invisible h-7 w-[116px] rounded-md border border-border-light"
+          />
         </div>
 
         {error && (
-          <div className="mb-2 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[11px] text-[var(--text-error)]">
+          <div className="mb-2 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[12px] text-[var(--text-error)]">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-2.5 flex-1 content-start">
+        <div className="grid grid-cols-3 gap-2.5 flex-1 min-h-0 content-start overflow-y-auto pt-1">
           <button
             type="button"
             onClick={openCreateModal}
             disabled={mutating}
             className="relative border-none cursor-pointer font-['Nanum_Pen_Script'] aspect-square
-              border-2 border-dashed border-border-dashed rounded-sm flex flex-col items-center
-              justify-center bg-bg-surface-muted transition-all duration-200 disabled:cursor-not-allowed
-              disabled:opacity-60 hover:bg-bg-surface-muted-hover hover:border-border-dashed-hover
+              border-2 border-dashed border-[var(--border-archive-add)] rounded-sm flex flex-col items-center
+              justify-center bg-[var(--bg-archive-add)] transition-all duration-200 disabled:cursor-not-allowed
+              disabled:opacity-60 hover:bg-[var(--bg-archive-add-hover)] hover:border-[var(--border-archive-add-hover)]
               hover:shadow-[var(--shadow-subtle)] hover:-translate-y-0.5"
           >
-            <Plus className="w-7 h-7 text-[var(--text-upload-plus-soft)]" />
+            <Plus className="w-7 h-7 text-[var(--text-archive-add)]" />
           </button>
 
           {loadingArchives && (
@@ -187,25 +193,31 @@ export function ArchivePage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col py-3.5 px-6 pl-7 gap-0 overflow-hidden">
-        <div className="flex items-center gap-2 pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
-          {selectedArchiveId !== null && (
-            <button
-              type="button"
-              onClick={() => setSelectedArchiveId(null)}
-              className="w-6 h-6 flex items-center justify-center rounded-md border-none bg-transparent
-                cursor-pointer text-text-muted hover:bg-bg-hover
-                transition-all duration-150"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-          )}
-          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
-            {getArchiveName()}
+      <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-5 gap-2 overflow-hidden">
+        <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            {selectedArchiveId !== null && (
+              <button
+                type="button"
+                onClick={() => setSelectedArchiveId(null)}
+                className="w-7 h-7 flex items-center justify-center rounded-md border-none bg-transparent
+                  cursor-pointer text-text-muted hover:bg-bg-hover
+                  transition-all duration-150"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            )}
+            <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+              {getArchiveName()}
+            </div>
           </div>
+          <div
+            aria-hidden="true"
+            className="invisible h-7 w-[116px] rounded-md border border-border-light"
+          />
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           {loadingDiaries && (
             <div className="py-8 text-center text-xs text-text-secondary">
               일기를 불러오는 중
@@ -243,7 +255,7 @@ export function ArchivePage() {
                   </div>
                 )}
                 <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                  <div className="text-[11px] text-text-secondary tracking-[0.5px]">
+                  <div className="text-[12px] text-text-secondary tracking-[0.5px]">
                     {entry.writtenAt}
                   </div>
                   <div className="text-xs text-text-primary leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis">
@@ -347,7 +359,7 @@ function ArchiveFormModal({
 
         <div className="py-4 px-5 flex flex-col gap-3">
           <div>
-            <div className="text-[11px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
+            <div className="text-[12px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
               아카이브 이름
             </div>
             <input
@@ -358,13 +370,13 @@ function ArchiveFormModal({
               autoFocus
               placeholder="행복했던 날"
               className="w-full py-2.5 px-3 border border-border-medium rounded-md
-                bg-bg-editor-panel font-['Nanum_Myeongjo'] text-[13px] text-[var(--text-input)]
+                bg-bg-editor-panel font-['Nanum_Myeongjo'] text-[14px] text-[var(--text-input)]
                 outline-none focus:border-[var(--border-input-focus)]"
             />
           </div>
 
           <div>
-            <div className="text-[11px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
+            <div className="text-[12px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
               색상
             </div>
             <div className="flex gap-2">
@@ -391,7 +403,7 @@ function ArchiveFormModal({
               type="button"
               onClick={onClose}
               className="py-2 px-4 border border-border-medium bg-transparent rounded-md
-                cursor-pointer font-['Nanum_Myeongjo'] text-[11px] text-text-muted
+                cursor-pointer font-['Nanum_Myeongjo'] text-[12px] text-text-muted
                 transition-all duration-150 hover:bg-bg-hover"
             >
               취소
@@ -400,7 +412,7 @@ function ArchiveFormModal({
               type="submit"
               disabled={mutating || !name.trim()}
               className="py-2 px-4 bg-[var(--bg-save-button)] text-notebook-page border-none rounded-md
-                cursor-pointer font-['Nanum_Myeongjo'] text-[11px] transition-all duration-150
+                cursor-pointer font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
                 hover:bg-[var(--bg-save-button-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {mutating ? "저장 중" : "저장"}

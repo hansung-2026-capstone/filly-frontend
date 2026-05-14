@@ -1,6 +1,12 @@
 import { Settings, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
+import { useCurrentUser } from "../hook/common/useCurrentUser";
+import {
+  DEFAULT_BACKGROUND_THEME,
+  getBackgroundThemeId,
+  getStoredBackgroundThemeId,
+} from "../lib/backgroundTheme";
 
 type TabConfig = {
   path: string;
@@ -11,11 +17,37 @@ type TabConfig = {
 };
 
 const TABS: TabConfig[] = [
-  { path: "home", label: "홈", bgClass: "bg-[var(--tab-home)]", textClass: "text-[var(--tab-home-text)]" },
-  { path: "stats", label: "통계", bgClass: "bg-[var(--tab-stats)]", textClass: "text-[var(--tab-stats-text)]" },
-  { path: "recommend", label: "추천", bgClass: "bg-[var(--tab-recommend)]", textClass: "text-[var(--tab-recommend-text)]" },
-  { path: "archive", label: "아카이브", bgClass: "bg-[var(--tab-archive)]", textClass: "text-[var(--tab-archive-text)]" },
-  { path: "settings", label: "설정", icon: Settings, bgClass: "bg-[var(--tab-settings)]", textClass: "text-[var(--tab-settings-text)]" },
+  {
+    path: "home",
+    label: "홈",
+    bgClass: "bg-[var(--tab-home)]",
+    textClass: "text-[var(--tab-home-text)]",
+  },
+  {
+    path: "stats",
+    label: "통계",
+    bgClass: "bg-[var(--tab-stats)]",
+    textClass: "text-[var(--tab-stats-text)]",
+  },
+  {
+    path: "recommend",
+    label: "추천",
+    bgClass: "bg-[var(--tab-recommend)]",
+    textClass: "text-[var(--tab-recommend-text)]",
+  },
+  {
+    path: "archive",
+    label: "아카이브",
+    bgClass: "bg-[var(--tab-archive)]",
+    textClass: "text-[var(--tab-archive-text)]",
+  },
+  {
+    path: "settings",
+    label: "설정",
+    icon: Settings,
+    bgClass: "bg-[var(--tab-settings)]",
+    textClass: "text-[var(--tab-settings-text)]",
+  },
 ];
 
 const NOTEBOOK_LAYOUT = {
@@ -25,10 +57,10 @@ const NOTEBOOK_LAYOUT = {
   pageWidth: 1000,
   pageHeight: 680,
   shadowWidth: 1040,
-  shadowHeight: 720,
+  shadowHeight: 700,
   pageOffsetX: 20,
   pageOffsetY: 24,
-  shadowOffsetY: 4,
+  shadowOffsetY: 14,
   padding: 24,
 };
 
@@ -38,11 +70,14 @@ function getNotebookScale() {
   const availableWidth = window.innerWidth - NOTEBOOK_LAYOUT.padding;
   const availableHeight = window.innerHeight - NOTEBOOK_LAYOUT.padding;
 
-  return Math.max(0.25, Math.min(
-    NOTEBOOK_LAYOUT.maxScale,
-    availableWidth / NOTEBOOK_LAYOUT.baseWidth,
-    availableHeight / NOTEBOOK_LAYOUT.baseHeight,
-  ));
+  return Math.max(
+    0.25,
+    Math.min(
+      NOTEBOOK_LAYOUT.maxScale,
+      availableWidth / NOTEBOOK_LAYOUT.baseWidth,
+      availableHeight / NOTEBOOK_LAYOUT.baseHeight,
+    ),
+  );
 }
 
 function NotebookPage({ side }: { side: "left" | "right" }) {
@@ -80,8 +115,29 @@ function NotebookPage({ side }: { side: "left" | "right" }) {
 export function Root() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: user, isLoading } = useCurrentUser();
   const [notebookScale, setNotebookScale] = useState(getNotebookScale);
-  const activePage = location.pathname === "/" ? "home" : location.pathname.slice(1);
+  const [initialStoredTheme] = useState(() => getStoredBackgroundThemeId());
+  const activePage =
+    location.pathname === "/" ? "home" : location.pathname.slice(1);
+  const backgroundTheme = getBackgroundThemeId(
+    user?.backgroundTheme ?? initialStoredTheme ?? DEFAULT_BACKGROUND_THEME,
+  );
+
+  useEffect(() => {
+    const rootElement = document.documentElement;
+    const previousTheme = rootElement.getAttribute("data-background-theme");
+
+    rootElement.setAttribute("data-background-theme", backgroundTheme);
+
+    return () => {
+      if (previousTheme) {
+        rootElement.setAttribute("data-background-theme", previousTheme);
+      } else {
+        rootElement.removeAttribute("data-background-theme");
+      }
+    };
+  }, [backgroundTheme]);
 
   useEffect(() => {
     const updateNotebookScale = () => {
@@ -110,15 +166,28 @@ export function Root() {
     transformOrigin: "top left",
   };
 
+  if (isLoading && !user && !initialStoredTheme) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page-loading)]">
+        <div className="text-[12px] font-bold tracking-[2px] text-[var(--text-page-label)]">
+          불러오는 중
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden p-3">
+    <div
+      data-background-theme={backgroundTheme}
+      className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden p-3"
+    >
       <div
         className="absolute inset-0 opacity-50"
         style={{ background: "var(--notebook-bg-radial)" }}
       />
 
       <div
-        className="fixed inset-0 pointer-events-none z-0"
+        className="fixed inset-0 pointer-events-none z-0 opacity-40"
         style={{ background: "var(--notebook-texture-lines)" }}
       />
 
@@ -130,7 +199,9 @@ export function Root() {
             top: NOTEBOOK_LAYOUT.shadowOffsetY * notebookScale,
             width: NOTEBOOK_LAYOUT.shadowWidth,
             height: NOTEBOOK_LAYOUT.shadowHeight,
-            boxShadow: "var(--notebook-desk-shadow)",
+            background: "var(--notebook-cover-background)",
+            backgroundSize: "var(--notebook-cover-background-size)",
+            boxShadow: "var(--notebook-cover-shadow)",
           }}
         />
 
@@ -187,7 +258,7 @@ export function Root() {
                 aria-label={tab.label}
                 title={tab.label}
                 className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
-                  font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
+                  font-['Nanum_Pen_Script'] text-[15px] tracking-wider relative transition-all duration-[0.25s]
                   shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
                   hover:w-14 hover:shadow-[var(--shadow-tab-hover)]
                   ${tab.path === "settings" ? "mt-auto" : ""}
@@ -198,7 +269,11 @@ export function Root() {
                   className="absolute inset-0 rounded-r-md pointer-events-none"
                   style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
                 />
-                {tab.icon ? <tab.icon className="h-5 w-5" aria-hidden="true" /> : tab.label}
+                {tab.icon ? (
+                  <tab.icon className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  tab.label
+                )}
               </button>
             ))}
           </div>

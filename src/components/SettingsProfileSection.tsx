@@ -55,7 +55,7 @@ export function SettingsProfileSection() {
         />
 
         <div className="min-w-0 flex-1">
-          <div className="text-[11px] tracking-[2px] text-[var(--text-page-label)] uppercase">
+          <div className="text-[12px] tracking-[2px] text-[var(--text-page-label)] uppercase">
             사용자 프로필
           </div>
           <div className="mt-1 flex items-center justify-between gap-3">
@@ -103,7 +103,7 @@ export function SettingsProfileSection() {
                 type="button"
                 onClick={startNicknameEdit}
                 disabled={isLoading}
-                className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-bg-hover px-3 py-1.5 text-[11px] font-bold text-text-control hover:bg-[var(--bg-hover-medium)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-bg-hover px-3 py-1.5 text-[12px] font-bold text-text-control hover:bg-[var(--bg-hover-medium)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Pencil className="w-3 h-3" aria-hidden="true" />
                 변경
@@ -112,7 +112,7 @@ export function SettingsProfileSection() {
           </div>
 
           {error && isEditingNickname && (
-            <p className="mt-1 text-[11px] font-bold text-[var(--text-error)]">
+            <p className="mt-1 text-[12px] font-bold text-[var(--text-error)]">
               {error}
             </p>
           )}
