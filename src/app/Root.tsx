@@ -243,7 +243,7 @@ export function Root() {
             }}
           />
 
-          <div className="absolute top-0 left-0 w-[1000px] h-[680px] z-[9] flex pointer-events-none">
+          <div className="absolute top-0 left-0 w-[1000px] h-[680px] z-[9] flex overflow-hidden rounded-md pointer-events-none">
             <div className="pointer-events-auto w-full h-full">
               <Outlet />
             </div>
