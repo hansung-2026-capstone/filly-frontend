@@ -304,14 +304,6 @@ export function RecommendPage() {
     setReceiptAtBottom(scrollHeight - scrollTop - clientHeight < 8);
   }
 
-  const visibleCardIds = new Set(cardOrder);
-  const currentRevealedCardId =
-    recommendationDraw?.cards.find(
-      (card) =>
-        visibleCardIds.has(card.cardId) &&
-        (card.revealed || revealedRecommendations[card.cardId]),
-    )?.cardId ?? null;
-
   function startShuffleMotion() {
     setIsShuffling(true);
     window.setTimeout(() => {
@@ -327,10 +319,6 @@ export function RecommendPage() {
       isPreparingShuffle ||
       revealingCardId !== null
     ) {
-      return;
-    }
-
-    if (currentRevealedCardId !== null && currentRevealedCardId !== cardId) {
       return;
     }
 
@@ -475,16 +463,11 @@ export function RecommendPage() {
                       !isShuffling &&
                       !isShuffleLocked;
                     const isRevealing = revealingCardId === cardId;
-                    const isBlockedByRevealedCard =
-                      currentRevealedCardId !== null &&
-                      currentRevealedCardId !== cardId;
                     const isCardDisabled =
-                      recommendationLoading ||
-                      !recommendationDraw ||
+                      isWaitingForInitialRecommendation ||
                       isShuffling ||
                       isShuffleLocked ||
                       isPreparingShuffle ||
-                      isBlockedByRevealedCard ||
                       (revealingCardId !== null && !isRevealing);
                     const cardLabel = `추천 카드 ${card?.position ?? slotIndex + 1}`;
                     const shufflePath =
@@ -510,8 +493,6 @@ export function RecommendPage() {
                         aria-label={cardLabel}
                         className={`group relative z-[1] h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
                           isWaitingForInitialRecommendation ? "opacity-55" : ""
-                        } ${
-                          isBlockedByRevealedCard ? "opacity-55" : ""
                         } ${
                           isCardDisabled ? "cursor-default" : "cursor-pointer"
                         }`}
@@ -626,12 +607,8 @@ export function RecommendPage() {
                                 </>
                               ) : (
                                 <div className="flex h-full items-center justify-center text-center text-[13px] leading-[1.7] text-text-muted">
-                                  {isBlockedByRevealedCard ? (
-                                    <>
-                                      카드 섞기로
-                                      <br />
-                                      다음 추천을 만나보세요.
-                                    </>
+                                  {isWaitingForInitialRecommendation ? (
+                                    <>추천 카드를 불러오는 중이에요.</>
                                   ) : (
                                     <>
                                       카드를 선택하면
