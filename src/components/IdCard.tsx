@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { UserAvatar } from "./UserAvatar";
 
 interface IdCardProps {
   avatarUrl: string;
@@ -7,9 +7,6 @@ interface IdCardProps {
 }
 
 export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(
-    avatarUrl,
-  );
   const visibleKeywords = keywords.slice(0, 3);
 
   return (
@@ -27,18 +24,10 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
       {/* 본문 */}
       <div className="bg-notebook-page flex flex-col items-center px-4 pt-4 pb-3 gap-3">
         {/* 아바타 */}
-        <div className="w-[72px] h-[72px] rounded-full overflow-hidden border-[3px] border-border-medium bg-bg-hover flex items-center justify-center flex-shrink-0 shadow-small">
-          {profileImageUrl ? (
-            <img
-              src={profileImageUrl}
-              alt="avatar"
-              className="w-full h-full object-cover"
-              onError={() => setProfileImageUrl(null)}
-            />
-          ) : (
-            <span className="text-3xl">👤</span>
-          )}
-        </div>
+        <UserAvatar
+          avatarUrl={avatarUrl}
+          className="w-[72px] h-[72px] border-[3px] border-border-medium shadow-small"
+        />
 
         {/* 닉네임 */}
         <div className="text-center">
