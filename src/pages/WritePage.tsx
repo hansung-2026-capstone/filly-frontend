@@ -143,7 +143,7 @@ export function WritePage() {
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo'] relative">
       {isSaving && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-page-loading z-20 gap-3">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-page-loading z-20 gap-3 rounded-md">
           <div className="w-6 h-6 border-2 border-[var(--border-spinner)] border-t-[var(--border-spinner-active)] rounded-full animate-spin" />
           <span className="text-sm text-text-primary tracking-wide">
             {editDiary ? "일기 수정 중..." : "일기 작성 중..."}
