@@ -180,7 +180,7 @@ export function HomePage() {
         </div>
 
         <div className="flex flex-col items-center justify-center py-5 px-2 gap-2 border-b border-border-light">
-          <UserAvatar avatarUrl={user?.currentAvatarUrl ?? null} />
+          <UserAvatar avatarUrl={user?.currentAvatarUrl ?? null} className="w-25 h-25" />
           <div className="w-full px-2 py-2 text-center text-[15px] font-bold tracking-[1px] text-text-stronger font-['Nanum_Myeongjo']">
             {userLoading ? "···" : user?.nickname ?? "이름 없음"}
           </div>
