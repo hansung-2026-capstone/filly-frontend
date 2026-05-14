@@ -57,10 +57,10 @@ const NOTEBOOK_LAYOUT = {
   pageWidth: 1000,
   pageHeight: 680,
   shadowWidth: 1040,
-  shadowHeight: 720,
+  shadowHeight: 700,
   pageOffsetX: 20,
   pageOffsetY: 24,
-  shadowOffsetY: 4,
+  shadowOffsetY: 14,
   padding: 24,
 };
 
@@ -186,7 +186,9 @@ export function Root() {
             top: NOTEBOOK_LAYOUT.shadowOffsetY * notebookScale,
             width: NOTEBOOK_LAYOUT.shadowWidth,
             height: NOTEBOOK_LAYOUT.shadowHeight,
-            boxShadow: "var(--notebook-desk-shadow)",
+            background: "var(--notebook-cover-background)",
+            backgroundSize: "var(--notebook-cover-background-size)",
+            boxShadow: "var(--notebook-cover-shadow)",
           }}
         />
 
