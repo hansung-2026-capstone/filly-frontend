@@ -11,6 +11,7 @@ import { useCurrentUser } from "../hook/common/useCurrentUser";
 import {
   formatDateKeyFromParts,
   getWeeksInMonth,
+  isFutureMonth,
   MONTHS,
   WEEK_DAYS_LONG,
   WEEK_DAYS_SHORT,
@@ -107,6 +108,10 @@ export function HomePage() {
   const [selectedDiary, setSelectedDiary] = useState<DiaryItem | null>(null);
   const navigate = useNavigate();
   const weeks = getWeeksInMonth(currentYear, currentMonth);
+  const nextMonth = currentMonth === 12
+    ? { year: currentYear + 1, month: 1 }
+    : { year: currentYear, month: currentMonth + 1 };
+  const nextMonthDisabled = isFutureMonth(nextMonth.year, nextMonth.month);
   const { diaries, loading, refetch } = useMonthlyDiaries(currentYear, currentMonth);
   const { data: user, isLoading: userLoading } = useCurrentUser();
 
@@ -125,12 +130,10 @@ export function HomePage() {
   };
 
   const handleNextMonth = () => {
-    if (currentMonth === 12) {
-      setCurrentMonth(1);
-      setCurrentYear(currentYear + 1);
-    } else {
-      setCurrentMonth(currentMonth + 1);
-    }
+    if (nextMonthDisabled) return;
+
+    setCurrentYear(nextMonth.year);
+    setCurrentMonth(nextMonth.month);
   };
 
   return (
@@ -171,9 +174,12 @@ export function HomePage() {
             </button>
             <button
               onClick={handleNextMonth}
+              disabled={nextMonthDisabled}
+              aria-disabled={nextMonthDisabled}
               className="flex-1 rounded-lg bg-[var(--bg-hover-soft)] py-2 flex items-center justify-center gap-1
                 border-none cursor-pointer text-[11px] tracking-[1px] text-[var(--text-control-muted)]
-                hover:bg-bg-control-hover hover:text-[var(--text-dark)] transition-all"
+                hover:bg-bg-control-hover hover:text-[var(--text-dark)] transition-all
+                disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:bg-[var(--bg-hover-soft)] disabled:hover:text-[var(--text-control-muted)]"
             >
               <span>다음</span>
               <ChevronRight className="w-3 h-3" />
