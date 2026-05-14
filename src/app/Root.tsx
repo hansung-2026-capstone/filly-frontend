@@ -1,6 +1,8 @@
 import { Settings, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
+import { useCurrentUser } from "../hook/common/useCurrentUser";
+import { getBackgroundThemeId } from "../lib/backgroundTheme";
 
 type TabConfig = {
   path: string;
@@ -80,8 +82,10 @@ function NotebookPage({ side }: { side: "left" | "right" }) {
 export function Root() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: user } = useCurrentUser();
   const [notebookScale, setNotebookScale] = useState(getNotebookScale);
   const activePage = location.pathname === "/" ? "home" : location.pathname.slice(1);
+  const backgroundTheme = getBackgroundThemeId(user?.backgroundTheme);
 
   useEffect(() => {
     const updateNotebookScale = () => {
@@ -111,7 +115,10 @@ export function Root() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden p-3">
+    <div
+      data-background-theme={backgroundTheme}
+      className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden p-3"
+    >
       <div
         className="absolute inset-0 opacity-50"
         style={{ background: "var(--notebook-bg-radial)" }}

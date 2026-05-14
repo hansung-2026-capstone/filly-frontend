@@ -1,5 +1,6 @@
 import { SettingsPreferencesSection } from "../components/SettingsPreferencesSection";
 import { SettingsProfileSection } from "../components/SettingsProfileSection";
+import { SettingsThemeSection } from "../components/SettingsThemeSection";
 
 export function SettingsPage() {
   return (
@@ -25,6 +26,7 @@ export function SettingsPage() {
           </div>
 
           <SettingsProfileSection />
+          <SettingsThemeSection />
         </section>
       </div>
 
