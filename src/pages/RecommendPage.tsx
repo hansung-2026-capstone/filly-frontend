@@ -68,6 +68,7 @@ function getCardOrder(draw: RecommendationDraw | null) {
 
   return [...draw.cards]
     .sort((a, b) => a.position - b.position)
+    .slice(0, CARD_COUNT)
     .map((card) => card.cardId);
 }
 
@@ -303,9 +304,12 @@ export function RecommendPage() {
     setReceiptAtBottom(scrollHeight - scrollTop - clientHeight < 8);
   }
 
+  const visibleCardIds = new Set(cardOrder);
   const currentRevealedCardId =
     recommendationDraw?.cards.find(
-      (card) => card.revealed || revealedRecommendations[card.cardId],
+      (card) =>
+        visibleCardIds.has(card.cardId) &&
+        (card.revealed || revealedRecommendations[card.cardId]),
     )?.cardId ?? null;
 
   function startShuffleMotion() {
@@ -377,6 +381,7 @@ export function RecommendPage() {
 
   function handleRecommendationHistoryClick(item: RecommendationDetail) {
     if (item.drawId !== recommendationDraw?.drawId) return;
+    if (!cardOrder.includes(item.cardId)) return;
 
     setRevealedRecommendations((currentDetails) => ({
       ...currentDetails,
