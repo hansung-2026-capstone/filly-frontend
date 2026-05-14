@@ -37,6 +37,23 @@
   --tab-settings: #c7b8ff;
   --tab-settings-text: rgba(55, 42, 105, 0.8);
 
+  /* Theme Preview Swatches */
+  --theme-preview-classic-1: #5c4a3a;
+  --theme-preview-classic-2: #faf6ed;
+  --theme-preview-classic-3: #ff7eb3;
+  --theme-preview-rose-1: #6b4752;
+  --theme-preview-rose-2: #fff4f3;
+  --theme-preview-rose-3: #ff8fbd;
+  --theme-preview-forest-1: #40523f;
+  --theme-preview-forest-2: #f4f7ed;
+  --theme-preview-forest-3: #91d79d;
+  --theme-preview-ocean-1: #38586a;
+  --theme-preview-ocean-2: #eef8fb;
+  --theme-preview-ocean-3: #81d7f0;
+  --theme-preview-night-1: #262333;
+  --theme-preview-night-2: #f0ecf5;
+  --theme-preview-night-3: #b8a4df;
+
   /* Text Colors */
   --text-primary: rgba(60, 45, 30, 0.84);
   --text-secondary: rgba(95, 78, 58, 0.66);
@@ -305,6 +322,162 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+}
+
+
+/* Background Theme Presets */
+[data-background-theme="classic"] {
+  --theme-preview-classic-1: #5c4a3a;
+  --theme-preview-classic-2: #faf6ed;
+  --theme-preview-classic-3: #ff7eb3;
+}
+
+[data-background-theme="rose"] {
+  --notebook-bg: #6b4752;
+  --notebook-page: #fff4f3;
+  --notebook-page-gradient-left: linear-gradient(135deg, #f8e8e7 0%, #fff4f3 42%, #f3dedf 100%);
+  --notebook-page-gradient-right: linear-gradient(225deg, #f8e8e7 0%, #fff4f3 42%, #f3dedf 100%);
+  --notebook-bg-radial: radial-gradient(circle at 30% 40%, rgba(107, 71, 82, 0.82) 0%, rgba(107, 71, 82, 0.42) 50%, transparent 100%);
+  --notebook-page-edge-gradient: repeating-linear-gradient(to right, rgba(242, 222, 221, 0.9), rgba(242, 222, 221, 0.9) 1px, rgba(235, 214, 213, 0.9) 1px, rgba(235, 214, 213, 0.9) 2px);
+  --notebook-spine-gradient: linear-gradient(to right, rgba(92, 42, 58, 0.02) 0%, rgba(92, 42, 58, 0.05) 25%, rgba(92, 42, 58, 0.08) 45%, rgba(92, 42, 58, 0.08) 55%, rgba(92, 42, 58, 0.05) 75%, rgba(92, 42, 58, 0.02) 100%);
+  --tab-home: #ff8fbd;
+  --tab-home-text: rgba(112, 35, 62, 0.82);
+  --tab-stats: #a9e8c4;
+  --tab-stats-text: rgba(42, 88, 62, 0.82);
+  --tab-recommend: #ffd6a8;
+  --tab-recommend-text: rgba(116, 70, 34, 0.82);
+  --tab-archive: #b8d9ff;
+  --tab-archive-text: rgba(42, 75, 112, 0.82);
+  --tab-settings: #e4b8ff;
+  --tab-settings-text: rgba(78, 48, 112, 0.82);
+  --text-primary: rgba(68, 42, 44, 0.84);
+  --text-secondary: rgba(105, 72, 75, 0.66);
+  --text-strong: rgba(62, 38, 40, 0.86);
+  --text-muted: rgba(78, 50, 54, 0.72);
+  --text-stronger: rgba(68, 42, 44, 0.95);
+  --text-page-label: rgba(112, 74, 78, 0.58);
+  --border-light: rgba(174, 116, 122, 0.14);
+  --border-subtle: rgba(170, 112, 120, 0.18);
+  --border-input-strong: rgba(126, 78, 86, 0.62);
+  --border-input-focus-strong: rgba(102, 56, 68, 0.82);
+  --bg-hover: rgba(178, 118, 126, 0.09);
+  --bg-active: rgba(178, 118, 126, 0.16);
+  --bg-surface-muted: rgba(250, 226, 224, 0.62);
+  --bg-editor-panel: rgba(255, 250, 248, 0.84);
+  --theme-preview-rose-1: #6b4752;
+  --theme-preview-rose-2: #fff4f3;
+  --theme-preview-rose-3: #ff8fbd;
+}
+
+[data-background-theme="forest"] {
+  --notebook-bg: #40523f;
+  --notebook-page: #f4f7ed;
+  --notebook-page-gradient-left: linear-gradient(135deg, #eaf0df 0%, #f4f7ed 42%, #e5edd8 100%);
+  --notebook-page-gradient-right: linear-gradient(225deg, #eaf0df 0%, #f4f7ed 42%, #e5edd8 100%);
+  --notebook-bg-radial: radial-gradient(circle at 30% 40%, rgba(64, 82, 63, 0.82) 0%, rgba(64, 82, 63, 0.42) 50%, transparent 100%);
+  --notebook-page-edge-gradient: repeating-linear-gradient(to right, rgba(226, 234, 214, 0.9), rgba(226, 234, 214, 0.9) 1px, rgba(217, 227, 204, 0.9) 1px, rgba(217, 227, 204, 0.9) 2px);
+  --notebook-spine-gradient: linear-gradient(to right, rgba(42, 64, 42, 0.02) 0%, rgba(42, 64, 42, 0.05) 25%, rgba(42, 64, 42, 0.08) 45%, rgba(42, 64, 42, 0.08) 55%, rgba(42, 64, 42, 0.05) 75%, rgba(42, 64, 42, 0.02) 100%);
+  --tab-home: #f3a3b8;
+  --tab-home-text: rgba(96, 44, 60, 0.82);
+  --tab-stats: #91d79d;
+  --tab-stats-text: rgba(35, 82, 45, 0.84);
+  --tab-recommend: #e8d06e;
+  --tab-recommend-text: rgba(96, 82, 28, 0.84);
+  --tab-archive: #9ed0c9;
+  --tab-archive-text: rgba(34, 82, 78, 0.82);
+  --tab-settings: #b8d89a;
+  --tab-settings-text: rgba(58, 88, 44, 0.84);
+  --text-primary: rgba(45, 58, 38, 0.84);
+  --text-secondary: rgba(72, 92, 62, 0.66);
+  --text-strong: rgba(42, 55, 34, 0.88);
+  --text-muted: rgba(58, 76, 48, 0.74);
+  --text-stronger: rgba(42, 58, 34, 0.96);
+  --text-page-label: rgba(78, 98, 66, 0.58);
+  --border-light: rgba(116, 146, 98, 0.14);
+  --border-subtle: rgba(112, 142, 96, 0.18);
+  --border-input-strong: rgba(80, 116, 68, 0.62);
+  --border-input-focus-strong: rgba(58, 92, 48, 0.82);
+  --bg-hover: rgba(118, 150, 98, 0.09);
+  --bg-active: rgba(118, 150, 98, 0.16);
+  --bg-surface-muted: rgba(232, 240, 218, 0.64);
+  --bg-editor-panel: rgba(250, 253, 246, 0.84);
+  --theme-preview-forest-1: #40523f;
+  --theme-preview-forest-2: #f4f7ed;
+  --theme-preview-forest-3: #91d79d;
+}
+
+[data-background-theme="ocean"] {
+  --notebook-bg: #38586a;
+  --notebook-page: #eef8fb;
+  --notebook-page-gradient-left: linear-gradient(135deg, #dff0f5 0%, #eef8fb 42%, #d7ecf2 100%);
+  --notebook-page-gradient-right: linear-gradient(225deg, #dff0f5 0%, #eef8fb 42%, #d7ecf2 100%);
+  --notebook-bg-radial: radial-gradient(circle at 30% 40%, rgba(56, 88, 106, 0.82) 0%, rgba(56, 88, 106, 0.42) 50%, transparent 100%);
+  --notebook-page-edge-gradient: repeating-linear-gradient(to right, rgba(215, 235, 241, 0.9), rgba(215, 235, 241, 0.9) 1px, rgba(205, 228, 236, 0.9) 1px, rgba(205, 228, 236, 0.9) 2px);
+  --notebook-spine-gradient: linear-gradient(to right, rgba(30, 64, 80, 0.02) 0%, rgba(30, 64, 80, 0.05) 25%, rgba(30, 64, 80, 0.08) 45%, rgba(30, 64, 80, 0.08) 55%, rgba(30, 64, 80, 0.05) 75%, rgba(30, 64, 80, 0.02) 100%);
+  --tab-home: #ff99b6;
+  --tab-home-text: rgba(92, 38, 58, 0.82);
+  --tab-stats: #8ee3c0;
+  --tab-stats-text: rgba(28, 82, 64, 0.84);
+  --tab-recommend: #ffe089;
+  --tab-recommend-text: rgba(94, 76, 28, 0.84);
+  --tab-archive: #81d7f0;
+  --tab-archive-text: rgba(26, 78, 98, 0.84);
+  --tab-settings: #9ec2ff;
+  --tab-settings-text: rgba(42, 64, 112, 0.84);
+  --text-primary: rgba(36, 54, 64, 0.84);
+  --text-secondary: rgba(62, 86, 98, 0.66);
+  --text-strong: rgba(34, 50, 58, 0.88);
+  --text-muted: rgba(48, 72, 84, 0.74);
+  --text-stronger: rgba(34, 54, 64, 0.96);
+  --text-page-label: rgba(66, 96, 110, 0.58);
+  --border-light: rgba(98, 150, 170, 0.14);
+  --border-subtle: rgba(94, 146, 168, 0.18);
+  --border-input-strong: rgba(62, 116, 138, 0.62);
+  --border-input-focus-strong: rgba(42, 92, 116, 0.82);
+  --bg-hover: rgba(92, 150, 170, 0.09);
+  --bg-active: rgba(92, 150, 170, 0.16);
+  --bg-surface-muted: rgba(222, 240, 246, 0.64);
+  --bg-editor-panel: rgba(248, 253, 255, 0.84);
+  --theme-preview-ocean-1: #38586a;
+  --theme-preview-ocean-2: #eef8fb;
+  --theme-preview-ocean-3: #81d7f0;
+}
+
+[data-background-theme="night"] {
+  --notebook-bg: #262333;
+  --notebook-page: #f0ecf5;
+  --notebook-page-gradient-left: linear-gradient(135deg, #e6e0ee 0%, #f0ecf5 42%, #ddd7e8 100%);
+  --notebook-page-gradient-right: linear-gradient(225deg, #e6e0ee 0%, #f0ecf5 42%, #ddd7e8 100%);
+  --notebook-bg-radial: radial-gradient(circle at 30% 40%, rgba(38, 35, 51, 0.86) 0%, rgba(38, 35, 51, 0.48) 50%, transparent 100%);
+  --notebook-page-edge-gradient: repeating-linear-gradient(to right, rgba(221, 216, 232, 0.9), rgba(221, 216, 232, 0.9) 1px, rgba(211, 205, 224, 0.9) 1px, rgba(211, 205, 224, 0.9) 2px);
+  --notebook-spine-gradient: linear-gradient(to right, rgba(22, 18, 34, 0.02) 0%, rgba(22, 18, 34, 0.06) 25%, rgba(22, 18, 34, 0.10) 45%, rgba(22, 18, 34, 0.10) 55%, rgba(22, 18, 34, 0.06) 75%, rgba(22, 18, 34, 0.02) 100%);
+  --tab-home: #d89ac1;
+  --tab-home-text: rgba(72, 38, 68, 0.86);
+  --tab-stats: #9bcda8;
+  --tab-stats-text: rgba(38, 78, 48, 0.86);
+  --tab-recommend: #dccb82;
+  --tab-recommend-text: rgba(82, 70, 32, 0.86);
+  --tab-archive: #91bdd8;
+  --tab-archive-text: rgba(34, 68, 92, 0.86);
+  --tab-settings: #b8a4df;
+  --tab-settings-text: rgba(52, 42, 92, 0.86);
+  --text-primary: rgba(48, 42, 64, 0.84);
+  --text-secondary: rgba(78, 70, 98, 0.66);
+  --text-strong: rgba(42, 36, 58, 0.88);
+  --text-muted: rgba(62, 54, 82, 0.74);
+  --text-stronger: rgba(42, 36, 60, 0.96);
+  --text-page-label: rgba(86, 78, 108, 0.58);
+  --border-light: rgba(116, 104, 146, 0.15);
+  --border-subtle: rgba(112, 104, 142, 0.20);
+  --border-input-strong: rgba(82, 72, 120, 0.62);
+  --border-input-focus-strong: rgba(62, 52, 100, 0.82);
+  --bg-hover: rgba(112, 104, 142, 0.10);
+  --bg-active: rgba(112, 104, 142, 0.18);
+  --bg-surface-muted: rgba(228, 222, 238, 0.66);
+  --bg-editor-panel: rgba(250, 248, 255, 0.84);
+  --theme-preview-night-1: #262333;
+  --theme-preview-night-2: #f0ecf5;
+  --theme-preview-night-3: #b8a4df;
 }
 
 @theme inline {
