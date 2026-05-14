@@ -187,7 +187,7 @@ export function Root() {
       />
 
       <div
-        className="fixed inset-0 pointer-events-none z-0"
+        className="fixed inset-0 pointer-events-none z-0 opacity-40"
         style={{ background: "var(--notebook-texture-lines)" }}
       />
 
