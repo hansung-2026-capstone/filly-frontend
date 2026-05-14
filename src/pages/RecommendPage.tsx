@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { X, Download, Check } from "lucide-react";
 import { toPng } from "html-to-image";
+import { isAxiosError } from "axios";
 import tarotCardImage from "../assets/tarot/card.png";
 import {
   getRecommendationHistory,
@@ -25,19 +26,9 @@ import type {
 const CARD_COUNT = 3;
 const CARD_RESET_DURATION_MS = 700;
 const CARD_RESET_SETTLE_BUFFER_MS = 120;
-const SHUFFLE_DURATION_MS = 1300;
-const SHUFFLE_REORDER_DELAY_MS = 460;
-const SHUFFLE_PATHS = [
-  {
-    x: ["0%", "58%", "118%", "82%", "24%", "0%"],
-  },
-  {
-    x: ["0%", "-48%", "54%", "-36%", "38%", "0%"],
-  },
-  {
-    x: ["0%", "-58%", "-118%", "-82%", "-24%", "0%"],
-  },
-];
+const SHUFFLE_MIN_VISIBLE_MS = 1200;
+const SHUFFLE_STEP_DURATION_MS = 600;
+const RECOMMENDATION_REQUEST_COOLDOWN_MS = 1800;
 import { Portal } from "../components/Portal";
 
 type CaptureTarget = "idCard" | "receipt" | "keywordCloud";
@@ -68,6 +59,7 @@ function getCardOrder(draw: RecommendationDraw | null) {
 
   return [...draw.cards]
     .sort((a, b) => a.position - b.position)
+    .slice(0, CARD_COUNT)
     .map((card) => card.cardId);
 }
 
@@ -84,13 +76,25 @@ function getCenteredCardOrder(currentOrder: number[], cardId: number) {
   return nextOrder;
 }
 
-function getShuffledCardOrder(currentOrder: number[]) {
-  const nextOrder = [...currentOrder].sort(() => Math.random() - 0.5);
-
-  if (nextOrder.every((cardId, index) => cardId === currentOrder[index])) {
-    nextOrder.push(nextOrder.shift() ?? 0);
+function swapOrderByIndex(
+  currentOrder: number[],
+  firstIndex: number,
+  secondIndex: number,
+) {
+  if (
+    firstIndex < 0 ||
+    secondIndex < 0 ||
+    firstIndex >= currentOrder.length ||
+    secondIndex >= currentOrder.length
+  ) {
+    return currentOrder;
   }
 
+  const nextOrder = [...currentOrder];
+  [nextOrder[firstIndex], nextOrder[secondIndex]] = [
+    nextOrder[secondIndex],
+    nextOrder[firstIndex],
+  ];
   return nextOrder;
 }
 
@@ -149,6 +153,22 @@ export function RecommendPage() {
   const receiptScrollRef = useRef<HTMLDivElement>(null);
   const receiptWrapRef = useRef<HTMLDivElement>(null);
   const keywordCloudRef = useRef<HTMLDivElement>(null);
+  const lastRecommendationRequestAtRef = useRef(0);
+
+  function isRateLimitError(error: unknown) {
+    return isAxiosError(error) && error.response?.status === 429;
+  }
+
+  function canRequestRecommendationNow() {
+    return (
+      Date.now() - lastRecommendationRequestAtRef.current >=
+      RECOMMENDATION_REQUEST_COOLDOWN_MS
+    );
+  }
+
+  function markRecommendationRequested() {
+    lastRecommendationRequestAtRef.current = Date.now();
+  }
 
   useEffect(() => {
     let ignore = false;
@@ -303,18 +323,6 @@ export function RecommendPage() {
     setReceiptAtBottom(scrollHeight - scrollTop - clientHeight < 8);
   }
 
-  const currentRevealedCardId =
-    recommendationDraw?.cards.find(
-      (card) => card.revealed || revealedRecommendations[card.cardId],
-    )?.cardId ?? null;
-
-  function startShuffleMotion() {
-    setIsShuffling(true);
-    window.setTimeout(() => {
-      setCardOrder((currentOrder) => getShuffledCardOrder(currentOrder));
-    }, SHUFFLE_REORDER_DELAY_MS);
-  }
-
   async function handleRecommendationCardClick(cardId: number) {
     if (
       !recommendationDraw ||
@@ -325,8 +333,8 @@ export function RecommendPage() {
     ) {
       return;
     }
-
-    if (currentRevealedCardId !== null && currentRevealedCardId !== cardId) {
+    if (!canRequestRecommendationNow()) {
+      setRecommendationError("요청이 많아요. 잠시 후 다시 시도해주세요.");
       return;
     }
 
@@ -340,6 +348,7 @@ export function RecommendPage() {
     setSelectedCardId(cardId);
     setRevealingCardId(cardId);
     setRecommendationError(null);
+    markRecommendationRequested();
 
     try {
       const detail = await revealRecommendationCard(
@@ -362,7 +371,11 @@ export function RecommendPage() {
     } catch (error) {
       console.error("[recommendation] 추천 카드를 공개하지 못했어요.", error);
       setSelectedCardId(null);
-      setRecommendationError("추천 카드를 공개하지 못했어요.");
+      setRecommendationError(
+        isRateLimitError(error)
+          ? "요청이 많아요. 잠시 후 다시 시도해주세요."
+          : "추천 카드를 공개하지 못했어요.",
+      );
     } finally {
       setRevealingCardId(null);
     }
@@ -377,6 +390,7 @@ export function RecommendPage() {
 
   function handleRecommendationHistoryClick(item: RecommendationDetail) {
     if (item.drawId !== recommendationDraw?.drawId) return;
+    if (!cardOrder.includes(item.cardId)) return;
 
     setRevealedRecommendations((currentDetails) => ({
       ...currentDetails,
@@ -395,11 +409,14 @@ export function RecommendPage() {
     ) {
       return;
     }
-
+    if (!canRequestRecommendationNow()) {
+      setRecommendationError("요청이 많아요. 잠시 후 다시 시도해주세요.");
+      return;
+    }
     setIsShuffleLocked(true);
     setRecommendationError(null);
+    markRecommendationRequested();
     const previousRevealedRecommendations = revealedRecommendations;
-    const previousSelectedCardId = selectedCardId;
     const nextDrawPromise = shuffleRecommendationDraw(recommendationDraw.drawId);
 
     if (selectedCardId !== null) {
@@ -411,19 +428,41 @@ export function RecommendPage() {
     }
 
     setRevealedRecommendations({});
-    startShuffleMotion();
+    setIsShuffling(true);
+    const stepPairs: [number, number][] = [
+      [0, 1],
+      [1, 2],
+      [0, 1],
+    ];
+    let stepIndex = 0;
+    const shuffleLoopId = window.setInterval(() => {
+      const [firstIndex, secondIndex] = stepPairs[stepIndex % stepPairs.length];
+      stepIndex += 1;
+      setCardOrder((currentOrder) =>
+        swapOrderByIndex(currentOrder, firstIndex, secondIndex),
+      );
+    }, SHUFFLE_STEP_DURATION_MS);
 
     try {
-      const nextDraw = await nextDrawPromise;
+      const [nextDraw] = await Promise.all([
+        nextDrawPromise,
+        wait(SHUFFLE_MIN_VISIBLE_MS),
+      ]);
       setRecommendationDraw(nextDraw);
       setCardOrder(getCardOrder(nextDraw));
       setSelectedCardId(null);
     } catch (error) {
       console.error("[recommendation] 추천 카드를 섞지 못했어요.", error);
       setRevealedRecommendations(previousRevealedRecommendations);
-      setSelectedCardId(previousSelectedCardId);
-      setRecommendationError("추천 카드를 섞지 못했어요.");
+      setCardOrder(getCardOrder(recommendationDraw));
+      setSelectedCardId(null);
+      setRecommendationError(
+        isRateLimitError(error)
+          ? "요청이 많아요. 잠시 후 다시 시도해주세요."
+          : "추천 카드를 섞지 못했어요.",
+      );
     } finally {
+      window.clearInterval(shuffleLoopId);
       setIsShuffling(false);
       setIsShuffleLocked(false);
     }
@@ -470,20 +509,13 @@ export function RecommendPage() {
                       !isShuffling &&
                       !isShuffleLocked;
                     const isRevealing = revealingCardId === cardId;
-                    const isBlockedByRevealedCard =
-                      currentRevealedCardId !== null &&
-                      currentRevealedCardId !== cardId;
                     const isCardDisabled =
-                      recommendationLoading ||
-                      !recommendationDraw ||
+                      isWaitingForInitialRecommendation ||
                       isShuffling ||
                       isShuffleLocked ||
                       isPreparingShuffle ||
-                      isBlockedByRevealedCard ||
                       (revealingCardId !== null && !isRevealing);
                     const cardLabel = `추천 카드 ${card?.position ?? slotIndex + 1}`;
-                    const shufflePath =
-                      SHUFFLE_PATHS[slotIndex % SHUFFLE_PATHS.length];
                     return (
                       <motion.div
                         layout
@@ -506,23 +538,12 @@ export function RecommendPage() {
                         className={`group relative z-[1] h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
                           isWaitingForInitialRecommendation ? "opacity-55" : ""
                         } ${
-                          isBlockedByRevealedCard ? "opacity-55" : ""
-                        } ${
                           isCardDisabled ? "cursor-default" : "cursor-pointer"
                         }`}
-                        animate={{
-                          x: isShuffling ? shufflePath.x : "0%",
-                        }}
                         transition={{
-                          x: {
-                            duration: isShuffling ? SHUFFLE_DURATION_MS / 1000 : 0.5,
-                            ease: [0.28, 0, 0.22, 1],
-                            repeat: isShuffling ? Infinity : 0,
-                            repeatType: "loop",
-                          },
                           layout: {
-                            duration: 0.7,
-                            ease: [0.4, 0, 0.2, 1],
+                            duration: isShuffling ? SHUFFLE_STEP_DURATION_MS / 1000 : 0.45,
+                            ease: [0.22, 0.61, 0.36, 1],
                           },
                         }}
                         style={{ zIndex: showSelectedFront ? 10 : 1 }}
@@ -621,12 +642,8 @@ export function RecommendPage() {
                                 </>
                               ) : (
                                 <div className="flex h-full items-center justify-center text-center text-[13px] leading-[1.7] text-text-muted">
-                                  {isBlockedByRevealedCard ? (
-                                    <>
-                                      카드 섞기로
-                                      <br />
-                                      다음 추천을 만나보세요.
-                                    </>
+                                  {isWaitingForInitialRecommendation ? (
+                                    <>추천 카드를 불러오는 중이에요.</>
                                   ) : (
                                     <>
                                       카드를 선택하면
