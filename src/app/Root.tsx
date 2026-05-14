@@ -1,11 +1,21 @@
+import { Settings, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 
-const TABS = [
+type TabConfig = {
+  path: string;
+  label: string;
+  icon?: LucideIcon;
+  bgClass: string;
+  textClass: string;
+};
+
+const TABS: TabConfig[] = [
   { path: "home", label: "홈", bgClass: "bg-[var(--tab-home)]", textClass: "text-[var(--tab-home-text)]" },
   { path: "stats", label: "통계", bgClass: "bg-[var(--tab-stats)]", textClass: "text-[var(--tab-stats-text)]" },
   { path: "recommend", label: "추천", bgClass: "bg-[var(--tab-recommend)]", textClass: "text-[var(--tab-recommend-text)]" },
   { path: "archive", label: "아카이브", bgClass: "bg-[var(--tab-archive)]", textClass: "text-[var(--tab-archive-text)]" },
+  { path: "settings", label: "설정", icon: Settings, bgClass: "bg-[var(--tab-settings)]", textClass: "text-[var(--tab-settings-text)]" },
 ];
 
 const NOTEBOOK_LAYOUT = {
@@ -168,16 +178,19 @@ export function Root() {
             </div>
           </div>
 
-          <div className="absolute left-full top-10 flex flex-col items-start gap-1.5 z-20">
+          <div className="absolute left-full top-10 bottom-10 flex flex-col items-start gap-1.5 z-20">
             {TABS.map((tab) => (
               <button
                 key={tab.path}
                 onClick={() => handleTabClick(tab.path)}
                 data-page={tab.path}
+                aria-label={tab.label}
+                title={tab.label}
                 className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
                   font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
                   shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
                   hover:w-14 hover:shadow-[var(--shadow-tab-hover)]
+                  ${tab.path === "settings" ? "mt-auto" : ""}
                   ${activePage === tab.path ? "active shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
                 style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
               >
@@ -185,7 +198,7 @@ export function Root() {
                   className="absolute inset-0 rounded-r-md pointer-events-none"
                   style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
                 />
-                {tab.label}
+                {tab.icon ? <tab.icon className="h-5 w-5" aria-hidden="true" /> : tab.label}
               </button>
             ))}
           </div>

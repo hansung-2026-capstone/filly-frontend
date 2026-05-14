@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { CalendarCell } from "../components/CalendarCell";
 import { DiaryDetailModal } from "../components/DiaryDetailModal";
 import { MonthPickerModal } from "../components/MonthPickerModal";
-import { NicknameEditor } from "../components/NicknameEditor";
+import { UserAvatar } from "../components/UserAvatar";
 import { useMonthlyDiaries } from "../hook/common/useMonthlyDiaries";
 import { useCurrentUser } from "../hook/common/useCurrentUser";
 import {
@@ -105,8 +105,7 @@ export function HomePage() {
   const navigate = useNavigate();
   const weeks = getWeeksInMonth(currentYear, currentMonth);
   const { diaries, loading, refetch } = useMonthlyDiaries(currentYear, currentMonth);
-  const { data: user } = useCurrentUser();
-  const profileImageUrl = user?.currentAvatarUrl ?? null;
+  const { data: user, isLoading: userLoading } = useCurrentUser();
 
   const handleMonthSelect = (year: number, month: number) => {
     setCurrentYear(year);
@@ -147,19 +146,10 @@ export function HomePage() {
         </button>
 
         <div className="flex flex-col items-center justify-center py-5 px-2 gap-2 border-b border-border-light">
-          <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-[var(--border-avatar)] shadow-sm bg-bg-hover flex items-center justify-center">
-            {profileImageUrl ? (
-              <img
-                src={profileImageUrl}
-                alt="프로필 이미지"
-                className="w-full h-full object-cover"
-                onError={(event) => { event.currentTarget.style.display = "none"; }}
-              />
-            ) : (
-              <span className="text-[22px] text-[var(--text-muted-light)]">👤</span>
-            )}
+          <UserAvatar avatarUrl={user?.currentAvatarUrl ?? null} />
+          <div className="w-full px-2 py-2 text-center text-[15px] font-bold tracking-[1px] text-text-stronger font-['Nanum_Myeongjo']">
+            {userLoading ? "···" : user?.nickname ?? "이름 없음"}
           </div>
-          <NicknameEditor />
         </div>
 
         <div className="flex-1 flex flex-col items-stretch py-3.5 px-2.5">
