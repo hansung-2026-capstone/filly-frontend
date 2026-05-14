@@ -117,14 +117,27 @@ export function Root() {
   const location = useLocation();
   const { data: user, isLoading } = useCurrentUser();
   const [notebookScale, setNotebookScale] = useState(getNotebookScale);
-  const [initialStoredTheme] = useState(() =>
-    getStoredBackgroundThemeId(),
-  );
+  const [initialStoredTheme] = useState(() => getStoredBackgroundThemeId());
   const activePage =
     location.pathname === "/" ? "home" : location.pathname.slice(1);
   const backgroundTheme = getBackgroundThemeId(
     user?.backgroundTheme ?? initialStoredTheme ?? DEFAULT_BACKGROUND_THEME,
   );
+
+  useEffect(() => {
+    const rootElement = document.documentElement;
+    const previousTheme = rootElement.getAttribute("data-background-theme");
+
+    rootElement.setAttribute("data-background-theme", backgroundTheme);
+
+    return () => {
+      if (previousTheme) {
+        rootElement.setAttribute("data-background-theme", previousTheme);
+      } else {
+        rootElement.removeAttribute("data-background-theme");
+      }
+    };
+  }, [backgroundTheme]);
 
   useEffect(() => {
     const updateNotebookScale = () => {
@@ -245,7 +258,7 @@ export function Root() {
                 aria-label={tab.label}
                 title={tab.label}
                 className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
-                  font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
+                  font-['Nanum_Pen_Script'] text-[15px] tracking-wider relative transition-all duration-[0.25s]
                   shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
                   hover:w-14 hover:shadow-[var(--shadow-tab-hover)]
                   ${tab.path === "settings" ? "mt-auto" : ""}

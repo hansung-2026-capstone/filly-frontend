@@ -18,7 +18,8 @@ function getThemeCardClass(isSelected: boolean) {
 
 export function SettingsThemeSection() {
   const { data: user, isLoading } = useCurrentUser();
-  const { updateBackgroundTheme, saving, error, clearError } = useUpdateBackgroundTheme();
+  const { updateBackgroundTheme, saving, error, clearError } =
+    useUpdateBackgroundTheme();
   const savedTheme = getBackgroundThemeId(user?.backgroundTheme);
   const [draftTheme, setDraftTheme] = useState<BackgroundThemeId | null>(null);
   const selectedTheme = draftTheme ?? savedTheme;
@@ -41,18 +42,18 @@ export function SettingsThemeSection() {
     <section className="w-full pt-6" aria-label="테마 선택">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-[13px] font-bold tracking-[1px] text-text-muted">
+          <h3 className="text-[14px] font-bold tracking-[1px] text-text-muted">
             테마
           </h3>
-          <p className="mt-1 text-[11px] leading-[1.6] text-text-secondary">
-            노트북의 배경과 종이 분위기를 골라요.
+          <p className="mt-1 text-[12px] leading-[1.6] text-text-secondary">
+            공책의 배경과 종이 분위기를 골라요.
           </p>
         </div>
         <button
           type="button"
           onClick={() => void saveTheme()}
           disabled={!isDirty || saving || isLoading}
-          className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-[var(--bg-strong-control)] px-3 py-1.5 text-[11px] font-bold text-[var(--text-white-soft)] transition-colors hover:bg-[var(--bg-strong-control-hover)] disabled:opacity-35 disabled:cursor-not-allowed"
+          className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-[var(--bg-strong-control)] px-3 py-1.5 text-[12px] font-bold text-[var(--text-white-soft)] transition-colors hover:bg-[var(--bg-strong-control-hover)] disabled:opacity-35 disabled:cursor-not-allowed"
         >
           <Check className="w-3 h-3" aria-hidden="true" />
           {saving ? "저장 중" : "저장"}
@@ -80,10 +81,10 @@ export function SettingsThemeSection() {
                   />
                 ))}
               </span>
-              <span className="block text-[11px] font-bold text-text-strong">
+              <span className="block text-[12px] font-bold text-text-strong">
                 {theme.label}
               </span>
-              <span className="mt-1 block text-[10px] leading-[1.5] text-text-secondary">
+              <span className="mt-1 block text-[11px] leading-[1.5] text-text-secondary">
                 {theme.description}
               </span>
             </button>
@@ -92,7 +93,7 @@ export function SettingsThemeSection() {
       </div>
 
       {error && (
-        <p className="mt-3 text-[11px] font-bold text-[var(--text-error)]">
+        <p className="mt-3 text-[12px] font-bold text-[var(--text-error)]">
           {error}
         </p>
       )}

@@ -38,7 +38,7 @@ const AI_DRAFT_TONE_OPTIONS: Array<{ value: AiDraftTonePreference; label: string
 ];
 
 function getOptionClass(isSelected: boolean) {
-  return `rounded-full border px-3 py-1.5 text-[11px] font-bold transition-colors ${
+  return `rounded-full border px-3 py-1.5 text-[12px] font-bold transition-colors ${
     isSelected
       ? "border-[var(--border-input-strong)] bg-bg-active text-text-control-strong"
       : "border-border-light bg-transparent text-text-secondary hover:bg-bg-hover"
@@ -83,10 +83,10 @@ export function SettingsPreferencesSection() {
     <section className="w-full pt-6" aria-label="AI 초안 스타일">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <h3 className="text-[13px] font-bold tracking-[1px] text-text-muted">
+          <h3 className="text-[14px] font-bold tracking-[1px] text-text-muted">
             AI 초안 스타일
           </h3>
-          <p className="mt-1 text-[11px] leading-[1.6] text-text-secondary">
+          <p className="mt-1 text-[12px] leading-[1.6] text-text-secondary">
             일기 초안을 만들 때 참고할 기본 정보를 설정해요.
           </p>
         </div>
@@ -94,7 +94,7 @@ export function SettingsPreferencesSection() {
           type="button"
           onClick={() => void savePreferences()}
           disabled={!isDirty || saving || isLoading}
-          className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-[var(--bg-strong-control)] px-3 py-1.5 text-[11px] font-bold text-[var(--text-white-soft)] transition-colors hover:bg-[var(--bg-strong-control-hover)] disabled:opacity-35 disabled:cursor-not-allowed"
+          className="flex flex-shrink-0 items-center gap-1.5 rounded-full bg-[var(--bg-strong-control)] px-3 py-1.5 text-[12px] font-bold text-[var(--text-white-soft)] transition-colors hover:bg-[var(--bg-strong-control-hover)] disabled:opacity-35 disabled:cursor-not-allowed"
         >
           <Check className="w-3 h-3" aria-hidden="true" />
           {saving ? "저장 중" : "저장"}
@@ -103,7 +103,7 @@ export function SettingsPreferencesSection() {
 
       <div className="flex flex-col gap-5">
         <div>
-          <div className="mb-2 text-[11px] font-bold text-text-strong">성별</div>
+          <div className="mb-2 text-[12px] font-bold text-text-strong">성별</div>
           <div className="flex flex-wrap gap-2">
             {GENDER_OPTIONS.map((option) => (
               <button
@@ -119,7 +119,7 @@ export function SettingsPreferencesSection() {
         </div>
 
         <div>
-          <div className="mb-2 text-[11px] font-bold text-text-strong">나이대</div>
+          <div className="mb-2 text-[12px] font-bold text-text-strong">나이대</div>
           <div className="flex flex-wrap gap-2">
             {AGE_GROUP_OPTIONS.map((option) => (
               <button
@@ -135,7 +135,7 @@ export function SettingsPreferencesSection() {
         </div>
 
         <div>
-          <div className="mb-2 text-[11px] font-bold text-text-strong">초안 어투</div>
+          <div className="mb-2 text-[12px] font-bold text-text-strong">초안 어투</div>
           <div className="grid grid-cols-2 gap-2">
             {AI_DRAFT_TONE_OPTIONS.map((option) => (
               <button
@@ -148,10 +148,10 @@ export function SettingsPreferencesSection() {
                     : "border-border-light bg-transparent hover:bg-bg-hover"
                 }`}
               >
-                <span className="block text-[11px] font-bold text-text-strong">
+                <span className="block text-[12px] font-bold text-text-strong">
                   {option.label}
                 </span>
-                <span className="mt-1 block text-[10px] leading-[1.5] text-text-secondary">
+                <span className="mt-1 block text-[11px] leading-[1.5] text-text-secondary">
                   {option.description}
                 </span>
               </button>
@@ -161,7 +161,7 @@ export function SettingsPreferencesSection() {
       </div>
 
       {error && (
-        <p className="mt-3 text-[11px] font-bold text-[var(--text-error)]">
+        <p className="mt-3 text-[12px] font-bold text-[var(--text-error)]">
           {error}
         </p>
       )}

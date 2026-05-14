@@ -7,7 +7,7 @@ export function SettingsPage() {
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">
       <div className="flex-1 flex flex-col py-8 px-8 overflow-y-auto">
         <header className="mb-5">
-          <div className="text-[10px] tracking-[3px] text-[var(--text-page-label)] uppercase">
+          <div className="text-[11px] tracking-[3px] text-[var(--text-page-label)] uppercase">
             Settings
           </div>
           <h1 className="mt-2 text-[20px] font-bold tracking-[1px] text-text-stronger">
@@ -17,10 +17,10 @@ export function SettingsPage() {
 
         <section className="w-full max-w-[390px]">
           <div className="mb-3 flex items-end justify-between border-b border-border-light pb-2">
-            <h2 className="text-[13px] font-bold tracking-[1px] text-text-muted">
+            <h2 className="text-[14px] font-bold tracking-[1px] text-text-muted">
               계정
             </h2>
-            <span className="text-[10px] tracking-[2px] text-[var(--text-page-label)] uppercase">
+            <span className="text-[11px] tracking-[2px] text-[var(--text-page-label)] uppercase">
               Profile
             </span>
           </div>
@@ -35,10 +35,10 @@ export function SettingsPage() {
 
         <section className="w-full max-w-[390px]">
           <div className="mb-3 flex items-end justify-between border-b border-border-light pb-2">
-            <h2 className="text-[13px] font-bold tracking-[1px] text-text-muted">
-              개인화
+            <h2 className="text-[14px] font-bold tracking-[1px] text-text-muted">
+              일기 설정
             </h2>
-            <span className="text-[10px] tracking-[2px] text-[var(--text-page-label)] uppercase">
+            <span className="text-[11px] tracking-[2px] text-[var(--text-page-label)] uppercase">
               AI Draft
             </span>
           </div>

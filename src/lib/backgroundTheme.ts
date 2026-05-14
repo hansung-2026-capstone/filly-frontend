@@ -3,7 +3,6 @@ export const BACKGROUND_THEME_IDS = [
   "rose",
   "forest",
   "ocean",
-  "night",
 ] as const;
 
 export type BackgroundThemeId = (typeof BACKGROUND_THEME_IDS)[number];
@@ -57,16 +56,6 @@ export const BACKGROUND_THEME_PRESETS: BackgroundThemePreset[] = [
       "var(--theme-preview-ocean-1)",
       "var(--theme-preview-ocean-2)",
       "var(--theme-preview-ocean-3)",
-    ],
-  },
-  {
-    id: "night",
-    label: "나이트",
-    description: "깊은 밤의 잉크색 노트",
-    swatches: [
-      "var(--theme-preview-night-1)",
-      "var(--theme-preview-night-2)",
-      "var(--theme-preview-night-3)",
     ],
   },
 ];

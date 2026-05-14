@@ -22,7 +22,7 @@ export function useUpdatePreferences() {
         );
         await invalidateUserQuery(queryClient);
       } catch (mutationError) {
-        setError("개인화 설정을 저장하지 못했습니다.");
+        setError("일기 설정을 저장하지 못했습니다.");
         throw mutationError;
       }
     },

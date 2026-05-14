@@ -96,7 +96,7 @@ export function TiptapEditor({
         "data-gramm": "false",
         class: [
           "outline-none h-full",
-          "font-['Nanum_Myeongjo'] text-[13px]",
+          "font-['Nanum_Myeongjo'] text-[14px]",
           "text-[var(--text-input)] leading-[1.7]",
         ].join(" "),
       },
@@ -187,7 +187,7 @@ export function TiptapEditor({
         <div className="paper-texture absolute inset-0 pointer-events-none rounded-lg opacity-40" />
         <EditorContent editor={editor} className="relative z-10 flex-1 overflow-y-auto" />
         {maxLength !== undefined && (
-          <div className="relative z-10 text-[11px] text-text-subtle mt-1.5 text-right">
+          <div className="relative z-10 text-[12px] text-text-subtle mt-1.5 text-right">
             {editorState?.charCount ?? 0}/{maxLength}글자
           </div>
         )}

@@ -111,12 +111,22 @@ export function StatsPage() {
   return (
     <div className="flex w-full h-full font-['Nanum_Myeongjo']">
       {/* Left page - Persona */}
-      <div className="flex-1 flex flex-col py-4 px-4 pl-5 overflow-y-auto">
-        <div className="flex flex-col h-full">
+      <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-5 gap-2 overflow-hidden">
+        <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
+          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+            페르소나
+          </div>
+          <div
+            aria-hidden="true"
+            className="invisible h-7 w-[116px] rounded-md border border-border-light"
+          />
+        </div>
+
+        <div className="flex-1 min-h-0 flex flex-col">
           {/* Current persona card */}
           <div className="flex-shrink-0 mb-3.5">
             <div className="py-4 px-4 bg-[var(--bg-stats-persona)] rounded-[10px] flex flex-col gap-2">
-              <div className="flex items-center gap-1 text-[11px] text-[var(--text-white-muted)] tracking-wide">
+              <div className="flex items-center gap-1 text-[12px] text-[var(--text-white-muted)] tracking-wide">
                 <Sparkles className="w-3.5 h-3.5 text-[var(--text-white-soft)]" />
                 <span>페르소나 리포트</span>
               </div>
@@ -127,10 +137,10 @@ export function StatsPage() {
                 </>
               ) : (
                 <>
-                  <div className="text-[15px] text-white font-bold leading-[1.4]">
+                  <div className="text-[16px] text-white font-bold leading-[1.4]">
                     {current?.title ?? "아직 생성된 페르소나가 없어요"}
                   </div>
-                  <div className="text-[11px] text-[var(--text-white-strong)] leading-[1.7]">
+                  <div className="text-[12px] text-[var(--text-white-strong)] leading-[1.7]">
                     {current?.summary ??
                       "최근 30일 일기 5개 이상 작성 후 7일이 지나면 자동으로 페르소나가 생성됩니다."}
                   </div>
@@ -141,7 +151,7 @@ export function StatsPage() {
 
           {/* History */}
           <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto">
-            <div className="text-[11px] tracking-[2px] text-[var(--text-page-label)] uppercase mb-0.5">
+            <div className="text-[12px] tracking-[2px] text-[var(--text-page-label)] uppercase mb-0.5">
               페르소나 히스토리
             </div>
 
@@ -159,11 +169,11 @@ export function StatsPage() {
                 </div>
               ))
             ) : error ? (
-              <div className="py-6 px-3 text-center text-[11px] leading-[1.6] text-text-muted bg-bg-beige-subtle border border-border-light rounded-md">
+              <div className="py-6 px-3 text-center text-[12px] leading-[1.6] text-text-muted bg-bg-beige-subtle border border-border-light rounded-md">
                 페르소나 기록을 불러오지 못했어요.
               </div>
             ) : history.length === 0 ? (
-              <div className="py-6 px-3 text-center text-[11px] leading-[1.6] text-text-muted bg-bg-beige-subtle border border-border-light rounded-md">
+              <div className="py-6 px-3 text-center text-[12px] leading-[1.6] text-text-muted bg-bg-beige-subtle border border-border-light rounded-md">
                 아직 생성된 페르소나 기록이 없어요.
               </div>
             ) : (
@@ -184,7 +194,7 @@ export function StatsPage() {
                     />
                     <div className="flex flex-col gap-0.5 min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0 flex-1 text-[11px] text-text-muted truncate">
+                        <div className="min-w-0 flex-1 text-[12px] text-text-muted truncate">
                           {item.title}
                         </div>
                         {isExpandable && (
@@ -193,18 +203,18 @@ export function StatsPage() {
                             aria-expanded={isExpanded}
                             aria-controls={summaryId}
                             onClick={() => togglePersonaHistorySummary(item.id)}
-                            className="flex-shrink-0 text-[10px] leading-none text-text-secondary hover:text-text-muted transition-colors"
+                            className="flex-shrink-0 text-[11px] leading-none text-text-secondary hover:text-text-muted transition-colors"
                           >
                             {isExpanded ? "접기" : "더 보기"}
                           </button>
                         )}
                       </div>
-                      <div className="text-[11px] text-text-secondary">
+                      <div className="text-[12px] text-text-secondary">
                         {item.generatedAtLabel}
                       </div>
                       <div
                         id={summaryId}
-                        className="text-[11px] leading-[1.45] text-text-dark-muted overflow-hidden whitespace-pre-line"
+                        className="text-[12px] leading-[1.45] text-text-dark-muted overflow-hidden whitespace-pre-line"
                         style={
                           isExpandable
                             ? getCollapsedSummaryStyle(isExpanded)
@@ -233,7 +243,7 @@ export function StatsPage() {
             <button
               type="button"
               onClick={handlePreviousMonth}
-              className="w-7 h-7 border-none text-[13px] text-text-muted hover:bg-bg-hover transition-colors"
+              className="w-7 h-7 border-none text-[14px] text-text-muted hover:bg-bg-hover transition-colors"
               aria-label="이전 달"
             >
               &lt;
@@ -241,7 +251,7 @@ export function StatsPage() {
             <button
               type="button"
               onClick={() => setShowMonthPicker(true)}
-              className="px-2 py-0.5 border-x border-border-light text-[11px] text-text-muted hover:bg-bg-hover transition-colors"
+              className="px-2 py-0.5 border-x border-border-light text-[12px] text-text-muted hover:bg-bg-hover transition-colors"
             >
               {selectedYear}년 {selectedMonth}월
             </button>
@@ -249,7 +259,7 @@ export function StatsPage() {
               type="button"
               onClick={handleNextMonth}
               disabled={isFutureMonth(nextMonth.year, nextMonth.month)}
-              className="w-7 h-7 border-none text-[13px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-35 disabled:cursor-not-allowed"
+              className="w-7 h-7 border-none text-[14px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-35 disabled:cursor-not-allowed"
               aria-label="다음 달"
             >
               &gt;
@@ -259,7 +269,7 @@ export function StatsPage() {
         <div className="flex gap-5 flex-shrink-0">
           <div className="w-[110px] flex flex-col gap-3.5">
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
-              <span className="text-[11px] tracking-[1.5px] text-text-secondary">
+              <span className="text-[12px] tracking-[1.5px] text-text-secondary">
                 일기 개수
               </span>
               <span className="text-[22px] text-[var(--text-stats-primary)]">
@@ -268,7 +278,7 @@ export function StatsPage() {
             </div>
 
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
-              <span className="text-[11px] tracking-[1.5px] text-text-secondary">
+              <span className="text-[12px] tracking-[1.5px] text-text-secondary">
                 글자 수
               </span>
               <span className="text-[22px] text-[var(--text-stats-primary)]">
@@ -277,7 +287,7 @@ export function StatsPage() {
             </div>
 
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1 px-2">
-              <span className="text-[11px] tracking-[1.5px] text-text-secondary">
+              <span className="text-[12px] tracking-[1.5px] text-text-secondary">
                 자주 나온 사람
               </span>
               <span className="text-[18px] text-[var(--text-stats-primary)] text-center truncate max-w-full">
@@ -318,11 +328,11 @@ export function StatsPage() {
                             background: EMOTION_COLORS[index % EMOTION_COLORS.length],
                           }}
                         />
-                        <span className="text-[11px] text-[var(--text-stats-muted)] truncate">
+                        <span className="text-[12px] text-[var(--text-stats-muted)] truncate">
                           {emotion}
                         </span>
                       </div>
-                      <span className="text-[11px] text-text-primary">
+                      <span className="text-[12px] text-text-primary">
                         {value}%
                       </span>
                     </div>
@@ -331,7 +341,7 @@ export function StatsPage() {
               </div>
             ) : (
               <div className="h-[180px] flex items-center justify-center text-center">
-                <span className="text-[12px] leading-[1.7] text-[var(--text-soft-label)]">
+                <span className="text-[13px] leading-[1.7] text-[var(--text-soft-label)]">
                   아직 감정 기록이 없어요.
                 </span>
               </div>
@@ -340,7 +350,7 @@ export function StatsPage() {
         </div>
 
         <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
-          <div className="text-[15px] text-[var(--text-stats-primary)] mb-2">
+          <div className="text-[16px] text-[var(--text-stats-primary)] mb-2">
             키워드 클라우드
           </div>
           <div>
@@ -351,13 +361,13 @@ export function StatsPage() {
                 keywords={stat?.keywordCloud ?? null}
                 height={88}
                 framed={false}
-                emptyClassName="text-[11px] text-[var(--text-soft-label)]"
+                emptyClassName="text-[12px] text-[var(--text-soft-label)]"
               />
             )}
           </div>
         </div>
         <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
-          <div className="text-[15px] text-[var(--text-stats-primary)] mb-3">
+          <div className="text-[16px] text-[var(--text-stats-primary)] mb-3">
             일상 패턴
           </div>
           <div className="flex flex-col gap-1.5">
@@ -367,13 +377,13 @@ export function StatsPage() {
               ))
             ) : dailyPatternEntries.length > 0 ? (
               dailyPatternEntries.map(({ label, count }) => (
-                <div key={label} className="flex justify-between text-[11px]">
+                <div key={label} className="flex justify-between text-[12px]">
                   <span className="text-[var(--text-stats-muted)]">{label}</span>
                   <span className="text-[var(--text-stats-primary)]">{count}</span>
                 </div>
               ))
             ) : (
-              <span className="h-[72px] flex items-center justify-center text-center text-[11px] text-[var(--text-soft-label)]">
+              <span className="h-[72px] flex items-center justify-center text-center text-[12px] text-[var(--text-soft-label)]">
                 아직 일상 패턴 기록이 없어요.
               </span>
             )}

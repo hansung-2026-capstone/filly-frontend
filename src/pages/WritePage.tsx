@@ -287,7 +287,7 @@ export function WritePage() {
             {editDiary ? "일기 수정" : "일기 작성"}
           </button>
           {validationMessage && (
-            <p className="m-0 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[11px] text-[var(--text-error)]">
+            <p className="m-0 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[12px] text-[var(--text-error)]">
               {validationMessage}
             </p>
           )}

@@ -88,7 +88,7 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
           }}
           className="flex-1 min-w-0 h-1 accent-[var(--accent-audio-progress)] cursor-pointer"
         />
-        <span className="text-[11px] text-text-muted tabular-nums flex-shrink-0">
+        <span className="text-[12px] text-text-muted tabular-nums flex-shrink-0">
           {formatTime(currentTime)}/{formatTime(duration)}
         </span>
       </div>
@@ -98,7 +98,7 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
         onClick={onRemove}
         className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-bg-strong-control
           border-2 border-notebook-page flex items-center justify-center
-          text-white cursor-pointer transition-all duration-150 hover:bg-bg-strong-control-hover
+          text-[var(--text-white-soft)] cursor-pointer transition-all duration-150 hover:bg-bg-strong-control-hover
           shadow-[var(--shadow-remove-button)]"
       >
         <X className="w-3 h-3" strokeWidth={2.5} />
@@ -135,7 +135,7 @@ export function VoiceRecorderSection({
         <h3 className="text-sm text-text-primary tracking-[0.5px] m-0 font-medium">
           {title}
         </h3>
-        <span className="text-[11px] text-text-subtle">
+        <span className="text-[12px] text-text-subtle">
           최대 {maxSeconds}초
         </span>
       </div>
