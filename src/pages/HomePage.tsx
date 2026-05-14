@@ -1,6 +1,7 @@
 import { ChevronDown, ChevronLeft, ChevronRight, Pencil } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AvatarPreviewModal } from "../components/AvatarPreviewModal";
 import { CalendarCell } from "../components/CalendarCell";
 import { DiaryDetailModal } from "../components/DiaryDetailModal";
 import { MonthPickerModal } from "../components/MonthPickerModal";
@@ -102,6 +103,7 @@ export function HomePage() {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
   const today = new Date().getDate();
   const [showMonthModal, setShowMonthModal] = useState(false);
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [selectedDiary, setSelectedDiary] = useState<DiaryItem | null>(null);
   const navigate = useNavigate();
   const weeks = getWeeksInMonth(currentYear, currentMonth);
@@ -180,7 +182,12 @@ export function HomePage() {
         </div>
 
         <div className="flex flex-col items-center justify-center py-5 px-2 gap-2 border-b border-border-light">
-          <UserAvatar avatarUrl={user?.currentAvatarUrl ?? null} className="w-25 h-25" />
+          <button
+            onClick={() => setShowAvatarModal(true)}
+            className="border-none bg-transparent p-0 cursor-pointer rounded-full transition-all duration-200 hover:opacity-85"
+          >
+            <UserAvatar avatarUrl={user?.currentAvatarUrl ?? null} className="w-25 h-25" />
+          </button>
           <div className="w-full px-2 py-2 text-center text-[15px] font-bold tracking-[1px] text-text-stronger font-['Nanum_Myeongjo']">
             {userLoading ? "···" : user?.nickname ?? "이름 없음"}
           </div>
@@ -225,6 +232,11 @@ export function HomePage() {
         selectedMonth={currentMonth}
         onSelect={handleMonthSelect}
         onClose={() => setShowMonthModal(false)}
+      />
+      <AvatarPreviewModal
+        isOpen={showAvatarModal}
+        avatarUrl={user?.currentAvatarUrl ?? null}
+        onClose={() => setShowAvatarModal(false)}
       />
       {selectedDiary && (
         <DiaryDetailModal
