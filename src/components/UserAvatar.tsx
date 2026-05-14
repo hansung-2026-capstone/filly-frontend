@@ -22,7 +22,7 @@ export function UserAvatar({
         <img
           src={profileImageUrl}
           alt="프로필 이미지"
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center scale-110"
           onError={() => setFailedAvatarUrl(profileImageUrl)}
         />
       ) : (

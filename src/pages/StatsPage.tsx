@@ -341,7 +341,7 @@ export function StatsPage() {
 
         <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
           <div className="text-[15px] text-[var(--text-stats-primary)] mb-2">
-            클라우드 키워드
+            키워드 클라우드
           </div>
           <div>
             {statLoading ? (
