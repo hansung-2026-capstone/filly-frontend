@@ -193,7 +193,7 @@ export function HomePage() {
               cursor-pointer text-[11px] text-text-muted hover:bg-[var(--bg-hover-medium)] transition-all"
           >
             <Pencil className="w-[15px] h-[15px] text-[var(--text-pencil-muted)]" />
-            <span>기본 작성</span>
+            <span>일기 작성</span>
           </button>
         </div>
       </div>
