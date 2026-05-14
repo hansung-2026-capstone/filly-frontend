@@ -99,12 +99,12 @@ export function ArchivePage() {
             onClick={openCreateModal}
             disabled={mutating}
             className="relative border-none cursor-pointer font-['Nanum_Pen_Script'] aspect-square
-              border-2 border-dashed border-border-dashed rounded-sm flex flex-col items-center
-              justify-center bg-bg-surface-muted transition-all duration-200 disabled:cursor-not-allowed
-              disabled:opacity-60 hover:bg-bg-surface-muted-hover hover:border-border-dashed-hover
+              border-2 border-dashed border-[var(--border-archive-add)] rounded-sm flex flex-col items-center
+              justify-center bg-[var(--bg-archive-add)] transition-all duration-200 disabled:cursor-not-allowed
+              disabled:opacity-60 hover:bg-[var(--bg-archive-add-hover)] hover:border-[var(--border-archive-add-hover)]
               hover:shadow-[var(--shadow-subtle)] hover:-translate-y-0.5"
           >
-            <Plus className="w-7 h-7 text-[var(--text-upload-plus-soft)]" />
+            <Plus className="w-7 h-7 text-[var(--text-archive-add)]" />
           </button>
 
           {loadingArchives && (

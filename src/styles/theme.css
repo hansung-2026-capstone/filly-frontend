@@ -194,6 +194,11 @@
   --archive-peach-shadow: rgba(255, 212, 179, 0.35);
   --archive-lavender: #d4b3ff;
   --archive-lavender-shadow: rgba(212, 179, 255, 0.35);
+  --bg-archive-add: rgba(184, 150, 104, 0.20);
+  --bg-archive-add-hover: rgba(184, 150, 104, 0.34);
+  --border-archive-add: rgba(126, 92, 58, 0.54);
+  --border-archive-add-hover: rgba(96, 68, 42, 0.74);
+  --text-archive-add: rgba(92, 64, 38, 0.82);
 
   /* Star Colors */
   --star-filled: rgba(230, 190, 60, 0.85);
@@ -345,6 +350,11 @@
   --tab-recommend-text: rgba(116, 70, 34, 0.82);
   --tab-archive: #9fc4e0;
   --tab-archive-text: rgba(42, 75, 112, 0.82);
+  --bg-archive-add: rgba(206, 130, 148, 0.22);
+  --bg-archive-add-hover: rgba(206, 130, 148, 0.36);
+  --border-archive-add: rgba(156, 82, 100, 0.56);
+  --border-archive-add-hover: rgba(126, 62, 82, 0.76);
+  --text-archive-add: rgba(116, 54, 74, 0.84);
   --tab-settings: #c6a8dc;
   --tab-settings-text: rgba(78, 48, 112, 0.82);
   --text-primary: rgba(58, 48, 52, 0.90);
@@ -444,6 +454,11 @@
   --tab-recommend-text: rgba(96, 82, 28, 0.84);
   --tab-archive: #8fc2bb;
   --tab-archive-text: rgba(34, 82, 78, 0.82);
+  --bg-archive-add: rgba(112, 154, 96, 0.22);
+  --bg-archive-add-hover: rgba(112, 154, 96, 0.36);
+  --border-archive-add: rgba(74, 120, 62, 0.56);
+  --border-archive-add-hover: rgba(54, 96, 44, 0.76);
+  --text-archive-add: rgba(50, 88, 42, 0.84);
   --tab-settings: #a8c28a;
   --tab-settings-text: rgba(58, 88, 44, 0.84);
   --text-primary: rgba(50, 56, 46, 0.90);
@@ -543,6 +558,11 @@
   --tab-recommend-text: rgba(94, 76, 28, 0.84);
   --tab-archive: #7cc3d8;
   --tab-archive-text: rgba(26, 78, 98, 0.84);
+  --bg-archive-add: rgba(92, 164, 190, 0.22);
+  --bg-archive-add-hover: rgba(92, 164, 190, 0.36);
+  --border-archive-add: rgba(52, 124, 150, 0.58);
+  --border-archive-add-hover: rgba(34, 100, 128, 0.78);
+  --text-archive-add: rgba(30, 92, 120, 0.84);
   --tab-settings: #93b0df;
   --tab-settings-text: rgba(42, 64, 112, 0.84);
   --text-primary: rgba(46, 56, 62, 0.90);
