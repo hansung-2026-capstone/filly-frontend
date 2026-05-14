@@ -6,6 +6,7 @@ import { StatsPage } from '../pages/StatsPage';
 import { ArchivePage } from '../pages/ArchivePage';
 import { RecommendPage } from '../pages/RecommendPage';
 import { WritePage } from '../pages/WritePage';
+import { SettingsPage } from '../pages/SettingsPage';
 import LoginPage from '../pages/LoginPage';
 
 function App() {
@@ -27,6 +28,7 @@ function App() {
           <Route path="/stats" element={<StatsPage />} />
           <Route path="/recommend" element={<RecommendPage />} />
           <Route path="/archive" element={<ArchivePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
           <Route path="/write" element={<WritePage />} />
         </Route>
       </Routes>

@@ -34,6 +34,8 @@
   --tab-recommend-text: rgba(120, 90, 10, 0.8);
   --tab-archive: #66e0ff;
   --tab-archive-text: rgba(15, 80, 110, 0.8);
+  --tab-settings: #c7b8ff;
+  --tab-settings-text: rgba(55, 42, 105, 0.8);
 
   /* Text Colors */
   --text-primary: rgba(60, 45, 30, 0.84);
@@ -344,6 +346,8 @@
   --color-tab-recommend-text: var(--tab-recommend-text);
   --color-tab-archive: var(--tab-archive);
   --color-tab-archive-text: var(--tab-archive-text);
+  --color-tab-settings: var(--tab-settings);
+  --color-tab-settings-text: var(--tab-settings-text);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-strong: var(--text-strong);
