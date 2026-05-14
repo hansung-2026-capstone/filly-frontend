@@ -2,7 +2,11 @@ import { Settings, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useCurrentUser } from "../hook/common/useCurrentUser";
-import { getBackgroundThemeId } from "../lib/backgroundTheme";
+import {
+  DEFAULT_BACKGROUND_THEME,
+  getBackgroundThemeId,
+  getStoredBackgroundThemeId,
+} from "../lib/backgroundTheme";
 
 type TabConfig = {
   path: string;
@@ -13,11 +17,37 @@ type TabConfig = {
 };
 
 const TABS: TabConfig[] = [
-  { path: "home", label: "홈", bgClass: "bg-[var(--tab-home)]", textClass: "text-[var(--tab-home-text)]" },
-  { path: "stats", label: "통계", bgClass: "bg-[var(--tab-stats)]", textClass: "text-[var(--tab-stats-text)]" },
-  { path: "recommend", label: "추천", bgClass: "bg-[var(--tab-recommend)]", textClass: "text-[var(--tab-recommend-text)]" },
-  { path: "archive", label: "아카이브", bgClass: "bg-[var(--tab-archive)]", textClass: "text-[var(--tab-archive-text)]" },
-  { path: "settings", label: "설정", icon: Settings, bgClass: "bg-[var(--tab-settings)]", textClass: "text-[var(--tab-settings-text)]" },
+  {
+    path: "home",
+    label: "홈",
+    bgClass: "bg-[var(--tab-home)]",
+    textClass: "text-[var(--tab-home-text)]",
+  },
+  {
+    path: "stats",
+    label: "통계",
+    bgClass: "bg-[var(--tab-stats)]",
+    textClass: "text-[var(--tab-stats-text)]",
+  },
+  {
+    path: "recommend",
+    label: "추천",
+    bgClass: "bg-[var(--tab-recommend)]",
+    textClass: "text-[var(--tab-recommend-text)]",
+  },
+  {
+    path: "archive",
+    label: "아카이브",
+    bgClass: "bg-[var(--tab-archive)]",
+    textClass: "text-[var(--tab-archive-text)]",
+  },
+  {
+    path: "settings",
+    label: "설정",
+    icon: Settings,
+    bgClass: "bg-[var(--tab-settings)]",
+    textClass: "text-[var(--tab-settings-text)]",
+  },
 ];
 
 const NOTEBOOK_LAYOUT = {
@@ -40,11 +70,14 @@ function getNotebookScale() {
   const availableWidth = window.innerWidth - NOTEBOOK_LAYOUT.padding;
   const availableHeight = window.innerHeight - NOTEBOOK_LAYOUT.padding;
 
-  return Math.max(0.25, Math.min(
-    NOTEBOOK_LAYOUT.maxScale,
-    availableWidth / NOTEBOOK_LAYOUT.baseWidth,
-    availableHeight / NOTEBOOK_LAYOUT.baseHeight,
-  ));
+  return Math.max(
+    0.25,
+    Math.min(
+      NOTEBOOK_LAYOUT.maxScale,
+      availableWidth / NOTEBOOK_LAYOUT.baseWidth,
+      availableHeight / NOTEBOOK_LAYOUT.baseHeight,
+    ),
+  );
 }
 
 function NotebookPage({ side }: { side: "left" | "right" }) {
@@ -82,10 +115,16 @@ function NotebookPage({ side }: { side: "left" | "right" }) {
 export function Root() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { data: user } = useCurrentUser();
+  const { data: user, isLoading } = useCurrentUser();
   const [notebookScale, setNotebookScale] = useState(getNotebookScale);
-  const activePage = location.pathname === "/" ? "home" : location.pathname.slice(1);
-  const backgroundTheme = getBackgroundThemeId(user?.backgroundTheme);
+  const [initialStoredTheme] = useState(() =>
+    getStoredBackgroundThemeId(),
+  );
+  const activePage =
+    location.pathname === "/" ? "home" : location.pathname.slice(1);
+  const backgroundTheme = getBackgroundThemeId(
+    user?.backgroundTheme ?? initialStoredTheme ?? DEFAULT_BACKGROUND_THEME,
+  );
 
   useEffect(() => {
     const updateNotebookScale = () => {
@@ -113,6 +152,16 @@ export function Root() {
     transform: `scale(${notebookScale})`,
     transformOrigin: "top left",
   };
+
+  if (isLoading && !user && !initialStoredTheme) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page-loading)]">
+        <div className="text-[12px] font-bold tracking-[2px] text-[var(--text-page-label)]">
+          불러오는 중
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -205,7 +254,11 @@ export function Root() {
                   className="absolute inset-0 rounded-r-md pointer-events-none"
                   style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
                 />
-                {tab.icon ? <tab.icon className="h-5 w-5" aria-hidden="true" /> : tab.label}
+                {tab.icon ? (
+                  <tab.icon className="h-5 w-5" aria-hidden="true" />
+                ) : (
+                  tab.label
+                )}
               </button>
             ))}
           </div>

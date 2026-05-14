@@ -16,6 +16,7 @@ export interface BackgroundThemePreset {
 }
 
 export const DEFAULT_BACKGROUND_THEME: BackgroundThemeId = "classic";
+export const BACKGROUND_THEME_STORAGE_KEY = "background-theme";
 
 export const BACKGROUND_THEME_PRESETS: BackgroundThemePreset[] = [
   {
@@ -74,4 +75,28 @@ export function getBackgroundThemeId(theme: string | null | undefined): Backgrou
   return BACKGROUND_THEME_IDS.includes(theme as BackgroundThemeId)
     ? (theme as BackgroundThemeId)
     : DEFAULT_BACKGROUND_THEME;
+}
+
+export function getStoredBackgroundThemeId(): BackgroundThemeId | null {
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  const storedTheme = localStorage.getItem(BACKGROUND_THEME_STORAGE_KEY);
+
+  if (!storedTheme) {
+    return null;
+  }
+
+  return BACKGROUND_THEME_IDS.includes(storedTheme as BackgroundThemeId)
+    ? (storedTheme as BackgroundThemeId)
+    : null;
+}
+
+export function setStoredBackgroundThemeId(backgroundTheme: BackgroundThemeId) {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  localStorage.setItem(BACKGROUND_THEME_STORAGE_KEY, backgroundTheme);
 }

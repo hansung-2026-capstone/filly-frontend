@@ -1,7 +1,10 @@
 import { useCallback, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { User } from "../../types/user";
-import type { BackgroundThemeId } from "../../lib/backgroundTheme";
+import {
+  type BackgroundThemeId,
+  setStoredBackgroundThemeId,
+} from "../../lib/backgroundTheme";
 import { queryKeys } from "../queries/keys";
 import {
   invalidateUserQuery,
@@ -18,6 +21,7 @@ export function useUpdateBackgroundTheme() {
       setError(null);
       try {
         await mutation.mutateAsync(backgroundTheme);
+        setStoredBackgroundThemeId(backgroundTheme);
         queryClient.setQueryData<User>(queryKeys.user, (user) =>
           user ? { ...user, backgroundTheme } : user,
         );
