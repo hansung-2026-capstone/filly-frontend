@@ -4,10 +4,8 @@ import { usePersona } from "../hook/common/usePersona";
 import { useMonthlyStat } from "../hook/common/useMonthlyStat";
 import { MonthPickerModal } from "../components/MonthPickerModal";
 import { KeywordCloud } from "../components/KeywordCloud";
+import { NotebookDetailModal } from "../components/NotebookDetailModal";
 import { isFutureMonth } from "../lib/date";
-
-const COLLAPSED_SUMMARY_LINE_COUNT = 2;
-const EXPANDABLE_SUMMARY_MIN_LENGTH = 80;
 
 const EMOTION_COLORS = [
   "var(--emotion-chart-1)",
@@ -34,20 +32,6 @@ function buildEmotionGradient(entries: [string, number][]) {
   return `conic-gradient(${stops.join(", ")})`;
 }
 
-function isPersonaSummaryExpandable(summary: string) {
-  return summary.trim().length > EXPANDABLE_SUMMARY_MIN_LENGTH;
-}
-
-function getCollapsedSummaryStyle(isExpanded: boolean) {
-  if (isExpanded) return undefined;
-
-  return {
-    display: "-webkit-box",
-    WebkitBoxOrient: "vertical",
-    WebkitLineClamp: COLLAPSED_SUMMARY_LINE_COUNT,
-  } as const;
-}
-
 function moveMonth(year: number, month: number, delta: number) {
   const nextDate = new Date(year, month - 1 + delta, 1);
   return {
@@ -62,9 +46,9 @@ export function StatsPage() {
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
   const [showMonthPicker, setShowMonthPicker] = useState(false);
-  const [expandedPersonaIds, setExpandedPersonaIds] = useState<Set<number>>(
-    () => new Set(),
-  );
+  const [selectedPersonaHistory, setSelectedPersonaHistory] = useState<
+    (typeof history)[number] | null
+  >(null);
   const { stat, loading: statLoading } = useMonthlyStat(
     selectedYear,
     selectedMonth
@@ -72,20 +56,6 @@ export function StatsPage() {
   const emotionEntries = Object.entries(stat?.emotionDistribution ?? {})
     .filter(([, value]) => value > 0)
     .sort(([, a], [, b]) => b - a);
-  const togglePersonaHistorySummary = (personaId: number) => {
-    setExpandedPersonaIds((currentIds) => {
-      const nextIds = new Set(currentIds);
-
-      if (nextIds.has(personaId)) {
-        nextIds.delete(personaId);
-      } else {
-        nextIds.add(personaId);
-      }
-
-      return nextIds;
-    });
-  };
-
   const dailyPatternEntries = Object.entries(stat?.dailyPattern ?? {})
     .flatMap(([day, times]) =>
       Object.entries(times).map(([time, count]) => ({
@@ -109,9 +79,9 @@ export function StatsPage() {
   };
 
   return (
-    <div className="flex w-full h-full font-['Nanum_Myeongjo']">
+    <div className="flex h-auto w-full flex-col font-['Nanum_Myeongjo'] md:h-full md:flex-row">
       {/* Left page - Persona */}
-      <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-5 gap-2 overflow-hidden">
+      <div className="flex h-auto flex-col gap-2 px-4 py-4 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:px-5 md:py-3">
         <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
           <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
             페르소나
@@ -122,7 +92,7 @@ export function StatsPage() {
           />
         </div>
 
-        <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex flex-col md:min-h-0 md:flex-1">
           {/* Current persona card */}
           <div className="flex-shrink-0 mb-3.5">
             <div className="py-4 px-4 bg-[var(--bg-stats-persona)] rounded-[10px] flex flex-col gap-2">
@@ -150,24 +120,27 @@ export function StatsPage() {
           </div>
 
           {/* History */}
-          <div className="flex-1 flex flex-col gap-1.5 overflow-y-auto">
+          <div className="flex flex-none flex-col gap-1.5 md:flex-1 md:overflow-y-auto">
             <div className="text-[12px] tracking-[2px] text-[var(--text-page-label)] uppercase mb-0.5">
               페르소나 히스토리
             </div>
 
             {personaLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div
-                  key={i}
-                  className="flex items-center gap-2.5 py-2 px-2.5 rounded-md bg-[var(--bg-stats-row)] border border-[var(--border-faint)]"
-                >
-                  <div className="w-2 h-9 rounded flex-shrink-0 bg-[var(--bg-hover-soft)] animate-pulse" />
-                  <div className="flex flex-col gap-0.5 flex-1">
-                    <div className="h-3 w-2/3 bg-[var(--bg-hover-soft)] rounded animate-pulse" />
-                    <div className="h-2 w-1/3 bg-[var(--bg-hover-soft)] rounded animate-pulse" />
+              <div className="flex gap-2 overflow-x-auto md:block md:space-y-1.5 md:overflow-visible">
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="flex w-[150px] flex-shrink-0 items-center gap-2.5 rounded-md bg-[var(--bg-stats-row)] px-2.5 py-2
+                      border border-[var(--border-faint)] md:w-full"
+                  >
+                    <div className="h-9 w-2 flex-shrink-0 rounded bg-[var(--bg-hover-soft)] animate-pulse" />
+                    <div className="flex flex-1 flex-col gap-0.5">
+                      <div className="h-3 w-2/3 rounded bg-[var(--bg-hover-soft)] animate-pulse" />
+                      <div className="h-2 w-1/3 rounded bg-[var(--bg-hover-soft)] animate-pulse" />
+                    </div>
                   </div>
-                </div>
-              ))
+                ))}
+              </div>
             ) : error ? (
               <div className="py-6 px-3 text-center text-[12px] leading-[1.6] text-text-muted bg-bg-beige-subtle border border-border-light rounded-md">
                 페르소나 기록을 불러오지 못했어요.
@@ -177,63 +150,40 @@ export function StatsPage() {
                 아직 생성된 페르소나 기록이 없어요.
               </div>
             ) : (
-              history.map((item) => {
-                const isExpandable = isPersonaSummaryExpandable(item.summary);
-                const isExpanded = expandedPersonaIds.has(item.id);
-                const summaryId = `persona-summary-${item.id}`;
-
-                return (
-                  <div
-                    key={item.id}
-                    className="flex items-start gap-2.5 py-2 px-2.5 rounded-md bg-[var(--bg-stats-row)]
-                      border border-[var(--border-faint)]"
-                  >
-                    <div
-                      className="w-2 h-9 rounded flex-shrink-0"
-                      style={{ background: item.color }}
-                    />
-                    <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="min-w-0 flex-1 text-[12px] text-text-muted truncate">
+              <div className="flex gap-2 overflow-x-auto md:block md:space-y-1.5 md:overflow-visible">
+                {history.map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setSelectedPersonaHistory(item)}
+                      className="flex w-[150px] flex-shrink-0 items-start gap-2.5 rounded-md bg-[var(--bg-stats-row)] px-2.5 py-2
+                        border border-[var(--border-faint)] text-left transition-colors hover:bg-bg-hover md:w-full"
+                    >
+                      <div
+                        className="h-9 w-2 flex-shrink-0 rounded"
+                        style={{ background: item.color }}
+                      />
+                      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <div className="truncate text-[12px] text-text-muted">
                           {item.title}
                         </div>
-                        {isExpandable && (
-                          <button
-                            type="button"
-                            aria-expanded={isExpanded}
-                            aria-controls={summaryId}
-                            onClick={() => togglePersonaHistorySummary(item.id)}
-                            className="flex-shrink-0 text-[11px] leading-none text-text-secondary hover:text-text-muted transition-colors"
-                          >
-                            {isExpanded ? "접기" : "더 보기"}
-                          </button>
-                        )}
+                        <div className="text-[12px] text-text-secondary">
+                          {item.generatedAtLabel}
+                        </div>
+                        <div className="line-clamp-2 whitespace-pre-line text-[12px] leading-[1.45] text-text-dark-muted">
+                          {item.summary}
+                        </div>
                       </div>
-                      <div className="text-[12px] text-text-secondary">
-                        {item.generatedAtLabel}
-                      </div>
-                      <div
-                        id={summaryId}
-                        className="text-[12px] leading-[1.45] text-text-dark-muted overflow-hidden whitespace-pre-line"
-                        style={
-                          isExpandable
-                            ? getCollapsedSummaryStyle(isExpanded)
-                            : undefined
-                        }
-                      >
-                        {item.summary}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
+                    </button>
+                ))}
+              </div>
             )}
           </div>
         </div>
       </div>
 
       {/* Right page - Stats */}
-      <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-5 gap-2 overflow-hidden">
+      <div className="flex h-auto flex-col gap-3 border-t border-border-light px-4 py-4 md:h-full md:max-h-[680px] md:flex-1 md:gap-2 md:overflow-hidden md:border-t-0 md:px-5 md:py-3">
         {/* 헤더 */}
         <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
           <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
@@ -266,8 +216,8 @@ export function StatsPage() {
             </button>
           </div>
         </div>
-        <div className="flex gap-5 flex-shrink-0">
-          <div className="w-[110px] flex flex-col gap-3.5">
+        <div className="flex flex-col gap-3.5 md:flex-row md:gap-5 md:flex-shrink-0">
+          <div className="grid w-full grid-cols-3 gap-2 md:w-[110px] md:flex md:flex-col md:gap-3.5">
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
               <span className="text-[12px] tracking-[1.5px] text-text-secondary">
                 일기 개수
@@ -296,13 +246,13 @@ export function StatsPage() {
             </div>
           </div>
 
-          <div className="flex-1 h-[292px] rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-5">
+          <div className="h-auto min-h-[260px] flex-1 rounded-lg border border-border-medium bg-bg-beige-subtle p-5 md:h-[292px] md:overflow-hidden">
             <div className="text-[18px] text-[var(--text-stats-primary)] mb-8">
               감정 분포
             </div>
 
             {statLoading ? (
-              <div className="flex items-center justify-center gap-9">
+              <div className="flex flex-col items-center justify-center gap-5 md:flex-row md:gap-9">
                 <div className="w-[125px] h-[125px] rounded-full bg-[var(--bg-stats-skeleton)] animate-pulse" />
                 <div className="w-[110px] flex flex-col gap-2">
                   {Array.from({ length: 4 }).map((_, i) => (
@@ -311,7 +261,7 @@ export function StatsPage() {
                 </div>
               </div>
             ) : emotionEntries.length > 0 ? (
-              <div className="flex items-center justify-center gap-9">
+              <div className="flex flex-col items-center justify-center gap-5 md:flex-row md:gap-9">
                 <div
                   className="w-[125px] h-[125px] rounded-full relative flex-shrink-0"
                   style={{ background: buildEmotionGradient(emotionEntries) }}
@@ -349,7 +299,7 @@ export function StatsPage() {
           </div>
         </div>
 
-        <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
+        <div className="min-h-[144px] rounded-lg border border-border-medium bg-bg-beige-subtle p-4 md:h-[144px] md:flex-shrink-0 md:overflow-hidden">
           <div className="text-[16px] text-[var(--text-stats-primary)] mb-2">
             키워드 클라우드
           </div>
@@ -366,7 +316,7 @@ export function StatsPage() {
             )}
           </div>
         </div>
-        <div className="h-[144px] flex-shrink-0 rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden p-4">
+        <div className="min-h-[144px] rounded-lg border border-border-medium bg-bg-beige-subtle p-4 md:h-[144px] md:flex-shrink-0 md:overflow-hidden">
           <div className="text-[16px] text-[var(--text-stats-primary)] mb-3">
             일상 패턴
           </div>
@@ -401,6 +351,32 @@ export function StatsPage() {
         }}
         onClose={() => setShowMonthPicker(false)}
       />
+
+      <NotebookDetailModal
+        isOpen={selectedPersonaHistory !== null}
+        onClose={() => setSelectedPersonaHistory(null)}
+        accent={selectedPersonaHistory?.color ?? "var(--bg-stats-persona)"}
+        eyebrow="Persona Report"
+        title={selectedPersonaHistory?.title ?? ""}
+        meta={selectedPersonaHistory?.generatedAtLabel}
+        widthClassName="w-[390px] max-w-[calc(100vw-32px)]"
+      >
+        <div className="space-y-4">
+          <div className="rounded-[16px] border border-border-light bg-bg-beige-subtle px-4 py-3">
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-[11px] tracking-[1.6px] text-[var(--text-page-label)] uppercase">
+                요약
+              </span>
+              <span className="rounded-full border border-border-light bg-bg-page px-2 py-0.5 text-[10px] text-text-secondary">
+                {selectedPersonaHistory?.generatedAtLabel}
+              </span>
+            </div>
+            <div className="whitespace-pre-line text-[13px] leading-[1.85] text-text-muted">
+              {selectedPersonaHistory?.summary}
+            </div>
+          </div>
+        </div>
+      </NotebookDetailModal>
     </div>
   );
 }

@@ -67,7 +67,7 @@ export function DatePickerModal({
         onClick={onClose}
       >
         <div
-          className="relative z-[91] bg-notebook-page rounded-lg p-6 shadow-lg w-80"
+          className="relative z-[91] w-80 max-w-[calc(100vw-32px)] rounded-lg bg-notebook-page p-6 shadow-lg"
           onClick={(event) => event.stopPropagation()}
         >
           <div className="flex items-center justify-between mb-4">

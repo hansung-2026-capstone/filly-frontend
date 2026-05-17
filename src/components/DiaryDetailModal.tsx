@@ -169,7 +169,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
         onClick={onClose}
       >
         <div
-          className="relative bg-notebook-page rounded-xl w-[480px] max-h-[78vh] flex flex-col
+          className="relative bg-notebook-page rounded-xl w-[480px] max-w-[calc(100vw-32px)] max-h-[78vh] flex flex-col
             shadow-[var(--shadow-modal)]
             overflow-hidden font-['Nanum_Myeongjo']"
           style={{ animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}
@@ -303,7 +303,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           onClick={() => setShowArchiveModal(false)}
         >
           <div
-            className="bg-notebook-page rounded-xl w-[360px] shadow-[var(--shadow-modal)]
+            className="bg-notebook-page rounded-xl w-[360px] max-w-[calc(100vw-32px)] shadow-[var(--shadow-modal)]
               overflow-hidden font-['Nanum_Myeongjo']"
             onClick={(e) => e.stopPropagation()}
             style={{

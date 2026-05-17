@@ -30,7 +30,7 @@ export function MonthPickerModal({
         onClick={onClose}
       >
         <div
-          className="bg-notebook-page rounded-xl w-[420px] shadow-[var(--shadow-modal)]
+          className="bg-notebook-page rounded-xl w-[420px] max-w-[calc(100vw-32px)] shadow-[var(--shadow-modal)]
             overflow-hidden font-['Nanum_Myeongjo']"
           onClick={(e) => e.stopPropagation()}
           style={{ animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}

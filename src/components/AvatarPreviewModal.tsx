@@ -45,10 +45,10 @@ export function AvatarPreviewModal({
             <img
               src={avatarUrl}
               alt="프로필 이미지"
-              className="block w-[400px] h-[400px] object-cover object-center"
+              className="block aspect-square w-[400px] max-w-[calc(100vw-32px)] object-cover object-center"
             />
           ) : (
-            <div className="w-[400px] h-[400px] flex items-center justify-center bg-bg-hover">
+            <div className="flex aspect-square w-[400px] max-w-[calc(100vw-32px)] items-center justify-center bg-bg-hover">
               <UserRound className="w-1/2 h-1/2 text-[var(--text-muted-light)]" />
             </div>
           )}

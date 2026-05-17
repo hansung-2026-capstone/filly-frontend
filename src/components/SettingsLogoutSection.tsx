@@ -62,7 +62,7 @@ export function SettingsLogoutSection() {
             onClick={closeModal}
           >
             <div
-              className="relative bg-notebook-page rounded-xl w-[360px] shadow-[var(--shadow-modal)] overflow-hidden font-['Nanum_Myeongjo']"
+              className="relative bg-notebook-page rounded-xl w-[360px] max-w-[calc(100vw-32px)] shadow-[var(--shadow-modal)] overflow-hidden font-['Nanum_Myeongjo']"
               style={{
                 animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)",
               }}

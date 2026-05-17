@@ -57,7 +57,7 @@ function CalendarColumn({
   const visibleDayLabels = WEEK_DAYS_LONG.slice(dayOffset, dayOffset + columnCount);
 
   return (
-    <div className={`${widthClass} flex flex-col pt-10 pb-8 shrink-0`}>
+    <div className={`${widthClass} hidden md:flex flex-col pt-10 pb-8 shrink-0`}>
       <div className={`${gridClass} grid text-center pb-2 mb-2 border-b border-[var(--border-calendar)]`}>
         {visibleDays.map((day, index) => {
           const dayIndex = dayOffset + index;
@@ -91,6 +91,51 @@ function CalendarColumn({
                 dayTextClass={getDayTextClass(dayIndex)}
                 onClick={onDiarySelect}
               />
+            );
+          }),
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MobileCalendarGrid({
+  currentMonth,
+  currentYear,
+  diaries,
+  loading,
+  onDiarySelect,
+  weeks,
+}: Omit<CalendarColumnProps, "columnCount" | "dayOffset">) {
+  return (
+    <div className="flex flex-col gap-2 px-3 pb-4 md:hidden">
+      <div className="grid grid-cols-7 border-b border-[var(--border-calendar)] pb-2 text-center">
+        {WEEK_DAYS_SHORT.map((day, dayIndex) => (
+          <span
+            key={day}
+            className={`py-1 text-[11px] font-bold leading-none tracking-[1px] ${getHeaderTextClass(dayIndex)}`}
+          >
+            {day}
+          </span>
+        ))}
+      </div>
+      <div className="grid grid-cols-7 grid-rows-6 gap-1.5">
+        {weeks.flatMap((week, weekIndex) =>
+          week.map((day, dayIndex) => {
+            const diaryKey = day
+              ? formatDateKeyFromParts(currentYear, currentMonth, day)
+              : null;
+
+            return (
+              <div key={`${weekIndex}-${dayIndex}`} className="min-h-[46px]">
+                <CalendarCell
+                  day={day}
+                  diary={diaryKey ? diaries[diaryKey] : undefined}
+                  loading={loading}
+                  dayTextClass={getDayTextClass(dayIndex)}
+                  onClick={onDiarySelect}
+                />
+              </div>
             );
           }),
         )}
@@ -137,9 +182,9 @@ export function HomePage() {
   };
 
   return (
-    <div className="w-full h-full flex font-['Nanum_Myeongjo'] bg-transparent overflow-hidden">
-      <div className="w-[129px] h-full flex flex-col border-r border-[var(--border-subtle)]">
-        <div className="h-[30%] w-full flex flex-col items-center justify-center gap-2 border-b border-[var(--border-subtle)] px-2">
+    <div className="flex h-auto w-full flex-col bg-transparent font-['Nanum_Myeongjo'] md:h-full md:flex-row md:overflow-hidden">
+      <div className="flex h-auto w-full flex-col border-b border-[var(--border-subtle)] md:h-full md:w-[129px] md:border-b-0 md:border-r">
+        <div className="flex h-auto w-full flex-col items-center justify-center gap-2 border-b border-[var(--border-subtle)] px-3 py-3 md:h-[30%] md:px-2 md:py-0">
           <button
             onClick={() => setShowMonthModal(true)}
             className="w-full rounded-xl overflow-hidden bg-[var(--bg-hover-soft)] p-0 flex flex-col items-stretch
@@ -187,22 +232,22 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="flex flex-col items-center justify-center py-5 px-2 gap-2 border-b border-border-light">
+        <div className="flex items-center justify-center gap-3 border-b border-border-light px-3 py-3 md:flex-col md:gap-2 md:px-2 md:py-5">
           <button
             onClick={() => setShowAvatarModal(true)}
             className="border-none bg-transparent p-0 cursor-pointer rounded-full transition-all duration-200 hover:opacity-85"
           >
             <UserAvatar avatarUrl={user?.currentAvatarUrl ?? null} className="w-25 h-25" />
           </button>
-          <div className="w-full px-2 py-2 text-center text-[16px] font-bold tracking-[1px] text-text-stronger font-['Nanum_Myeongjo']">
+          <div className="min-w-0 flex-1 px-2 py-2 text-left font-['Nanum_Myeongjo'] text-[16px] font-bold tracking-[1px] text-text-stronger md:w-full md:flex-none md:text-center">
             {userLoading ? "···" : user?.nickname ?? "이름 없음"}
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col items-stretch py-3.5 px-2.5">
+        <div className="flex flex-col items-stretch px-3 py-3 md:flex-1 md:px-2.5 md:py-3.5">
           <button
             onClick={() => navigate("/write")}
-            className="mt-auto flex items-center justify-center gap-1.5 py-2 px-2.5 border-none bg-bg-hover rounded-lg
+            className="flex items-center justify-center gap-1.5 rounded-lg border-none bg-bg-hover px-2.5 py-2 md:mt-auto
               cursor-pointer text-[12px] text-text-muted hover:bg-[var(--bg-hover-medium)] transition-all"
           >
             <Pencil className="w-[15px] h-[15px] text-[var(--text-pencil-muted)]" />
@@ -216,6 +261,14 @@ export function HomePage() {
         currentMonth={currentMonth}
         currentYear={currentYear}
         dayOffset={0}
+        diaries={diaries}
+        loading={loading}
+        onDiarySelect={setSelectedDiary}
+        weeks={weeks}
+      />
+      <MobileCalendarGrid
+        currentMonth={currentMonth}
+        currentYear={currentYear}
         diaries={diaries}
         loading={loading}
         onDiarySelect={setSelectedDiary}

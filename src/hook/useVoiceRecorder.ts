@@ -4,13 +4,57 @@ type RecordingState = "idle" | "recording";
 
 export type VoiceRecord = { id: number; file: File; url: string };
 
+type RecorderFormat = { mimeType: string; extension: string };
+
+const RECORDER_FORMATS: RecorderFormat[] = [
+  { mimeType: "audio/webm;codecs=opus", extension: "webm" },
+  { mimeType: "audio/webm", extension: "webm" },
+  { mimeType: "audio/mp4", extension: "m4a" },
+  { mimeType: "audio/mpeg", extension: "mp3" },
+];
+
+function getSupportedRecorderFormat() {
+  if (typeof MediaRecorder === "undefined") return null;
+  return (
+    RECORDER_FORMATS.find((format) =>
+      MediaRecorder.isTypeSupported(format.mimeType),
+    ) ?? null
+  );
+}
+
+function getRecorderErrorMessage(error: unknown) {
+  if (
+    typeof navigator === "undefined" ||
+    !navigator.mediaDevices?.getUserMedia
+  ) {
+    return "알 수 없는 이유로 마이크를 사용할 수 없어요. 브라우저와 마이크 권한 설정을 확인해주세요.";
+  }
+
+  if (typeof MediaRecorder === "undefined") {
+    return "이 브라우저에서는 음성 녹음 저장을 지원하지 않아요.";
+  }
+
+  if (error instanceof DOMException) {
+    if (error.name === "NotAllowedError") {
+      return "마이크 권한이 거부됐어요. 브라우저 설정에서 마이크 권한을 허용해주세요.";
+    }
+    if (error.name === "NotFoundError") {
+      return "사용 가능한 마이크를 찾을 수 없어요.";
+    }
+  }
+
+  return "알 수 없는 이유로 녹음을 시작하지 못했어요. 마이크 권한과 브라우저 설정을 확인해주세요.";
+}
+
 export function useVoiceRecorder(maxSeconds = 10) {
   const [record, setRecord] = useState<VoiceRecord | null>(null);
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const recordRef = useRef(record);
   const startTimeRef = useRef<number>(0);
+  const formatRef = useRef<RecorderFormat | null>(null);
 
   useEffect(() => {
     recordRef.current = record;
@@ -24,36 +68,50 @@ export function useVoiceRecorder(maxSeconds = 10) {
   );
 
   const start = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    chunksRef.current = [];
-    startTimeRef.current = Date.now();
+    setErrorMessage(null);
 
-    mediaRecorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunksRef.current.push(e.data);
-    };
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const format = getSupportedRecorderFormat();
+      const mediaRecorder = format
+        ? new MediaRecorder(stream, { mimeType: format.mimeType })
+        : new MediaRecorder(stream);
+      chunksRef.current = [];
+      startTimeRef.current = Date.now();
+      formatRef.current = format;
 
-    mediaRecorder.onstop = () => {
-      const durationSec = (Date.now() - startTimeRef.current) / 1000;
-      stream.getTracks().forEach((t) => t.stop());
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) chunksRef.current.push(e.data);
+      };
 
-      if (durationSec > maxSeconds) {
-        alert(`녹음은 최대 ${maxSeconds}초까지 가능합니다.`);
-        return;
-      }
+      mediaRecorder.onstop = () => {
+        const durationSec = (Date.now() - startTimeRef.current) / 1000;
+        stream.getTracks().forEach((t) => t.stop());
 
-      const blob = new Blob(chunksRef.current, { type: "audio/webm" });
-      const file = new File([blob], `recording-${Date.now()}.webm`, {
-        type: "audio/webm",
-      });
-      const url = URL.createObjectURL(blob);
-      if (recordRef.current) URL.revokeObjectURL(recordRef.current.url);
-      setRecord({ id: Date.now(), file, url });
-    };
+        if (durationSec > maxSeconds) {
+          setErrorMessage(`녹음은 최대 ${maxSeconds}초까지 가능합니다.`);
+          return;
+        }
 
-    mediaRecorder.start();
-    mediaRecorderRef.current = mediaRecorder;
-    setRecordingState("recording");
+        const recorderFormat = formatRef.current;
+        const mimeType = recorderFormat?.mimeType || mediaRecorder.mimeType || "audio/webm";
+        const extension = recorderFormat?.extension || "webm";
+        const blob = new Blob(chunksRef.current, { type: mimeType });
+        const file = new File([blob], `recording-${Date.now()}.${extension}`, {
+          type: mimeType,
+        });
+        const url = URL.createObjectURL(blob);
+        if (recordRef.current) URL.revokeObjectURL(recordRef.current.url);
+        setRecord({ id: Date.now(), file, url });
+      };
+
+      mediaRecorder.start();
+      mediaRecorderRef.current = mediaRecorder;
+      setRecordingState("recording");
+    } catch (error) {
+      setRecordingState("idle");
+      setErrorMessage(getRecorderErrorMessage(error));
+    }
   }, [maxSeconds]);
 
   const stop = useCallback(() => {
@@ -64,17 +122,19 @@ export function useVoiceRecorder(maxSeconds = 10) {
 
   const toggle = useCallback(() => {
     if (recordingState === "recording") stop();
-    else start();
+    else void start();
   }, [recordingState, start, stop]);
 
   const removeRecord = useCallback(() => {
     if (record) URL.revokeObjectURL(record.url);
     setRecord(null);
+    setErrorMessage(null);
   }, [record]);
 
   return {
     record,
     isRecording: recordingState === "recording",
+    errorMessage,
     toggle,
     removeRecord,
   };
