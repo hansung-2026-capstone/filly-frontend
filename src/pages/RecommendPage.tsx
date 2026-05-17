@@ -566,15 +566,6 @@ export function RecommendPage() {
     setSelectedCardId(null);
   }
 
-  function handleRecommendationHistoryClick(item: RecommendationDetail) {
-    if (item.drawId !== recommendationDraw?.drawId) return;
-    if (!cardOrder.includes(item.cardId)) return;
-    if (isLockedByActiveCard(item.cardId)) return;
-
-    setRevealedRecommendations({ [item.cardId]: item });
-    setSelectedCardId(item.cardId);
-  }
-
   function getRecommendationHistoryKey(item: RecommendationDetail) {
     return `${item.drawId}-${item.cardId}`;
   }
@@ -1197,26 +1188,6 @@ export function RecommendPage() {
           ) : null
         }
         widthClassName="w-[400px] max-w-[calc(100vw-32px)]"
-        footer={
-          selectedRecommendationHistory?.drawId ===
-          recommendationDraw?.drawId ? (
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  if (!selectedRecommendationHistory) return;
-                  handleRecommendationHistoryClick(
-                    selectedRecommendationHistory,
-                  );
-                  setSelectedRecommendationHistory(null);
-                }}
-                className="rounded-full border border-border-medium bg-bg-beige-subtle px-3 py-1.5 text-[12px] text-text-muted transition-colors hover:bg-bg-hover"
-              >
-                카드 보기
-              </button>
-            </div>
-          ) : null
-        }
       >
         {selectedRecommendationHistory && (
           <div className="space-y-3">
