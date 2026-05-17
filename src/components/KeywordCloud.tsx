@@ -47,7 +47,7 @@ export function KeywordCloud({
       ref={containerRef}
       className={`overflow-hidden w-full ${
         framed
-          ? "rounded-lg border border-border-medium bg-bg-beige-subtle"
+          ? "rounded-lg border border-border-medium"
           : ""
       }`}
       style={{ height }}

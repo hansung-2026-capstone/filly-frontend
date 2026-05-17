@@ -324,12 +324,6 @@ export function RecommendPage() {
       closeCaptureResults();
       return;
     }
-
-    if (result === "unsupported") {
-      window.alert(
-        "이 브라우저에서는 이미지 공유를 사용할 수 없어요. 이미지를 열고 길게 눌러 저장해주세요.",
-      );
-    }
   }
 
   async function capturePngFile(
@@ -400,10 +394,7 @@ export function RecommendPage() {
         ?.firstElementChild as HTMLElement | null;
       if (targets.includes("idCard") && idCardEl) {
         files.push(
-          await captureElementAsShown(
-            idCardEl,
-            `${prefix}-사원증.png`,
-          ),
+          await captureElementAsShown(idCardEl, `${prefix}-사원증.png`),
         );
       }
 
@@ -446,20 +437,15 @@ export function RecommendPage() {
         ?.firstElementChild as HTMLElement | null;
       if (targets.includes("keywordCloud") && cloudEl) {
         files.push(
-          await captureElementAsShown(
-            cloudEl,
-            `${prefix}-키워드클라우드.png`,
-          ),
+          await captureElementAsShown(cloudEl, `${prefix}-키워드클라우드.png`),
         );
       }
 
       if (files.length === 0) return;
 
       setShowCapturePicker(false);
-      if (files.length <= 2) {
-        const shareResult = await shareFiles(files);
-        if (shareResult === "shared" || shareResult === "cancelled") return;
-      }
+      const shareResult = await shareFiles(files);
+      if (shareResult === "shared" || shareResult === "cancelled") return;
 
       showCaptureResults(files);
     } catch (e) {
@@ -1029,7 +1015,7 @@ export function RecommendPage() {
                 text-[12px] text-text-muted hover:bg-bg-hover transition-colors disabled:opacity-50"
             >
               <Download className="w-3 h-3" />
-              {capturing ? "캡처 중..." : "이미지 저장"}
+              {capturing ? "캡처 중..." : "이미지 공유 및 저장"}
             </button>
           </div>
         </div>
@@ -1255,7 +1241,8 @@ export function RecommendPage() {
                     이미지 준비 완료
                   </div>
                   <div className="mt-0.5 text-[11px] text-text-secondary">
-                    여러 장 공유가 막히면 이미지를 하나씩 공유하거나 열어서 저장해주세요.
+                    여러 장 공유가 막히면 이미지를 하나씩 공유하거나 열어서
+                    저장해주세요.
                   </div>
                 </div>
                 <button
@@ -1272,7 +1259,9 @@ export function RecommendPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    void shareCaptureResult(captureResultFiles.map((file) => file.file))
+                    void shareCaptureResult(
+                      captureResultFiles.map((file) => file.file),
+                    )
                   }
                   className="w-full rounded-full border border-border-strong bg-bg-active px-3 py-2
                     text-[12px] text-text-heading transition-colors hover:bg-bg-active-hover"
