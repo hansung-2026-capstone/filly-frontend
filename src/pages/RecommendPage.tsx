@@ -33,15 +33,24 @@ const RECOMMENDATION_REQUEST_COOLDOWN_MS = 1800;
 import { Portal } from "../components/Portal";
 
 type CaptureTarget = "idCard" | "receipt" | "keywordCloud";
-type CaptureDownload = {
-  dataUrl: string;
-  filename: string;
+type CaptureResultFile = {
+  id: string;
+  name: string;
+  url: string;
 };
 
-const captureTargetOptions: { id: CaptureTarget; label: string; description: string }[] = [
+const captureTargetOptions: {
+  id: CaptureTarget;
+  label: string;
+  description: string;
+}[] = [
   { id: "idCard", label: "사원증", description: "ID Card" },
   { id: "receipt", label: "영수증", description: "Receipt" },
-  { id: "keywordCloud", label: "키워드 클라우드", description: "Keyword Cloud" },
+  {
+    id: "keywordCloud",
+    label: "키워드 클라우드",
+    description: "Keyword Cloud",
+  },
 ];
 
 const initialCaptureTargetSelection: Record<CaptureTarget, boolean> = {
@@ -109,19 +118,67 @@ function wait(ms: number) {
   });
 }
 
-async function dataUrlToFile(dataUrl: string, filename: string) {
-  const response = await fetch(dataUrl);
-  const blob = await response.blob();
+function dataUrlToBlob(dataUrl: string) {
+  const [metadata, data] = dataUrl.split(",");
+  if (!metadata || !data) {
+    throw new Error("이미지 데이터 형식이 올바르지 않아요.");
+  }
 
+  const mimeType = metadata.match(/data:([^;]+)/)?.[1] ?? "image/png";
+  if (!metadata.includes(";base64")) {
+    return new Blob([decodeURIComponent(data)], { type: mimeType });
+  }
+
+  const binary = window.atob(data);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+
+  return new Blob([bytes], { type: mimeType });
+}
+
+async function dataUrlToFile(dataUrl: string, filename: string) {
+  const blob = dataUrlToBlob(dataUrl);
   return new File([blob], filename, { type: blob.type || "image/png" });
 }
 
 function canShareFiles(files: File[]) {
-  return (
-    typeof navigator.share === "function" &&
-    typeof navigator.canShare === "function" &&
-    navigator.canShare({ files })
-  );
+  if (
+    typeof navigator.share !== "function" ||
+    typeof navigator.canShare !== "function"
+  ) {
+    return false;
+  }
+
+  try {
+    return navigator.canShare({ files });
+  } catch {
+    return false;
+  }
+}
+
+function isShareCancel(error: unknown) {
+  return error instanceof DOMException && error.name === "AbortError";
+}
+
+async function tryShareFiles(files: File[]) {
+  if (!canShareFiles(files)) return false;
+
+  try {
+    await navigator.share({
+      files,
+      title: files.length === 1 ? files[0].name : "Filly 공유 컨텐츠",
+    });
+    return true;
+  } catch (error) {
+    if (isShareCancel(error)) throw error;
+    console.warn(
+      "[capture] 공유 저장을 사용할 수 없어 다운로드로 전환합니다.",
+      error,
+    );
+    return false;
+  }
 }
 
 function moveMonth(year: number, month: number, delta: number) {
@@ -158,6 +215,9 @@ export function RecommendPage() {
   const [isPreparingShuffle, setIsPreparingShuffle] = useState(false);
   const [isShuffleLocked, setIsShuffleLocked] = useState(false);
   const [showCapturePicker, setShowCapturePicker] = useState(false);
+  const [captureResultFiles, setCaptureResultFiles] = useState<
+    CaptureResultFile[]
+  >([]);
   const [selectedCaptureTargets, setSelectedCaptureTargets] = useState(
     initialCaptureTargetSelection,
   );
@@ -167,7 +227,10 @@ export function RecommendPage() {
     selectedYear,
     selectedMonth,
   );
-  const { stat, loading: statLoading } = useMonthlyStat(selectedYear, selectedMonth);
+  const { stat, loading: statLoading } = useMonthlyStat(
+    selectedYear,
+    selectedMonth,
+  );
   const [receiptAtBottom, setReceiptAtBottom] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [capturing, setCapturing] = useState(false);
@@ -240,38 +303,38 @@ export function RecommendPage() {
     };
   }, []);
 
-  function downloadPngFile(file: File) {
-    const url = URL.createObjectURL(file);
-    const link = document.createElement("a");
-    link.download = file.name;
-    link.href = url;
-    link.target = "_blank";
-    link.rel = "noopener";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  useEffect(
+    () => () => {
+      captureResultFiles.forEach((file) => URL.revokeObjectURL(file.url));
+    },
+    [captureResultFiles],
+  );
+
+  function showCaptureResults(files: File[]) {
+    setCaptureResultFiles((currentFiles) => {
+      currentFiles.forEach((file) => URL.revokeObjectURL(file.url));
+
+      return files.map((file, index) => ({
+        id: `${file.name}-${file.lastModified}-${index}`,
+        name: file.name,
+        url: URL.createObjectURL(file),
+      }));
+    });
   }
 
-  async function savePngFiles(downloads: CaptureDownload[]) {
-    const files = await Promise.all(
-      downloads.map((download) =>
-        dataUrlToFile(download.dataUrl, download.filename),
-      ),
-    );
+  function closeCaptureResults() {
+    setCaptureResultFiles((currentFiles) => {
+      currentFiles.forEach((file) => URL.revokeObjectURL(file.url));
+      return [];
+    });
+  }
 
-    if (canShareFiles(files)) {
-      await navigator.share({
-        files,
-        title: files.length === 1 ? files[0].name : "Filly 공유 컨텐츠",
-      });
-      return;
+  async function sharePngFiles(files: File[]) {
+    if (await tryShareFiles(files)) {
+      return true;
     }
 
-    for (const file of files) {
-      downloadPngFile(file);
-      await wait(300);
-    }
+    return false;
   }
 
   function getCaptureOptions(element: HTMLElement) {
@@ -288,6 +351,15 @@ export function RecommendPage() {
         height: `${height}px`,
       },
     } satisfies Parameters<typeof toPng>[1];
+  }
+
+  async function capturePngFile(
+    element: HTMLElement,
+    filename: string,
+    options: Parameters<typeof toPng>[1],
+  ) {
+    const dataUrl = await toPng(element, options);
+    return dataUrlToFile(dataUrl, filename);
   }
 
   function getCaptureTargetAvailability(target: CaptureTarget) {
@@ -334,15 +406,19 @@ export function RecommendPage() {
     const prefix = `filly-${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
 
     try {
-      const downloads: CaptureDownload[] = [];
+      const files: File[] = [];
 
       // 사원증: 첫 번째 자식(IdCard div, rounded-2xl)을 직접 캡처 → 투명 배경으로 라운딩 살림
-      const idCardEl = idCardRef.current?.firstElementChild as HTMLElement | null;
+      const idCardEl = idCardRef.current
+        ?.firstElementChild as HTMLElement | null;
       if (targets.includes("idCard") && idCardEl) {
-        downloads.push({
-          dataUrl: await toPng(idCardEl, getCaptureOptions(idCardEl)),
-          filename: `${prefix}-사원증.png`,
-        });
+        files.push(
+          await capturePngFile(
+            idCardEl,
+            `${prefix}-사원증.png`,
+            getCaptureOptions(idCardEl),
+          ),
+        );
       }
 
       // 영수증: 펼쳐진 스크롤 컨테이너 전체 캡처
@@ -357,8 +433,8 @@ export function RecommendPage() {
         receiptEl.style.overflowY = "visible";
 
         try {
-          downloads.push({
-            dataUrl: await toPng(receiptEl, {
+          files.push(
+            await capturePngFile(receiptEl, `${prefix}-영수증.png`, {
               backgroundColor:
                 getComputedStyle(document.documentElement)
                   .getPropertyValue("--receipt-barcode-light")
@@ -372,8 +448,7 @@ export function RecommendPage() {
               },
               width,
             }),
-            filename: `${prefix}-영수증.png`,
-          });
+          );
         } finally {
           receiptEl.style.height = prevHeight;
           receiptEl.style.overflowY = prevOverflow;
@@ -381,21 +456,25 @@ export function RecommendPage() {
       }
 
       // 키워드 클라우드: 라운딩 영역만 캡처 → 투명 배경
-      const cloudEl = keywordCloudRef.current?.firstElementChild as HTMLElement | null;
+      const cloudEl = keywordCloudRef.current
+        ?.firstElementChild as HTMLElement | null;
       if (targets.includes("keywordCloud") && cloudEl) {
-        downloads.push({
-          dataUrl: await toPng(cloudEl, getCaptureOptions(cloudEl)),
-          filename: `${prefix}-키워드클라우드.png`,
-        });
+        files.push(
+          await capturePngFile(
+            cloudEl,
+            `${prefix}-키워드클라우드.png`,
+            getCaptureOptions(cloudEl),
+          ),
+        );
       }
 
-      if (downloads.length === 0) return;
-
-      await savePngFiles(downloads);
+      if (files.length === 0) return;
 
       setShowCapturePicker(false);
+      const shared = await sharePngFiles(files);
+      if (!shared) showCaptureResults(files);
     } catch (e) {
-      if (e instanceof DOMException && e.name === "AbortError") return;
+      if (isShareCancel(e)) return;
 
       console.error("[capture] 실패", e);
       window.alert("이미지 저장에 실패했어요. 잠시 후 다시 시도해주세요.");
@@ -425,7 +504,9 @@ export function RecommendPage() {
     }
 
     if (revealedRecommendations[cardId]) {
-      setCardOrder((currentOrder) => getCenteredCardOrder(currentOrder, cardId));
+      setCardOrder((currentOrder) =>
+        getCenteredCardOrder(currentOrder, cardId),
+      );
       setSelectedCardId(cardId);
       return;
     }
@@ -507,7 +588,9 @@ export function RecommendPage() {
     setRecommendationError(null);
     markRecommendationRequested();
     const previousRevealedRecommendations = revealedRecommendations;
-    const nextDrawPromise = shuffleRecommendationDraw(recommendationDraw.drawId);
+    const nextDrawPromise = shuffleRecommendationDraw(
+      recommendationDraw.drawId,
+    );
 
     if (selectedCardId !== null) {
       setIsPreparingShuffle(true);
@@ -559,7 +642,10 @@ export function RecommendPage() {
   }
 
   const selectedTargets = captureTargetOptions
-    .filter(({ id }) => selectedCaptureTargets[id] && getCaptureTargetAvailability(id))
+    .filter(
+      ({ id }) =>
+        selectedCaptureTargets[id] && getCaptureTargetAvailability(id),
+    )
     .map(({ id }) => id);
 
   const hasDownloadableContent = captureTargetOptions.some(({ id }) =>
@@ -613,11 +699,13 @@ export function RecommendPage() {
                         role="button"
                         tabIndex={isCardDisabled ? -1 : 0}
                         onClick={() => {
-                          if (!isCardDisabled) handleRecommendationCardClick(cardId);
+                          if (!isCardDisabled)
+                            handleRecommendationCardClick(cardId);
                         }}
                         onKeyDown={(event) => {
                           if (isCardDisabled) return;
-                          if (event.key !== "Enter" && event.key !== " ") return;
+                          if (event.key !== "Enter" && event.key !== " ")
+                            return;
 
                           event.preventDefault();
                           handleRecommendationCardClick(cardId);
@@ -632,7 +720,9 @@ export function RecommendPage() {
                         }`}
                         transition={{
                           layout: {
-                            duration: isShuffling ? SHUFFLE_STEP_DURATION_MS / 1000 : 0.45,
+                            duration: isShuffling
+                              ? SHUFFLE_STEP_DURATION_MS / 1000
+                              : 0.45,
                             ease: [0.22, 0.61, 0.36, 1],
                           },
                         }}
@@ -640,7 +730,9 @@ export function RecommendPage() {
                       >
                         <div
                           className={`relative left-1/2 top-1/2 aspect-[1023/1537] transition-[height,transform] duration-700 [transform-style:preserve-3d] ${
-                            showSelectedFront ? "h-[238px] md:h-[348px]" : "h-full"
+                            showSelectedFront
+                              ? "h-[238px] md:h-[348px]"
+                              : "h-full"
                           }`}
                           style={{
                             transform: showSelectedFront
@@ -648,12 +740,12 @@ export function RecommendPage() {
                               : "translate(-50%, -50%)",
                           }}
                         >
-                          <div
-                            className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]"
-                          >
+                          <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]">
                             <img
                               src={tarotCardImage}
-                              alt={recommendationLoading ? "LOADING" : cardLabel}
+                              alt={
+                                recommendationLoading ? "LOADING" : cardLabel
+                              }
                               className="h-full w-full object-cover"
                             />
                           </div>
@@ -769,7 +861,8 @@ export function RecommendPage() {
                         />
                       ))}
                     </div>
-                  ) : recommendationError && recommendationHistory.length === 0 ? (
+                  ) : recommendationError &&
+                    recommendationHistory.length === 0 ? (
                     <div className="h-full min-h-[116px] flex items-center justify-center rounded-lg border border-dashed border-border-dashed bg-bg-beige-subtle px-4 text-center">
                       <span className="text-[12px] leading-[1.7] text-text-muted">
                         {recommendationError}
@@ -797,7 +890,9 @@ export function RecommendPage() {
                           <button
                             key={historyKey}
                             type="button"
-                            onClick={() => setSelectedRecommendationHistory(item)}
+                            onClick={() =>
+                              setSelectedRecommendationHistory(item)
+                            }
                             className="w-[150px] flex-shrink-0 rounded-md border border-border-light bg-bg-beige-subtle px-2.5 py-2 text-left transition-colors md:w-full md:px-3"
                           >
                             <div className="flex items-center justify-between gap-2">
@@ -892,7 +987,10 @@ export function RecommendPage() {
                   </button>
                 )}
               </div>
-              <div ref={receiptWrapRef} className="relative h-[280px] max-h-[56vh] md:max-h-none">
+              <div
+                ref={receiptWrapRef}
+                className="relative h-[280px] max-h-[56vh] md:max-h-none"
+              >
                 <div
                   ref={receiptScrollRef}
                   className="h-full overflow-y-auto"
@@ -978,13 +1076,16 @@ export function RecommendPage() {
         }
         widthClassName="w-[400px] max-w-[calc(100vw-32px)]"
         footer={
-          selectedRecommendationHistory?.drawId === recommendationDraw?.drawId ? (
+          selectedRecommendationHistory?.drawId ===
+          recommendationDraw?.drawId ? (
             <div className="flex justify-end">
               <button
                 type="button"
                 onClick={() => {
                   if (!selectedRecommendationHistory) return;
-                  handleRecommendationHistoryClick(selectedRecommendationHistory);
+                  handleRecommendationHistoryClick(
+                    selectedRecommendationHistory,
+                  );
                   setSelectedRecommendationHistory(null);
                 }}
                 className="rounded-full border border-border-medium bg-bg-beige-subtle px-3 py-1.5 text-[12px] text-text-muted transition-colors hover:bg-bg-hover"
@@ -1091,25 +1192,31 @@ export function RecommendPage() {
                       aria-pressed={checked}
                       className={`w-full flex items-center justify-between rounded-lg border px-3 py-2.5
                         text-left transition-colors disabled:cursor-not-allowed disabled:opacity-45
-                        ${checked
-                          ? "border-border-strong bg-bg-active text-text-heading"
-                          : "border-border-medium bg-transparent text-text-muted hover:bg-bg-hover"
+                        ${
+                          checked
+                            ? "border-border-strong bg-bg-active text-text-heading"
+                            : "border-border-medium bg-transparent text-text-muted hover:bg-bg-hover"
                         }`}
                     >
                       <span>
-                        <span className="block text-[13px]">{option.label}</span>
+                        <span className="block text-[13px]">
+                          {option.label}
+                        </span>
                         <span className="block text-[11px] text-text-secondary">
                           {disabled ? "아직 준비 중이에요" : option.description}
                         </span>
                       </span>
                       <span
                         className={`w-5 h-5 rounded-full border flex items-center justify-center
-                          ${checked
-                            ? "border-border-strong bg-bg-selected"
-                            : "border-border-medium bg-bg-beige-subtle"
+                          ${
+                            checked
+                              ? "border-border-strong bg-bg-selected"
+                              : "border-border-medium bg-bg-beige-subtle"
                           }`}
                       >
-                        {checked && <Check className="w-3 h-3 text-text-heading" />}
+                        {checked && (
+                          <Check className="w-3 h-3 text-text-heading" />
+                        )}
                       </span>
                     </button>
                   );
@@ -1136,6 +1243,63 @@ export function RecommendPage() {
                 >
                   {capturing ? "저장 중..." : "선택 저장"}
                 </button>
+              </div>
+            </div>
+          </div>
+        </Portal>
+      )}
+
+      {captureResultFiles.length > 0 && (
+        <Portal>
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-bg-overlay backdrop-blur-[2px]"
+            onClick={closeCaptureResults}
+          >
+            <div
+              className="w-[340px] max-w-[calc(100vw-32px)] rounded-xl bg-notebook-page shadow-[var(--shadow-modal)]
+                overflow-hidden font-['Nanum_Myeongjo']"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between px-4 py-3 border-b border-border-light">
+                <div>
+                  <div className="text-[14px] text-text-heading tracking-wide">
+                    이미지 준비 완료
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={closeCaptureResults}
+                  className="w-7 h-7 flex items-center justify-center rounded-md
+                    hover:bg-bg-hover transition-colors"
+                >
+                  <X className="w-4 h-4 text-text-muted" />
+                </button>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto p-4 space-y-3">
+                {captureResultFiles.map((file) => (
+                  <a
+                    key={file.id}
+                    href={file.url}
+                    download={file.name}
+                    target="_blank"
+                    rel="noopener"
+                    className="block rounded-lg border border-border-medium bg-bg-beige-subtle p-2
+                      text-text-muted transition-colors hover:bg-bg-hover"
+                  >
+                    <img
+                      src={file.url}
+                      alt={file.name}
+                      className="mb-2 max-h-40 w-full rounded-md object-contain bg-notebook-page"
+                    />
+                    <span className="flex items-center justify-between gap-2 text-[12px]">
+                      <span className="truncate">{file.name}</span>
+                      <span className="flex-shrink-0 text-text-heading">
+                        저장
+                      </span>
+                    </span>
+                  </a>
+                ))}
               </div>
             </div>
           </div>
