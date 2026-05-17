@@ -2,7 +2,12 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 type RecordingState = "idle" | "recording";
 
-export type VoiceRecord = { id: number; file: File; url: string };
+export type VoiceRecord = {
+  id: number;
+  file: File;
+  url: string;
+  durationSeconds: number;
+};
 
 type RecorderFormat = { mimeType: string; extension: string };
 
@@ -85,7 +90,10 @@ export function useVoiceRecorder(maxSeconds = 10) {
       };
 
       mediaRecorder.onstop = () => {
-        const durationSec = (Date.now() - startTimeRef.current) / 1000;
+        const durationSec = Math.max(
+          0,
+          (Date.now() - startTimeRef.current) / 1000,
+        );
         stream.getTracks().forEach((t) => t.stop());
 
         if (durationSec > maxSeconds) {
@@ -102,7 +110,7 @@ export function useVoiceRecorder(maxSeconds = 10) {
         });
         const url = URL.createObjectURL(blob);
         if (recordRef.current) URL.revokeObjectURL(recordRef.current.url);
-        setRecord({ id: Date.now(), file, url });
+        setRecord({ id: Date.now(), file, url, durationSeconds: durationSec });
       };
 
       mediaRecorder.start();

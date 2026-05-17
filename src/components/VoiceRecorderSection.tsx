@@ -12,36 +12,58 @@ interface VoiceRecorderSectionProps {
   maxSeconds?: number;
 }
 
-function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
+function getSafeSeconds(seconds: number | undefined) {
+  return Number.isFinite(seconds) && seconds !== undefined
+    ? Math.max(0, seconds)
+    : 0;
+}
+
+function formatTime(seconds: number | undefined) {
+  const safeSeconds = getSafeSeconds(seconds);
+  const m = Math.floor(safeSeconds / 60);
+  const s = Math.floor(safeSeconds % 60);
   return m > 0 ? `${m}:${s.toString().padStart(2, "0")}` : `${s}초`;
 }
 
-function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
+function MiniPlayer({
+  url,
+  durationSeconds,
+  onRemove,
+}: {
+  url: string;
+  durationSeconds: number;
+  onRemove: () => void;
+}) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(durationSeconds);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoaded = () => setDuration(audio.duration);
+    const syncDuration = () => {
+      const metadataDuration = getSafeSeconds(audio.duration);
+      setDuration(metadataDuration || durationSeconds);
+    };
+    const onTimeUpdate = () => setCurrentTime(getSafeSeconds(audio.currentTime));
     const onEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
     };
     audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("loadedmetadata", onLoaded);
+    audio.addEventListener("loadedmetadata", syncDuration);
+    audio.addEventListener("durationchange", syncDuration);
     audio.addEventListener("ended", onEnded);
+    syncDuration();
+
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
-      audio.removeEventListener("loadedmetadata", onLoaded);
+      audio.removeEventListener("loadedmetadata", syncDuration);
+      audio.removeEventListener("durationchange", syncDuration);
       audio.removeEventListener("ended", onEnded);
     };
-  }, []);
+  }, [durationSeconds, url]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
@@ -50,10 +72,12 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play();
+      void audio.play();
       setIsPlaying(true);
     }
   };
+
+  const safeCurrentTime = Math.min(getSafeSeconds(currentTime), duration);
 
   return (
     <div className="relative overflow-visible flex-1 min-w-0 h-[67px] bg-bg-surface-muted rounded-lg border border-border-medium flex items-center gap-3 px-4">
@@ -80,18 +104,18 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
         <input
           type="range"
           min={0}
-          max={duration || 0}
+          max={duration}
           step={0.01}
-          value={currentTime}
+          value={safeCurrentTime}
           onChange={(e) => {
-            const t = Number(e.target.value);
+            const t = getSafeSeconds(Number(e.target.value));
             if (audioRef.current) audioRef.current.currentTime = t;
             setCurrentTime(t);
           }}
           className="flex-1 min-w-0 h-1 accent-[var(--accent-audio-progress)] cursor-pointer"
         />
         <span className="text-[12px] text-text-muted tabular-nums flex-shrink-0">
-          {formatTime(currentTime)}/{formatTime(duration)}
+          {formatTime(safeCurrentTime)}/{formatTime(duration)}
         </span>
       </div>
 
@@ -173,7 +197,11 @@ export function VoiceRecorderSection({
         )}
 
         {record && !isRecording && (
-          <MiniPlayer url={record.url} onRemove={onRemove} />
+          <MiniPlayer
+            url={record.url}
+            durationSeconds={record.durationSeconds}
+            onRemove={onRemove}
+          />
         )}
       </div>
 
