@@ -52,7 +52,7 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
               {visibleKeywords.map((kw, i) => (
                 <span
                   key={i}
-                  className="text-[11px] px-2 py-0.5 rounded-full border border-border-light text-text-muted bg-bg-beige-subtle"
+                  className="whitespace-nowrap rounded-full border border-border-light bg-bg-beige-subtle px-2 py-0.5 text-[11px] leading-none text-text-muted"
                 >
                   {kw}
                 </span>

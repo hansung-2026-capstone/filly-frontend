@@ -148,7 +148,7 @@ export function WritePage() {
   };
 
   return (
-    <div className="flex w-full h-full font-['Nanum_Myeongjo'] relative">
+    <div className="relative flex h-auto w-full flex-col font-['Nanum_Myeongjo'] md:h-full md:flex-row">
       {isSaving && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-page-loading z-20 gap-3 rounded-md">
           <div className="w-6 h-6 border-2 border-[var(--border-spinner)] border-t-[var(--border-spinner-active)] rounded-full animate-spin" />
@@ -158,7 +158,7 @@ export function WritePage() {
         </div>
       )}
 
-      <div className={`flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto${editDiary ? " opacity-40 pointer-events-none select-none" : ""}`}>
+      <div className={`flex flex-col gap-5 px-4 py-5 md:min-h-0 md:flex-1 md:overflow-y-auto md:px-6${editDiary ? " opacity-40 pointer-events-none select-none" : ""}`}>
         <div className="pb-3 border-b border-[var(--border-subtle)]">
           <h2 className="text-base text-text-heading tracking-wide m-0 font-medium">
             {editDiary ? "수정 모드에서는 AI 기능 비활성" : "AI 작성 툴"}
@@ -173,7 +173,7 @@ export function WritePage() {
             placeholder="오늘 하루는 어땠나요? 자유롭게 기록해보세요..."
             maxLength={100}
             showToolbar={false}
-            className="flex-1"
+            className="min-h-[160px] flex-1"
             onChange={setShortText}
           />
         </div>
@@ -186,6 +186,7 @@ export function WritePage() {
             isRecording={voiceRecorder.isRecording}
             onToggle={voiceRecorder.toggle}
             onRemove={voiceRecorder.removeRecord}
+            errorMessage={voiceRecorder.errorMessage}
           />
           <div className="flex justify-end pt-2">
             <button
@@ -203,7 +204,7 @@ export function WritePage() {
       </div>
 
       <div
-        className={`flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto relative ${
+        className={`relative flex flex-col gap-5 border-t border-border-light px-4 py-5 md:min-h-0 md:flex-1 md:overflow-y-auto md:border-t-0 md:px-6 ${
           isDraftGenerating ? "pointer-events-none select-none" : ""
         }`}
         aria-busy={isDraftGenerating}
@@ -262,7 +263,7 @@ export function WritePage() {
             placeholder="AI가 생성한 초안이 여기에 표시됩니다..."
             maxLength={500}
             showToolbar
-            className="flex-1"
+            className="min-h-[260px] flex-1"
             content={draftContent}
             onChange={setFinalText}
           />

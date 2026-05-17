@@ -8,6 +8,7 @@ interface VoiceRecorderSectionProps {
   isRecording: boolean;
   onToggle: () => void;
   onRemove: () => void;
+  errorMessage?: string | null;
   maxSeconds?: number;
 }
 
@@ -60,6 +61,7 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
 
       {/* 재생/일시정지 버튼 */}
       <button
+        type="button"
         onClick={togglePlay}
         className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-bg-control hover:bg-bg-control-hover transition-colors"
       >
@@ -95,6 +97,7 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
 
       {/* X 버튼 */}
       <button
+        type="button"
         onClick={onRemove}
         className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-bg-strong-control
           border-2 border-notebook-page flex items-center justify-center
@@ -113,6 +116,7 @@ export function VoiceRecorderSection({
   isRecording,
   onToggle,
   onRemove,
+  errorMessage,
   maxSeconds = 10,
 }: VoiceRecorderSectionProps) {
   const [elapsed, setElapsed] = useState(0);
@@ -142,6 +146,7 @@ export function VoiceRecorderSection({
 
       <div className="flex items-center gap-3 overflow-visible">
         <button
+          type="button"
           onClick={handleToggle}
           className={`w-[67px] h-[67px] flex-shrink-0 rounded-lg border-2 cursor-pointer
             flex items-center justify-center transition-all duration-150
@@ -171,6 +176,12 @@ export function VoiceRecorderSection({
           <MiniPlayer url={record.url} onRemove={onRemove} />
         )}
       </div>
+
+      {errorMessage && (
+        <p className="m-0 rounded-md bg-[var(--bg-error)] px-3 py-2 text-[12px] text-[var(--text-error)]">
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

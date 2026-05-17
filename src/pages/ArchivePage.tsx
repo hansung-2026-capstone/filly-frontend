@@ -75,8 +75,8 @@ export function ArchivePage() {
   }
 
   return (
-    <div className="flex w-full h-full font-['Nanum_Myeongjo']">
-      <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-5 gap-2 overflow-hidden">
+    <div className="flex h-auto w-full flex-col font-['Nanum_Myeongjo'] md:h-full md:flex-row">
+      <div className="flex h-auto flex-col gap-2 px-4 py-4 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:px-5 md:py-3">
         <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
           <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
             아카이브
@@ -93,7 +93,7 @@ export function ArchivePage() {
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-2.5 flex-1 min-h-0 content-start overflow-y-auto pt-1">
+        <div className="grid content-start gap-1.5 overflow-y-auto pt-1 grid-cols-4 md:min-h-0 md:flex-1 md:grid-cols-3 md:gap-2.5">
           <button
             type="button"
             onClick={openCreateModal}
@@ -104,11 +104,11 @@ export function ArchivePage() {
               disabled:opacity-60 hover:bg-[var(--bg-archive-add-hover)] hover:border-[var(--border-archive-add-hover)]
               hover:shadow-[var(--shadow-subtle)] hover:-translate-y-0.5"
           >
-            <Plus className="w-7 h-7 text-[var(--text-archive-add)]" />
+            <Plus className="h-4 w-4 text-[var(--text-archive-add)] md:h-7 md:w-7" />
           </button>
 
           {loadingArchives && (
-            <div className="col-span-2 flex items-center justify-center text-xs text-text-secondary">
+            <div className="col-span-4 flex items-center justify-center text-xs text-text-secondary md:col-span-3">
               불러오는 중
             </div>
           )}
@@ -137,15 +137,15 @@ export function ArchivePage() {
                   }}
                 >
                   <div
-                    className="absolute top-[-3px] left-1/2 -translate-x-1/2 w-[30px] h-2 bg-[var(--bg-paper-tape)]
-                      rounded-[1px] shadow-[var(--shadow-tape)]"
+                    className="absolute top-[-2px] left-1/2 h-1.5 w-[18px] -translate-x-1/2 bg-[var(--bg-paper-tape)]
+                      rounded-[1px] shadow-[var(--shadow-tape)] md:top-[-3px] md:h-2 md:w-[30px]"
                     style={{ transform: "translateX(-50%) rotate(-1deg)" }}
                   />
 
-                  <div className="text-[22px] text-[var(--text-black-title)] leading-none">
+                  <div className="text-[13px] text-[var(--text-black-title)] leading-none md:text-[22px]">
                     {archive.name}
                   </div>
-                  <div className="text-[20px] text-[var(--text-black-subtitle)] tracking-wide">
+                  <div className="text-[11px] text-[var(--text-black-subtitle)] tracking-wide md:text-[20px]">
                     {archive.entryCount}개
                   </div>
                 </button>
@@ -156,11 +156,11 @@ export function ArchivePage() {
                     event.stopPropagation();
                     setOpenMenuId(openMenuId === archive.id ? null : archive.id);
                   }}
-                  className="absolute top-1 right-1 z-[3] w-5 h-5 flex items-center justify-center
+                  className="absolute top-0.5 right-0.5 z-[3] flex h-4 w-4 items-center justify-center
                     rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150
-                    bg-[var(--bg-black-subtle)] hover:bg-[var(--bg-black-subtle-hover)]"
+                    bg-[var(--bg-black-subtle)] hover:bg-[var(--bg-black-subtle-hover)] md:top-1 md:right-1 md:h-5 md:w-5"
                 >
-                  <MoreVertical className="w-3 h-3 text-[var(--text-black-icon)]" />
+                  <MoreVertical className="h-2.5 w-2.5 text-[var(--text-black-icon)] md:h-3 md:w-3" />
                 </button>
 
                 {openMenuId === archive.id && (
@@ -193,7 +193,7 @@ export function ArchivePage() {
         </div>
       </div>
 
-      <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-5 gap-2 overflow-hidden">
+      <div className="flex h-auto flex-col gap-2 border-t border-border-light px-4 py-3 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:border-t-0 md:px-5 md:py-3">
         <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
           <div className="flex items-center gap-2 min-w-0">
             {selectedArchiveId !== null && (
@@ -217,7 +217,7 @@ export function ArchivePage() {
           />
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="overflow-y-auto md:min-h-0 md:flex-1">
           {loadingDiaries && (
             <div className="py-8 text-center text-xs text-text-secondary">
               일기를 불러오는 중

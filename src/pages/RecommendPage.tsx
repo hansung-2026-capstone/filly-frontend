@@ -18,6 +18,7 @@ import { IdCard, IdCardSkeleton } from "../components/IdCard";
 import { Receipt, ReceiptSkeleton } from "../components/Receipt";
 import { MonthPickerModal } from "../components/MonthPickerModal";
 import { KeywordCloud } from "../components/KeywordCloud";
+import { NotebookDetailModal } from "../components/NotebookDetailModal";
 import type {
   RecommendationDetail,
   RecommendationDraw,
@@ -32,6 +33,10 @@ const RECOMMENDATION_REQUEST_COOLDOWN_MS = 1800;
 import { Portal } from "../components/Portal";
 
 type CaptureTarget = "idCard" | "receipt" | "keywordCloud";
+type CaptureDownload = {
+  dataUrl: string;
+  filename: string;
+};
 
 const captureTargetOptions: { id: CaptureTarget; label: string; description: string }[] = [
   { id: "idCard", label: "사원증", description: "ID Card" },
@@ -104,6 +109,21 @@ function wait(ms: number) {
   });
 }
 
+async function dataUrlToFile(dataUrl: string, filename: string) {
+  const response = await fetch(dataUrl);
+  const blob = await response.blob();
+
+  return new File([blob], filename, { type: blob.type || "image/png" });
+}
+
+function canShareFiles(files: File[]) {
+  return (
+    typeof navigator.share === "function" &&
+    typeof navigator.canShare === "function" &&
+    navigator.canShare({ files })
+  );
+}
+
 function moveMonth(year: number, month: number, delta: number) {
   const nextDate = new Date(year, month - 1 + delta, 1);
   return {
@@ -122,6 +142,8 @@ export function RecommendPage() {
   const [recommendationHistory, setRecommendationHistory] = useState<
     RecommendationDetail[]
   >([]);
+  const [selectedRecommendationHistory, setSelectedRecommendationHistory] =
+    useState<RecommendationDetail | null>(null);
   const [revealedRecommendations, setRevealedRecommendations] = useState<
     Record<number, RecommendationDetail>
   >({});
@@ -218,13 +240,54 @@ export function RecommendPage() {
     };
   }, []);
 
-  function downloadPng(dataUrl: string, filename: string) {
+  function downloadPngFile(file: File) {
+    const url = URL.createObjectURL(file);
     const link = document.createElement("a");
-    link.download = filename;
-    link.href = dataUrl;
+    link.download = file.name;
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  async function savePngFiles(downloads: CaptureDownload[]) {
+    const files = await Promise.all(
+      downloads.map((download) =>
+        dataUrlToFile(download.dataUrl, download.filename),
+      ),
+    );
+
+    if (canShareFiles(files)) {
+      await navigator.share({
+        files,
+        title: files.length === 1 ? files[0].name : "Filly 공유 컨텐츠",
+      });
+      return;
+    }
+
+    for (const file of files) {
+      downloadPngFile(file);
+      await wait(300);
+    }
+  }
+
+  function getCaptureOptions(element: HTMLElement) {
+    const rect = element.getBoundingClientRect();
+    const width = Math.ceil(rect.width || element.scrollWidth);
+    const height = Math.ceil(rect.height || element.scrollHeight);
+
+    return {
+      pixelRatio: 2,
+      width,
+      height,
+      style: {
+        width: `${width}px`,
+        height: `${height}px`,
+      },
+    } satisfies Parameters<typeof toPng>[1];
   }
 
   function getCaptureTargetAvailability(target: CaptureTarget) {
@@ -270,50 +333,73 @@ export function RecommendPage() {
     setCapturing(true);
     const prefix = `filly-${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
 
-    const shouldCaptureReceipt = targets.includes("receipt");
-    const receiptEl = shouldCaptureReceipt ? receiptScrollRef.current : null;
-    const prevHeight = receiptEl?.style.height ?? "";
-    const prevOverflow = receiptEl?.style.overflowY ?? "";
-    if (receiptEl) {
-      receiptEl.style.height = "auto";
-      receiptEl.style.overflowY = "visible";
-    }
-
     try {
+      const downloads: CaptureDownload[] = [];
+
       // 사원증: 첫 번째 자식(IdCard div, rounded-2xl)을 직접 캡처 → 투명 배경으로 라운딩 살림
       const idCardEl = idCardRef.current?.firstElementChild as HTMLElement | null;
-      if (targets.includes("idCard") && idCardEl)
-        downloadPng(
-          await toPng(idCardEl, { pixelRatio: 2 }),
-          `${prefix}-사원증.png`,
-        );
+      if (targets.includes("idCard") && idCardEl) {
+        downloads.push({
+          dataUrl: await toPng(idCardEl, getCaptureOptions(idCardEl)),
+          filename: `${prefix}-사원증.png`,
+        });
+      }
 
       // 영수증: 펼쳐진 스크롤 컨테이너 전체 캡처
-      if (shouldCaptureReceipt && receiptScrollRef.current)
-        downloadPng(
-          await toPng(receiptScrollRef.current, {
-            backgroundColor: "var(--receipt-barcode-light)",
-            pixelRatio: 2,
-          }),
-          `${prefix}-영수증.png`,
-        );
+      if (targets.includes("receipt") && receiptScrollRef.current) {
+        const receiptEl = receiptScrollRef.current;
+        const prevHeight = receiptEl.style.height;
+        const prevOverflow = receiptEl.style.overflowY;
+        const width = receiptEl.scrollWidth;
+        const height = receiptEl.scrollHeight;
+
+        receiptEl.style.height = `${height}px`;
+        receiptEl.style.overflowY = "visible";
+
+        try {
+          downloads.push({
+            dataUrl: await toPng(receiptEl, {
+              backgroundColor:
+                getComputedStyle(document.documentElement)
+                  .getPropertyValue("--receipt-barcode-light")
+                  .trim() || "#ffffff",
+              height,
+              pixelRatio: 2,
+              style: {
+                height: `${height}px`,
+                overflowY: "visible",
+                width: `${width}px`,
+              },
+              width,
+            }),
+            filename: `${prefix}-영수증.png`,
+          });
+        } finally {
+          receiptEl.style.height = prevHeight;
+          receiptEl.style.overflowY = prevOverflow;
+        }
+      }
 
       // 키워드 클라우드: 라운딩 영역만 캡처 → 투명 배경
       const cloudEl = keywordCloudRef.current?.firstElementChild as HTMLElement | null;
-      if (targets.includes("keywordCloud") && cloudEl)
-        downloadPng(
-          await toPng(cloudEl, { pixelRatio: 2 }),
-          `${prefix}-키워드클라우드.png`,
-        );
+      if (targets.includes("keywordCloud") && cloudEl) {
+        downloads.push({
+          dataUrl: await toPng(cloudEl, getCaptureOptions(cloudEl)),
+          filename: `${prefix}-키워드클라우드.png`,
+        });
+      }
+
+      if (downloads.length === 0) return;
+
+      await savePngFiles(downloads);
 
       setShowCapturePicker(false);
     } catch (e) {
+      if (e instanceof DOMException && e.name === "AbortError") return;
+
       console.error("[capture] 실패", e);
+      window.alert("이미지 저장에 실패했어요. 잠시 후 다시 시도해주세요.");
     } finally {
-      if (receiptEl) {
-        receiptEl.style.height = prevHeight;
-        receiptEl.style.overflowY = prevOverflow;
-      }
       setCapturing(false);
     }
   }
@@ -399,6 +485,10 @@ export function RecommendPage() {
     setSelectedCardId(item.cardId);
   }
 
+  function getRecommendationHistoryKey(item: RecommendationDetail) {
+    return `${item.drawId}-${item.cardId}`;
+  }
+
   async function handleShuffleCards() {
     if (
       !recommendationDraw ||
@@ -480,10 +570,10 @@ export function RecommendPage() {
 
   return (
     <>
-      <div className="flex w-full h-full font-['Nanum_Myeongjo']">
+      <div className="flex h-auto w-full flex-col font-['Nanum_Myeongjo'] md:h-full md:flex-row">
         {/* Left page - 추천 */}
-        <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-3 gap-3 overflow-hidden">
-          <div className="flex-1 min-h-0 flex flex-col">
+        <div className="flex h-auto flex-col gap-3 px-3 py-4 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:py-3">
+          <div className="flex flex-col md:min-h-0 md:flex-1">
             <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
               <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
                 추천 컨텐츠
@@ -494,9 +584,9 @@ export function RecommendPage() {
               />
             </div>
 
-            <div className="flex-1 flex flex-col gap-4 min-h-0 pt-5">
+            <div className="flex flex-col gap-4 pt-5 md:min-h-0 md:flex-1">
               <div className="flex flex-col gap-4 flex-shrink-0">
-                <div className="relative flex h-[232px] w-full gap-3 px-2">
+                <div className="relative flex h-[164px] w-full gap-2 px-1 md:h-[232px] md:gap-3 md:px-2">
                   {cardOrder.map((cardId, slotIndex) => {
                     const card = recommendationDraw?.cards.find(
                       (item) => item.cardId === cardId,
@@ -550,7 +640,7 @@ export function RecommendPage() {
                       >
                         <div
                           className={`relative left-1/2 top-1/2 aspect-[1023/1537] transition-[height,transform] duration-700 [transform-style:preserve-3d] ${
-                            showSelectedFront ? "h-[348px]" : "h-full"
+                            showSelectedFront ? "h-[238px] md:h-[348px]" : "h-full"
                           }`}
                           style={{
                             transform: showSelectedFront
@@ -592,7 +682,7 @@ export function RecommendPage() {
                                 </button>
                               </div>
                             )}
-                            <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-hidden text-text-heading">
+                            <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-x-hidden overflow-y-auto text-text-heading">
                               {isRevealing ? (
                                 <div className="flex h-full items-center justify-center text-center text-[13px] leading-[1.7] text-text-muted">
                                   추천을 펼치는 중...
@@ -607,13 +697,13 @@ export function RecommendPage() {
                                         : ""}
                                     </span>
                                   </div>
-                                  <div className="line-clamp-2 text-[15px] font-bold leading-[1.35]">
+                                  <div className="text-[15px] font-bold leading-[1.35]">
                                     {detail.title}
                                   </div>
-                                  <div className="line-clamp-4 text-[11.5px] leading-[1.6] text-text-muted">
+                                  <div className="text-[11.5px] leading-[1.6] text-text-muted">
                                     {detail.description}
                                   </div>
-                                  <div className="mt-auto line-clamp-3 border-t border-border-medium pt-2 text-[10.5px] leading-[1.6] text-text-secondary">
+                                  <div className="border-t border-border-medium pt-2 text-[10.5px] leading-[1.6] text-text-secondary">
                                     {detail.reason}
                                   </div>
                                   {detail.searchKeyword && (
@@ -662,20 +752,20 @@ export function RecommendPage() {
                 </div>
               </div>
 
-              <div className="flex-1 min-h-[180px] flex flex-col overflow-hidden pt-2 border-t border-border-light">
+              <div className="flex flex-none flex-col overflow-hidden border-t border-border-light pt-2 md:min-h-[180px] md:flex-1">
                 <div className="flex items-center justify-between mb-2 flex-shrink-0">
                   <div className="text-[12px] tracking-[2px] text-[var(--text-page-label)] uppercase">
                     추천 히스토리
                   </div>
                 </div>
 
-                <div className="flex-1 overflow-y-auto pr-1">
+                <div className="flex-none overflow-x-auto overflow-y-hidden pr-1 md:flex-1 md:overflow-x-hidden md:overflow-y-auto">
                   {recommendationLoading ? (
-                    <div className="space-y-2">
+                    <div className="flex gap-2 md:block md:space-y-2">
                       {Array.from({ length: 3 }).map((_, index) => (
                         <div
                           key={index}
-                          className="h-14 rounded-md border border-border-light bg-bg-beige-subtle animate-pulse"
+                          className="h-14 min-w-[150px] rounded-md border border-border-light bg-bg-beige-subtle animate-pulse md:min-w-0"
                         />
                       ))}
                     </div>
@@ -694,33 +784,36 @@ export function RecommendPage() {
                       </span>
                     </div>
                   ) : (
-                    <div className="space-y-2">
+                    <div className="flex gap-2 md:block md:space-y-2">
                       {recommendationError && (
-                        <div className="rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2 text-[12px] leading-[1.5] text-text-muted">
+                        <div className="min-w-[150px] rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2 text-[12px] leading-[1.5] text-text-muted md:min-w-0">
                           {recommendationError}
                         </div>
                       )}
-                      {recommendationHistory.map((item) => (
-                        <button
-                          key={`${item.drawId}-${item.cardId}`}
-                          type="button"
-                          onClick={() => handleRecommendationHistoryClick(item)}
-                          className="w-full rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2 text-left transition-colors hover:bg-bg-hover disabled:cursor-default disabled:hover:bg-bg-beige-subtle"
-                          disabled={item.drawId !== recommendationDraw?.drawId}
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0 flex-1 truncate text-[12px] font-bold text-text-heading">
-                              {item.title}
+                      {recommendationHistory.map((item) => {
+                        const historyKey = getRecommendationHistoryKey(item);
+
+                        return (
+                          <button
+                            key={historyKey}
+                            type="button"
+                            onClick={() => setSelectedRecommendationHistory(item)}
+                            className="w-[150px] flex-shrink-0 rounded-md border border-border-light bg-bg-beige-subtle px-2.5 py-2 text-left transition-colors md:w-full md:px-3"
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <div className="min-w-0 flex-1 truncate text-[12px] font-bold text-text-heading">
+                                {item.title}
+                              </div>
+                              <div className="flex-shrink-0 text-[11px] text-text-secondary">
+                                {contentTypeLabels[item.contentType]}
+                              </div>
                             </div>
-                            <div className="flex-shrink-0 text-[11px] text-text-secondary">
-                              {contentTypeLabels[item.contentType]}
+                            <div className="mt-1 line-clamp-2 text-[12px] leading-[1.45] text-text-muted">
+                              {item.reason}
                             </div>
-                          </div>
-                          <div className="mt-1 line-clamp-2 text-[12px] leading-[1.45] text-text-muted">
-                            {item.reason}
-                          </div>
-                        </button>
-                      ))}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -730,7 +823,7 @@ export function RecommendPage() {
         </div>
 
         {/* Right page - 공유 컨텐츠 */}
-        <div className="flex-1 h-full max-h-[680px] flex flex-col py-3 px-3 gap-3 overflow-hidden">
+        <div className="flex h-auto flex-col gap-3 border-t border-border-light px-3 py-4 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:border-t-0 md:py-3">
           {/* 헤더 */}
           <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
             <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
@@ -765,7 +858,7 @@ export function RecommendPage() {
           </div>
 
           {/* 사원증 + 영수증 */}
-          <div className="flex gap-2.5 flex-shrink-0">
+          <div className="flex flex-col gap-3 md:flex-row md:gap-2.5 md:flex-shrink-0">
             {/* 사원증 컬럼 */}
             <div className="flex-1 flex flex-col gap-1.5">
               <span className="text-[12px] tracking-[1.5px] text-text-secondary uppercase">
@@ -799,7 +892,7 @@ export function RecommendPage() {
                   </button>
                 )}
               </div>
-              <div ref={receiptWrapRef} className="relative h-[280px]">
+              <div ref={receiptWrapRef} className="relative h-[280px] max-h-[56vh] md:max-h-none">
                 <div
                   ref={receiptScrollRef}
                   className="h-full overflow-y-auto"
@@ -866,6 +959,92 @@ export function RecommendPage() {
         onClose={() => setShowMonthPicker(false)}
       />
 
+      <NotebookDetailModal
+        isOpen={selectedRecommendationHistory !== null}
+        onClose={() => setSelectedRecommendationHistory(null)}
+        accent="var(--tab-recommend)"
+        eyebrow="Recommendation"
+        title={selectedRecommendationHistory?.title ?? ""}
+        meta={
+          selectedRecommendationHistory ? (
+            <span>
+              {contentTypeLabels[selectedRecommendationHistory.contentType]} ·{" "}
+              {selectedRecommendationHistory.category}
+              {selectedRecommendationHistory.subCategory
+                ? ` / ${selectedRecommendationHistory.subCategory}`
+                : ""}
+            </span>
+          ) : null
+        }
+        widthClassName="w-[400px] max-w-[calc(100vw-32px)]"
+        footer={
+          selectedRecommendationHistory?.drawId === recommendationDraw?.drawId ? (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  if (!selectedRecommendationHistory) return;
+                  handleRecommendationHistoryClick(selectedRecommendationHistory);
+                  setSelectedRecommendationHistory(null);
+                }}
+                className="rounded-full border border-border-medium bg-bg-beige-subtle px-3 py-1.5 text-[12px] text-text-muted transition-colors hover:bg-bg-hover"
+              >
+                카드 보기
+              </button>
+            </div>
+          ) : null
+        }
+      >
+        {selectedRecommendationHistory && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-2">
+              <div className="rounded-[16px] border border-border-light bg-bg-beige-subtle px-3 py-2.5">
+                <div className="text-[10px] tracking-[1.4px] text-[var(--text-page-label)] uppercase">
+                  유형
+                </div>
+                <div className="mt-1 text-[12px] font-bold text-text-heading">
+                  {contentTypeLabels[selectedRecommendationHistory.contentType]}
+                </div>
+              </div>
+              <div className="rounded-[16px] border border-border-light bg-bg-beige-subtle px-3 py-2.5">
+                <div className="text-[10px] tracking-[1.4px] text-[var(--text-page-label)] uppercase">
+                  기록
+                </div>
+                <div className="mt-1 text-[12px] font-bold text-text-heading">
+                  #{selectedRecommendationHistory.cardId}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-[16px] border border-border-light bg-bg-beige-subtle px-4 py-3">
+              <div className="mb-2 text-[11px] tracking-[1.6px] text-[var(--text-page-label)] uppercase">
+                설명
+              </div>
+              <div className="text-[13px] leading-[1.85] text-text-muted">
+                {selectedRecommendationHistory.description}
+              </div>
+            </div>
+
+            <div className="rounded-[16px] border border-border-light bg-[var(--bg-page)] px-4 py-3 shadow-[var(--shadow-subtle)]">
+              <div className="mb-2 text-[11px] tracking-[1.6px] text-[var(--text-page-label)] uppercase">
+                추천 이유
+              </div>
+              <div className="whitespace-pre-line text-[13px] leading-[1.85] text-text-muted">
+                {selectedRecommendationHistory.reason}
+              </div>
+            </div>
+
+            {selectedRecommendationHistory.searchKeyword && (
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full border border-border-light bg-bg-beige-subtle px-3 py-1 text-[11px] text-text-secondary">
+                  #{selectedRecommendationHistory.searchKeyword}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
+      </NotebookDetailModal>
+
       {showCapturePicker && (
         <Portal>
           <div
@@ -875,7 +1054,7 @@ export function RecommendPage() {
             }}
           >
             <div
-              className="w-[320px] rounded-xl bg-notebook-page shadow-[var(--shadow-modal)]
+              className="w-[320px] max-w-[calc(100vw-32px)] rounded-xl bg-notebook-page shadow-[var(--shadow-modal)]
                 overflow-hidden font-['Nanum_Myeongjo']"
               onClick={(e) => e.stopPropagation()}
             >
