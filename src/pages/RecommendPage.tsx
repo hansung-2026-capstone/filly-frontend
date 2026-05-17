@@ -879,7 +879,10 @@ export function RecommendPage() {
                         key={selectedCardId}
                         initial={{ rotateY: 0 }}
                         animate={{ rotateY: 180 }}
-                        transition={{ duration: 0.7, ease: [0.22, 0.61, 0.36, 1] }}
+                        transition={{
+                          duration: 0.95,
+                          ease: [0.22, 0.61, 0.36, 1],
+                        }}
                         className="pointer-events-auto relative aspect-[1023/1537] h-[238px] [transform-style:preserve-3d] md:h-[348px]"
                       >
                         <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] [backface-visibility:hidden]">
