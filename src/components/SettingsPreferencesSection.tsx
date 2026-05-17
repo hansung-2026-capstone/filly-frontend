@@ -80,16 +80,8 @@ export function SettingsPreferencesSection() {
   };
 
   return (
-    <section className="w-full pt-6" aria-label="AI 초안 스타일">
-      <div className="mb-4 flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-[14px] font-bold tracking-[1px] text-text-muted">
-            AI 초안 스타일
-          </h3>
-          <p className="mt-1 text-[12px] leading-[1.6] text-text-secondary">
-            일기 초안을 만들 때 참고할 기본 정보를 설정해요.
-          </p>
-        </div>
+    <section className="relative w-full" aria-label="AI 초안 스타일">
+      <div className="absolute right-0 top-0 flex justify-end">
         <button
           type="button"
           onClick={() => void savePreferences()}
