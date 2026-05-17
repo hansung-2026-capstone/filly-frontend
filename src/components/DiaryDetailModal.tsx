@@ -77,6 +77,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
   const { label, dow } = formatDiaryDate(diary.writtenAt);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [archiveActionError, setArchiveActionError] = useState<string | null>(null);
@@ -100,10 +101,13 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteDiary();
       onDeleted?.();
       onClose();
+    } catch {
+      setDeleteError("일기를 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setIsDeleting(false);
     }
@@ -235,11 +239,11 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                       border border-transparent rounded-md cursor-pointer
                       hover:bg-[var(--bg-danger-confirm-hover)] transition-all duration-150 font-['Nanum_Myeongjo']
                       disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {isDeleting ? "삭제 중..." : "삭제"}
-                  </button>
-                </div>
-              </>
+                    >
+                      {isDeleting ? "삭제 중..." : "삭제"}
+                    </button>
+                  </div>
+                </>
             ) : (
               <>
                 <button
@@ -282,6 +286,14 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
               </>
             )}
           </div>
+
+          {deleteError && (
+            <div className="relative z-10 px-5 pb-3">
+              <div className="px-3 py-2 rounded-md bg-[var(--bg-error)] text-[12px] text-[var(--text-error)]">
+                {deleteError}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
