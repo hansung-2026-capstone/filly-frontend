@@ -35,6 +35,7 @@ import { Portal } from "../components/Portal";
 type CaptureTarget = "idCard" | "receipt" | "keywordCloud";
 type CaptureResultFile = {
   id: string;
+  file: File;
   name: string;
   url: string;
 };
@@ -143,42 +144,12 @@ async function dataUrlToFile(dataUrl: string, filename: string) {
   return new File([blob], filename, { type: blob.type || "image/png" });
 }
 
-function canShareFiles(files: File[]) {
-  if (
-    typeof navigator.share !== "function" ||
-    typeof navigator.canShare !== "function"
-  ) {
-    return false;
-  }
-
-  try {
-    return navigator.canShare({ files });
-  } catch {
-    return false;
-  }
-}
-
 function isShareCancel(error: unknown) {
-  return error instanceof DOMException && error.name === "AbortError";
+  return error instanceof Error && error.name === "AbortError";
 }
 
-async function tryShareFiles(files: File[]) {
-  if (!canShareFiles(files)) return false;
-
-  try {
-    await navigator.share({
-      files,
-      title: files.length === 1 ? files[0].name : "Filly 공유 컨텐츠",
-    });
-    return true;
-  } catch (error) {
-    if (isShareCancel(error)) throw error;
-    console.warn(
-      "[capture] 공유 저장을 사용할 수 없어 다운로드로 전환합니다.",
-      error,
-    );
-    return false;
-  }
+function getShareTitle(files: File[]) {
+  return files.length === 1 ? files[0].name : "Filly 공유 컨텐츠";
 }
 
 function moveMonth(year: number, month: number, delta: number) {
@@ -316,6 +287,7 @@ export function RecommendPage() {
 
       return files.map((file, index) => ({
         id: `${file.name}-${file.lastModified}-${index}`,
+        file,
         name: file.name,
         url: URL.createObjectURL(file),
       }));
@@ -329,28 +301,35 @@ export function RecommendPage() {
     });
   }
 
-  async function sharePngFiles(files: File[]) {
-    if (await tryShareFiles(files)) {
-      return true;
-    }
+  async function shareFiles(files: File[]) {
+    if (typeof navigator.share !== "function") return "unsupported" as const;
 
-    return false;
+    try {
+      await navigator.share({
+        files,
+        title: getShareTitle(files),
+      });
+      return "shared" as const;
+    } catch (error) {
+      if (isShareCancel(error)) return "cancelled" as const;
+      console.warn("[capture] 공유 실패", error);
+      return "failed" as const;
+    }
   }
 
-  function getCaptureOptions(element: HTMLElement) {
-    const rect = element.getBoundingClientRect();
-    const width = Math.ceil(rect.width || element.scrollWidth);
-    const height = Math.ceil(rect.height || element.scrollHeight);
+  async function shareCaptureResult(files: File[]) {
+    const result = await shareFiles(files);
 
-    return {
-      pixelRatio: 2,
-      width,
-      height,
-      style: {
-        width: `${width}px`,
-        height: `${height}px`,
-      },
-    } satisfies Parameters<typeof toPng>[1];
+    if (result === "shared") {
+      closeCaptureResults();
+      return;
+    }
+
+    if (result === "unsupported") {
+      window.alert(
+        "이 브라우저에서는 이미지 공유를 사용할 수 없어요. 이미지를 열고 길게 눌러 저장해주세요.",
+      );
+    }
   }
 
   async function capturePngFile(
@@ -359,6 +338,14 @@ export function RecommendPage() {
     options: Parameters<typeof toPng>[1],
   ) {
     const dataUrl = await toPng(element, options);
+    return dataUrlToFile(dataUrl, filename);
+  }
+
+  async function captureElementAsShown(element: HTMLElement, filename: string) {
+    const dataUrl = await toPng(element, {
+      cacheBust: true,
+      pixelRatio: 2,
+    });
     return dataUrlToFile(dataUrl, filename);
   }
 
@@ -413,10 +400,9 @@ export function RecommendPage() {
         ?.firstElementChild as HTMLElement | null;
       if (targets.includes("idCard") && idCardEl) {
         files.push(
-          await capturePngFile(
+          await captureElementAsShown(
             idCardEl,
             `${prefix}-사원증.png`,
-            getCaptureOptions(idCardEl),
           ),
         );
       }
@@ -460,10 +446,9 @@ export function RecommendPage() {
         ?.firstElementChild as HTMLElement | null;
       if (targets.includes("keywordCloud") && cloudEl) {
         files.push(
-          await capturePngFile(
+          await captureElementAsShown(
             cloudEl,
             `${prefix}-키워드클라우드.png`,
-            getCaptureOptions(cloudEl),
           ),
         );
       }
@@ -471,8 +456,12 @@ export function RecommendPage() {
       if (files.length === 0) return;
 
       setShowCapturePicker(false);
-      const shared = await sharePngFiles(files);
-      if (!shared) showCaptureResults(files);
+      if (files.length <= 2) {
+        const shareResult = await shareFiles(files);
+        if (shareResult === "shared" || shareResult === "cancelled") return;
+      }
+
+      showCaptureResults(files);
     } catch (e) {
       if (isShareCancel(e)) return;
 
@@ -1265,6 +1254,9 @@ export function RecommendPage() {
                   <div className="text-[14px] text-text-heading tracking-wide">
                     이미지 준비 완료
                   </div>
+                  <div className="mt-0.5 text-[11px] text-text-secondary">
+                    여러 장 공유가 막히면 이미지를 하나씩 공유하거나 열어서 저장해주세요.
+                  </div>
                 </div>
                 <button
                   type="button"
@@ -1276,29 +1268,53 @@ export function RecommendPage() {
                 </button>
               </div>
 
+              <div className="border-b border-border-light px-4 py-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    void shareCaptureResult(captureResultFiles.map((file) => file.file))
+                  }
+                  className="w-full rounded-full border border-border-strong bg-bg-active px-3 py-2
+                    text-[12px] text-text-heading transition-colors hover:bg-bg-active-hover"
+                >
+                  전체 공유
+                </button>
+              </div>
+
               <div className="max-h-[60vh] overflow-y-auto p-4 space-y-3">
                 {captureResultFiles.map((file) => (
-                  <a
+                  <div
                     key={file.id}
-                    href={file.url}
-                    download={file.name}
-                    target="_blank"
-                    rel="noopener"
-                    className="block rounded-lg border border-border-medium bg-bg-beige-subtle p-2
-                      text-text-muted transition-colors hover:bg-bg-hover"
+                    className="rounded-lg border border-border-medium bg-bg-beige-subtle p-2"
                   >
-                    <img
-                      src={file.url}
-                      alt={file.name}
-                      className="mb-2 max-h-40 w-full rounded-md object-contain bg-notebook-page"
-                    />
-                    <span className="flex items-center justify-between gap-2 text-[12px]">
-                      <span className="truncate">{file.name}</span>
-                      <span className="flex-shrink-0 text-text-heading">
-                        저장
+                    <a
+                      href={file.url}
+                      download={file.name}
+                      target="_blank"
+                      rel="noopener"
+                      className="block text-text-muted transition-colors hover:text-text-heading"
+                    >
+                      <img
+                        src={file.url}
+                        alt={file.name}
+                        className="mb-2 max-h-40 w-full rounded-md object-contain bg-notebook-page"
+                      />
+                      <span className="flex items-center justify-between gap-2 text-[12px]">
+                        <span className="truncate">{file.name}</span>
+                        <span className="flex-shrink-0 text-text-heading">
+                          열기
+                        </span>
                       </span>
-                    </span>
-                  </a>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => void shareCaptureResult([file.file])}
+                      className="mt-2 w-full rounded-full border border-border-medium bg-transparent px-3 py-1.5
+                        text-[12px] text-text-muted transition-colors hover:bg-bg-hover"
+                    >
+                      이 이미지 공유
+                    </button>
+                  </div>
                 ))}
               </div>
             </div>
