@@ -10,7 +10,7 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
   const visibleKeywords = keywords.slice(0, 3);
 
   return (
-    <div className="w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium">
+    <div className="paper-texture w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium">
       {/* 상단 헤더 */}
       <div className="bg-tab-recommend px-4 py-2.5 flex items-center justify-between">
         <span className="text-[15px] font-black tracking-[3px] text-tab-recommend-text">
@@ -90,7 +90,7 @@ export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
 
 export function IdCardSkeleton() {
   return (
-    <div className="w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium">
+    <div className="paper-texture w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium">
       <div className="bg-tab-recommend opacity-60 h-9" />
       <div className="bg-notebook-page flex flex-col items-center px-4 pt-4 pb-3 gap-3">
         <div className="w-[72px] h-[72px] rounded-full bg-bg-hover animate-pulse" />
