@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { FaBookOpen } from 'react-icons/fa';
 import { RiKakaoTalkFill } from 'react-icons/ri';
 import { SiNaver } from 'react-icons/si';
@@ -39,24 +38,9 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, children, onClick
 };
 
 const LoginPage: React.FC = () => {
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('accessToken');
-        
-    if (token) {
-      localStorage.setItem('accessToken', token);
-      navigate('/', { replace: true });
-    }
-  }, [navigate]);
-
-  // 실제 로그인 동작을 구현할 함수들 (나중에 백엔드와 연결)
   const handleSocialLogin = (provider: string) => {
     console.log(`${provider} 로그인 시도`);
     
-    // const BACKEND_URL = `https://filly-backend-997421794532.asia-northeast3.run.app`;
     const BACKEND_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:8080' 
     : 'https://filly-diary.com';
