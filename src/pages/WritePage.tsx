@@ -8,6 +8,7 @@ import { TiptapEditor } from "../components/TiptapEditor";
 import { VoiceRecorderSection } from "../components/VoiceRecorderSection";
 import { usePhotoUpload } from "../hook/usePhotoUpload";
 import { useVoiceRecorder } from "../hook/useVoiceRecorder";
+import { useCurrentUser } from "../hook/common/useCurrentUser";
 import { useDiaryMutations } from "../hook/common/useDiaryMutations";
 import {
   formatDateKey,
@@ -20,6 +21,8 @@ import {
 import { hasDiaryText } from "../lib/diary";
 
 const EMOJIS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
+const DEFAULT_PREFERENCE = "none";
+
 function getEditDiary(locationState: unknown) {
   return (locationState as { diary?: DiaryItem } | null)?.diary;
 }
@@ -48,6 +51,7 @@ export function WritePage() {
   const diaryPhotos = usePhotoUpload();
   const voiceRecorder = useVoiceRecorder();
   const diaryMutations = useDiaryMutations(selectedDate);
+  const { data: user } = useCurrentUser();
   const dateLabel = editDiary
     ? formatKoreanDateKey(editDiary.writtenAt)
     : formatKoreanDate(selectedDate);
@@ -72,6 +76,9 @@ export function WritePage() {
 
       if (shortText.trim()) form.append("content", shortText.trim());
       form.append("writtenAt", formatDateKey(selectedDate));
+      form.append("gender", user?.gender ?? DEFAULT_PREFERENCE);
+      form.append("ageGroup", user?.ageGroup ?? DEFAULT_PREFERENCE);
+      form.append("aiDraftTone", user?.aiDraftTone ?? DEFAULT_PREFERENCE);
       appendPhotos(form, aiPhotos.photos);
       if (voiceRecorder.record) form.append("voice", voiceRecorder.record.file);
 
