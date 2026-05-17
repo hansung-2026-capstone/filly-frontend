@@ -160,6 +160,21 @@ function moveMonth(year: number, month: number, delta: number) {
   };
 }
 
+function getRevealedDrawDetail(
+  draw: RecommendationDraw,
+  history: RecommendationDetail[],
+) {
+  const revealedCard = draw.cards.find((card) => card.revealed);
+  if (!revealedCard) return null;
+
+  return (
+    history.find(
+      (item) =>
+        item.drawId === draw.drawId && item.cardId === revealedCard.cardId,
+    ) ?? null
+  );
+}
+
 export function RecommendPage() {
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -226,6 +241,27 @@ export function RecommendPage() {
     lastRecommendationRequestAtRef.current = Date.now();
   }
 
+  function getActiveRevealedCardId() {
+    const [firstRevealedCardId] = Object.keys(revealedRecommendations);
+    const activeCardId = firstRevealedCardId
+      ? Number(firstRevealedCardId)
+      : null;
+
+    if (
+      activeCardId === null ||
+      !recommendationDraw?.cards.some((card) => card.cardId === activeCardId)
+    ) {
+      return null;
+    }
+
+    return activeCardId;
+  }
+
+  function isLockedByActiveCard(cardId: number) {
+    const activeCardId = selectedCardId ?? getActiveRevealedCardId();
+    return activeCardId !== null && activeCardId !== cardId;
+  }
+
   useEffect(() => {
     let ignore = false;
 
@@ -241,20 +277,11 @@ export function RecommendPage() {
 
         if (ignore) return;
 
-        const currentDrawDetails = history.filter(
-          (item) => item.drawId === draw.drawId,
-        );
-
         setRecommendationDraw(draw);
         setRecommendationHistory(history);
+        const revealedDetail = getRevealedDrawDetail(draw, history);
         setRevealedRecommendations(
-          currentDrawDetails.reduce<Record<number, RecommendationDetail>>(
-            (details, item) => ({
-              ...details,
-              [item.cardId]: item,
-            }),
-            {},
-          ),
+          revealedDetail ? { [revealedDetail.cardId]: revealedDetail } : {},
         );
         setCardOrder(getCardOrder(draw));
       } catch (error) {
@@ -469,7 +496,8 @@ export function RecommendPage() {
       isShuffling ||
       isShuffleLocked ||
       isPreparingShuffle ||
-      revealingCardId !== null
+      revealingCardId !== null ||
+      isLockedByActiveCard(cardId)
     ) {
       return;
     }
@@ -498,10 +526,7 @@ export function RecommendPage() {
         cardId,
       );
 
-      setRevealedRecommendations((currentDetails) => ({
-        ...currentDetails,
-        [cardId]: detail,
-      }));
+      setRevealedRecommendations({ [cardId]: detail });
       setRecommendationHistory((currentHistory) => {
         const filteredHistory = currentHistory.filter(
           (item) =>
@@ -511,6 +536,38 @@ export function RecommendPage() {
         return [detail, ...filteredHistory];
       });
     } catch (error) {
+      const existingDetail = recommendationHistory.find(
+        (item) =>
+          item.drawId === recommendationDraw.drawId && item.cardId === cardId,
+      );
+      const currentDrawDetail = recommendationHistory.find(
+        (item) =>
+          item.drawId === recommendationDraw.drawId &&
+          recommendationDraw.cards.some((card) => card.cardId === item.cardId),
+      );
+
+      if (isAxiosError(error) && error.response?.status === 400 && existingDetail) {
+        setRevealedRecommendations({ [cardId]: existingDetail });
+        setRecommendationError(null);
+        return;
+      }
+
+      if (
+        isAxiosError(error) &&
+        error.response?.status === 400 &&
+        currentDrawDetail
+      ) {
+        setRevealedRecommendations({
+          [currentDrawDetail.cardId]: currentDrawDetail,
+        });
+        setSelectedCardId(currentDrawDetail.cardId);
+        setCardOrder((currentOrder) =>
+          getCenteredCardOrder(currentOrder, currentDrawDetail.cardId),
+        );
+        setRecommendationError(null);
+        return;
+      }
+
       console.error("[recommendation] 추천 카드를 공개하지 못했어요.", error);
       setSelectedCardId(null);
       setRecommendationError(
@@ -533,11 +590,9 @@ export function RecommendPage() {
   function handleRecommendationHistoryClick(item: RecommendationDetail) {
     if (item.drawId !== recommendationDraw?.drawId) return;
     if (!cardOrder.includes(item.cardId)) return;
+    if (isLockedByActiveCard(item.cardId)) return;
 
-    setRevealedRecommendations((currentDetails) => ({
-      ...currentDetails,
-      [item.cardId]: item,
-    }));
+    setRevealedRecommendations({ [item.cardId]: item });
     setSelectedCardId(item.cardId);
   }
 
@@ -567,6 +622,7 @@ export function RecommendPage() {
       recommendationDraw.drawId,
     );
 
+    setRevealedRecommendations({});
     if (selectedCardId !== null) {
       setIsPreparingShuffle(true);
       setSelectedCardId(null);
@@ -575,7 +631,6 @@ export function RecommendPage() {
       setIsPreparingShuffle(false);
     }
 
-    setRevealedRecommendations({});
     setIsShuffling(true);
     const stepPairs: [number, number][] = [
       [0, 1],
@@ -660,12 +715,20 @@ export function RecommendPage() {
                       !isShuffling &&
                       !isShuffleLocked;
                     const isRevealing = revealingCardId === cardId;
+                    const isCardLocked = isLockedByActiveCard(cardId);
+                    const showCardFilter =
+                      isWaitingForInitialRecommendation ||
+                      (!isPreparingShuffle &&
+                        !isShuffling &&
+                        !isShuffleLocked &&
+                        isCardLocked);
                     const isCardDisabled =
                       isWaitingForInitialRecommendation ||
                       isShuffling ||
                       isShuffleLocked ||
                       isPreparingShuffle ||
-                      (revealingCardId !== null && !isRevealing);
+                      (revealingCardId !== null && !isRevealing) ||
+                      isCardLocked;
                     const cardLabel = `추천 카드 ${card?.position ?? slotIndex + 1}`;
                     return (
                       <motion.div
@@ -690,6 +753,8 @@ export function RecommendPage() {
                         aria-label={cardLabel}
                         className={`group relative z-[1] h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
                           isWaitingForInitialRecommendation ? "opacity-55" : ""
+                        } ${
+                          showCardFilter ? "pointer-events-none" : ""
                         } ${
                           isCardDisabled ? "cursor-default" : "cursor-pointer"
                         }`}
@@ -724,6 +789,12 @@ export function RecommendPage() {
                               className="h-full w-full object-cover"
                             />
                           </div>
+                          {showCardFilter && (
+                            <div
+                              aria-hidden="true"
+                              className="pointer-events-none absolute inset-0 z-[3] rounded-md bg-white/70"
+                            />
+                          )}
 
                           <div
                             className={`absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
