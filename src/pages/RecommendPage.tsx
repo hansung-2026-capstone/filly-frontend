@@ -716,11 +716,9 @@ export function RecommendPage() {
                     const card = recommendationDraw?.cards.find(
                       (item) => item.cardId === cardId,
                     );
-                    const detail = revealedRecommendations[cardId];
                     const isSelected = selectedCardId === cardId;
                     const isSelectedCardPopped =
                       showSelectedCardPopup && isSelected;
-                    const showSelectedFront = false;
                     const isRevealing = revealingCardId === cardId;
                     const isCardLocked = isLockedByActiveCard(cardId);
                     const showCardFilter =
@@ -775,19 +773,10 @@ export function RecommendPage() {
                             ease: [0.22, 0.61, 0.36, 1],
                           },
                         }}
-                        style={{ zIndex: showSelectedFront ? 10 : 1 }}
+                        style={{ zIndex: 1 }}
                       >
                         <div
-                          className={`relative left-1/2 top-1/2 aspect-[1023/1537] transition-[height,transform] duration-700 [transform-style:preserve-3d] ${
-                            showSelectedFront
-                              ? "h-[238px] md:h-[348px]"
-                              : "h-full"
-                          }`}
-                          style={{
-                            transform: showSelectedFront
-                              ? "translate(-50%, -50%) rotateY(180deg)"
-                              : "translate(-50%, -50%)",
-                          }}
+                          className="relative left-1/2 top-1/2 aspect-[1023/1537] h-full -translate-x-1/2 -translate-y-1/2"
                         >
                           <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]">
                             <img
@@ -804,94 +793,6 @@ export function RecommendPage() {
                               className="pointer-events-none absolute inset-0 z-[3] rounded-md bg-white/70"
                             />
                           )}
-
-                          <div
-                            className={`absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-5 [backface-visibility:hidden] [transform:rotateY(180deg)] ${
-                              showSelectedFront
-                                ? "shadow-[0_18px_34px_rgba(0,0,0,0.2)]"
-                                : "shadow-[var(--shadow-subtle)]"
-                            }`}
-                          >
-                            <div className="absolute inset-0 opacity-20 paper-texture" />
-                            <div className="absolute inset-3 rounded-md border border-border-medium" />
-                            {showSelectedFront && (
-                              <div className="pointer-events-none absolute inset-3 z-[2]">
-                                <button
-                                  type="button"
-                                  onClick={(event) => {
-                                    event.stopPropagation();
-                                    handleCloseSelectedCard();
-                                  }}
-                                  aria-label="카드 닫기"
-                                  className="pointer-events-auto absolute right-1 top-1 p-1 text-[var(--text-icon-muted)] transition-colors hover:text-[var(--text-icon-soft)]"
-                                >
-                                  <X className="h-3.5 w-3.5" />
-                                </button>
-                              </div>
-                            )}
-                            <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-x-hidden overflow-y-auto text-text-heading">
-                              {isRevealing ? (
-                                <div className="flex h-full items-center justify-center text-center text-[13px] leading-[1.7] text-text-muted">
-                                  추천을 펼치는 중...
-                                </div>
-                              ) : detail ? (
-                                <>
-                                  <div className="flex items-center gap-2 text-[10px] tracking-[1.4px] text-text-secondary">
-                                    <span className="truncate">
-                                      {detail.category}
-                                      {detail.subCategory
-                                        ? ` / ${detail.subCategory}`
-                                        : ""}
-                                    </span>
-                                  </div>
-                                  <div className="text-[15px] font-bold leading-[1.35]">
-                                    {detail.title}
-                                  </div>
-                                  <div className="text-[11.5px] leading-[1.6] text-text-muted">
-                                    {detail.description}
-                                  </div>
-                                  <div className="border-t border-border-medium pt-2 text-[10.5px] leading-[1.6] text-text-secondary">
-                                    {detail.reason}
-                                  </div>
-                                  {detail.searchKeyword && (
-                                    <div className="truncate text-[9.5px] text-text-secondary">
-                                      #{detail.searchKeyword}
-                                    </div>
-                                  )}
-                                  <button
-                                    type="button"
-                                    onClick={(event) => {
-                                      event.stopPropagation();
-                                      handleShuffleCards();
-                                    }}
-                                    disabled={
-                                      isShuffling ||
-                                      isShuffleLocked ||
-                                      isPreparingShuffle ||
-                                      revealingCardId !== null
-                                    }
-                                    className="mt-1 self-center rounded-full border border-border-medium px-3 py-1 text-[10.5px] text-text-muted transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
-                                  >
-                                    {isShuffling || isPreparingShuffle
-                                      ? "뽑는 중..."
-                                      : "다른 카드 뽑기"}
-                                  </button>
-                                </>
-                              ) : (
-                                <div className="flex h-full items-center justify-center text-center text-[13px] leading-[1.7] text-text-muted">
-                                  {isWaitingForInitialRecommendation ? (
-                                    <>추천 카드를 불러오는 중이에요.</>
-                                  ) : (
-                                    <>
-                                      카드를 선택하면
-                                      <br />
-                                      오늘의 추천이 열려요.
-                                    </>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          </div>
                         </div>
                       </motion.div>
                     );
