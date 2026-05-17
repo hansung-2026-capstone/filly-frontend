@@ -212,6 +212,8 @@ export function RecommendPage() {
   const receiptWrapRef = useRef<HTMLDivElement>(null);
   const keywordCloudRef = useRef<HTMLDivElement>(null);
   const lastRecommendationRequestAtRef = useRef(0);
+  const isMountedRef = useRef(false);
+  const shuffleIntervalRef = useRef<number | null>(null);
 
   function isRateLimitError(error: unknown) {
     return isAxiosError(error) && error.response?.status === 429;
@@ -226,6 +228,13 @@ export function RecommendPage() {
 
   function markRecommendationRequested() {
     lastRecommendationRequestAtRef.current = Date.now();
+  }
+
+  function clearShuffleInterval() {
+    if (shuffleIntervalRef.current === null) return;
+
+    window.clearInterval(shuffleIntervalRef.current);
+    shuffleIntervalRef.current = null;
   }
 
   function getActiveRevealedCardId() {
@@ -248,6 +257,15 @@ export function RecommendPage() {
     const activeCardId = selectedCardId ?? getActiveRevealedCardId();
     return activeCardId !== null && activeCardId !== cardId;
   }
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      clearShuffleInterval();
+    };
+  }, []);
 
   useEffect(() => {
     let ignore = false;
@@ -598,6 +616,10 @@ export function RecommendPage() {
       setSelectedCardId(null);
       setCardOrder(getCardOrder(recommendationDraw));
       await wait(CARD_RESET_DURATION_MS + CARD_RESET_SETTLE_BUFFER_MS);
+      if (!isMountedRef.current) {
+        await nextDrawPromise.catch(() => undefined);
+        return;
+      }
       setIsPreparingShuffle(false);
     }
 
@@ -608,7 +630,10 @@ export function RecommendPage() {
       [0, 1],
     ];
     let stepIndex = 0;
-    const shuffleLoopId = window.setInterval(() => {
+    clearShuffleInterval();
+    shuffleIntervalRef.current = window.setInterval(() => {
+      if (!isMountedRef.current) return;
+
       const [firstIndex, secondIndex] = stepPairs[stepIndex % stepPairs.length];
       stepIndex += 1;
       setCardOrder((currentOrder) =>
@@ -621,10 +646,14 @@ export function RecommendPage() {
         nextDrawPromise,
         wait(SHUFFLE_MIN_VISIBLE_MS),
       ]);
+      if (!isMountedRef.current) return;
+
       setRecommendationDraw(nextDraw);
       setCardOrder(getCardOrder(nextDraw));
       setSelectedCardId(null);
     } catch (error) {
+      if (!isMountedRef.current) return;
+
       console.error("[recommendation] 추천 카드를 섞지 못했어요.", error);
       setRevealedRecommendations(previousRevealedRecommendations);
       setCardOrder(getCardOrder(recommendationDraw));
@@ -635,9 +664,12 @@ export function RecommendPage() {
           : "추천 카드를 섞지 못했어요.",
       );
     } finally {
-      window.clearInterval(shuffleLoopId);
-      setIsShuffling(false);
-      setIsShuffleLocked(false);
+      clearShuffleInterval();
+
+      if (isMountedRef.current) {
+        setIsShuffling(false);
+        setIsShuffleLocked(false);
+      }
     }
   }
 
