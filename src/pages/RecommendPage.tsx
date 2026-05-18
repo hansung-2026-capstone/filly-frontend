@@ -175,6 +175,15 @@ function isDrawCardRevealed(
   return draw.cards.some((card) => card.cardId === cardId && card.revealed);
 }
 
+function markDrawCardRevealed(draw: RecommendationDraw, cardId: number) {
+  return {
+    ...draw,
+    cards: draw.cards.map((card) =>
+      card.cardId === cardId ? { ...card, revealed: true } : card,
+    ),
+  };
+}
+
 function getApiErrorMessage(error: unknown) {
   if (!isAxiosError(error)) return null;
 
@@ -559,21 +568,11 @@ export function RecommendPage() {
 
         return [detail, ...filteredHistory];
       });
-
-      try {
-        const syncedDraw = await startRecommendationDraw();
-
-        if (!isMountedRef.current) return;
-        if (syncedDraw.drawId === recommendationDraw.drawId) {
-          setRecommendationDraw(syncedDraw);
-          setCardOrder(getCardOrder(syncedDraw));
-        }
-      } catch (syncError) {
-        console.error(
-          "[recommendation] 추천 카드 공개 상태를 동기화하지 못했어요.",
-          syncError,
-        );
-      }
+      setRecommendationDraw((currentDraw) =>
+        currentDraw?.drawId === recommendationDraw.drawId
+          ? markDrawCardRevealed(currentDraw, cardId)
+          : currentDraw,
+      );
     } catch (error) {
       const existingDetail = recommendationHistory.find(
         (item) =>
@@ -643,32 +642,6 @@ export function RecommendPage() {
       return;
     }
 
-    let confirmedDraw = recommendationDraw;
-
-    try {
-      const syncedDraw = await startRecommendationDraw();
-
-      if (!isMountedRef.current) return;
-      confirmedDraw = syncedDraw;
-      setRecommendationDraw(syncedDraw);
-      setCardOrder(getCardOrder(syncedDraw));
-    } catch (syncError) {
-      console.error(
-        "[recommendation] 추천 카드 공개 상태를 확인하지 못했어요.",
-        syncError,
-      );
-      setRecommendationError("추천 카드 공개 상태를 확인하지 못했어요.");
-      return;
-    }
-
-    if (
-      confirmedDraw.drawId !== recommendationDraw.drawId ||
-      !isDrawCardRevealed(confirmedDraw, selectedCardId)
-    ) {
-      setRecommendationError("카드 1장을 공개한 뒤 다시 시도해주세요.");
-      return;
-    }
-
     if (selectedCardId === null) {
       return;
     }
@@ -677,12 +650,12 @@ export function RecommendPage() {
     setRecommendationError(null);
     markRecommendationRequested();
     const previousRevealedRecommendations = revealedRecommendations;
-    const nextDrawPromise = shuffleRecommendationDraw(confirmedDraw.drawId);
+    const nextDrawPromise = shuffleRecommendationDraw(recommendationDraw.drawId);
 
     setRevealedRecommendations({});
     setIsPreparingShuffle(true);
     setSelectedCardId(null);
-    setCardOrder(getCardOrder(confirmedDraw));
+    setCardOrder(getCardOrder(recommendationDraw));
     await wait(CARD_RESET_DURATION_MS + CARD_RESET_SETTLE_BUFFER_MS);
     if (!isMountedRef.current) {
       await nextDrawPromise.catch(() => undefined);
