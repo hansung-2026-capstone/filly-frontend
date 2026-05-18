@@ -19,6 +19,7 @@ import { Receipt, ReceiptSkeleton } from "../components/Receipt";
 import { MonthPickerModal } from "../components/MonthPickerModal";
 import { KeywordCloud } from "../components/KeywordCloud";
 import { NotebookDetailModal } from "../components/NotebookDetailModal";
+import { Portal } from "../components/Portal";
 import type {
   RecommendationDetail,
   RecommendationDraw,
@@ -30,7 +31,6 @@ const CARD_RESET_SETTLE_BUFFER_MS = 120;
 const SHUFFLE_MIN_VISIBLE_MS = 1200;
 const SHUFFLE_STEP_DURATION_MS = 600;
 const RECOMMENDATION_REQUEST_COOLDOWN_MS = 1800;
-import { Portal } from "../components/Portal";
 
 type CaptureTarget = "idCard" | "receipt" | "keywordCloud";
 type CaptureResultFile = {
@@ -240,10 +240,6 @@ export function RecommendPage() {
 
   function isRateLimitError(error: unknown) {
     return isAxiosError(error) && error.response?.status === 429;
-  }
-
-  async function revealDrawCard(draw: RecommendationDraw, cardId: number) {
-    return revealRecommendationCard(draw.drawId, cardId);
   }
 
   function canRequestRecommendationNow() {
@@ -549,7 +545,10 @@ export function RecommendPage() {
     markRecommendationRequested();
 
     try {
-      const detail = await revealDrawCard(recommendationDraw, cardId);
+      const detail = await revealRecommendationCard(
+        recommendationDraw.drawId,
+        cardId,
+      );
 
       setRevealedRecommendations({ [cardId]: detail });
       setRecommendationHistory((currentHistory) => {
@@ -681,17 +680,15 @@ export function RecommendPage() {
     const nextDrawPromise = shuffleRecommendationDraw(confirmedDraw.drawId);
 
     setRevealedRecommendations({});
-    if (selectedCardId !== null) {
-      setIsPreparingShuffle(true);
-      setSelectedCardId(null);
-      setCardOrder(getCardOrder(confirmedDraw));
-      await wait(CARD_RESET_DURATION_MS + CARD_RESET_SETTLE_BUFFER_MS);
-      if (!isMountedRef.current) {
-        await nextDrawPromise.catch(() => undefined);
-        return;
-      }
-      setIsPreparingShuffle(false);
+    setIsPreparingShuffle(true);
+    setSelectedCardId(null);
+    setCardOrder(getCardOrder(confirmedDraw));
+    await wait(CARD_RESET_DURATION_MS + CARD_RESET_SETTLE_BUFFER_MS);
+    if (!isMountedRef.current) {
+      await nextDrawPromise.catch(() => undefined);
+      return;
     }
+    setIsPreparingShuffle(false);
 
     setIsShuffling(true);
     const stepPairs: [number, number][] = [
