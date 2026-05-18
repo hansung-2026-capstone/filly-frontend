@@ -72,10 +72,14 @@ const contentTypeLabels: Record<RecommendationDetail["contentType"], string> = {
 function getCardOrder(draw: RecommendationDraw | null) {
   if (!draw) return Array.from({ length: CARD_COUNT }, (_, index) => index);
 
-  return [...draw.cards]
-    .sort((a, b) => a.position - b.position)
-    .slice(0, CARD_COUNT)
-    .map((card) => card.cardId);
+  return Array.from({ length: CARD_COUNT }, (_, index) => {
+    const position = index + 1;
+    return (
+      draw.cards.find(
+        (card) => card.position === position && !card.revealed,
+      ) ?? draw.cards.find((card) => card.position === position)
+    )?.cardId;
+  }).filter((cardId): cardId is number => typeof cardId === "number");
 }
 
 function swapOrderByIndex(
@@ -162,6 +166,25 @@ function getRevealedDrawDetail(
   );
 }
 
+function isDrawCardRevealed(
+  draw: RecommendationDraw | null,
+  cardId: number | null,
+) {
+  if (!draw || cardId === null) return false;
+
+  return draw.cards.some((card) => card.cardId === cardId && card.revealed);
+}
+
+function getApiErrorMessage(error: unknown) {
+  if (!isAxiosError(error)) return null;
+
+  const data = error.response?.data;
+  if (!data || typeof data !== "object" || !("message" in data)) return null;
+
+  const message = data.message;
+  return typeof message === "string" && message.trim() ? message : null;
+}
+
 export function RecommendPage() {
   const now = new Date();
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -219,6 +242,10 @@ export function RecommendPage() {
     return isAxiosError(error) && error.response?.status === 429;
   }
 
+  async function revealDrawCard(draw: RecommendationDraw, cardId: number) {
+    return revealRecommendationCard(draw.drawId, cardId);
+  }
+
   function canRequestRecommendationNow() {
     return (
       Date.now() - lastRecommendationRequestAtRef.current >=
@@ -245,7 +272,7 @@ export function RecommendPage() {
 
     if (
       activeCardId === null ||
-      !recommendationDraw?.cards.some((card) => card.cardId === activeCardId)
+      !cardOrder.includes(activeCardId)
     ) {
       return null;
     }
@@ -522,10 +549,7 @@ export function RecommendPage() {
     markRecommendationRequested();
 
     try {
-      const detail = await revealRecommendationCard(
-        recommendationDraw.drawId,
-        cardId,
-      );
+      const detail = await revealDrawCard(recommendationDraw, cardId);
 
       setRevealedRecommendations({ [cardId]: detail });
       setRecommendationHistory((currentHistory) => {
@@ -536,6 +560,21 @@ export function RecommendPage() {
 
         return [detail, ...filteredHistory];
       });
+
+      try {
+        const syncedDraw = await startRecommendationDraw();
+
+        if (!isMountedRef.current) return;
+        if (syncedDraw.drawId === recommendationDraw.drawId) {
+          setRecommendationDraw(syncedDraw);
+          setCardOrder(getCardOrder(syncedDraw));
+        }
+      } catch (syncError) {
+        console.error(
+          "[recommendation] 추천 카드 공개 상태를 동기화하지 못했어요.",
+          syncError,
+        );
+      }
     } catch (error) {
       const existingDetail = recommendationHistory.find(
         (item) =>
@@ -569,9 +608,10 @@ export function RecommendPage() {
       console.error("[recommendation] 추천 카드를 공개하지 못했어요.", error);
       setSelectedCardId(null);
       setRecommendationError(
-        isRateLimitError(error)
-          ? "요청이 많아요. 잠시 후 다시 시도해주세요."
-          : "추천 카드를 공개하지 못했어요.",
+        getApiErrorMessage(error) ??
+          (isRateLimitError(error)
+            ? "요청이 많아요. 잠시 후 다시 시도해주세요."
+            : "추천 카드를 공개하지 못했어요."),
       );
     } finally {
       setRevealingCardId(null);
@@ -594,7 +634,8 @@ export function RecommendPage() {
       isShuffling ||
       isShuffleLocked ||
       isPreparingShuffle ||
-      revealingCardId !== null
+      revealingCardId !== null ||
+      !isDrawCardRevealed(recommendationDraw, selectedCardId)
     ) {
       return;
     }
@@ -602,19 +643,48 @@ export function RecommendPage() {
       setRecommendationError("요청이 많아요. 잠시 후 다시 시도해주세요.");
       return;
     }
+
+    let confirmedDraw = recommendationDraw;
+
+    try {
+      const syncedDraw = await startRecommendationDraw();
+
+      if (!isMountedRef.current) return;
+      confirmedDraw = syncedDraw;
+      setRecommendationDraw(syncedDraw);
+      setCardOrder(getCardOrder(syncedDraw));
+    } catch (syncError) {
+      console.error(
+        "[recommendation] 추천 카드 공개 상태를 확인하지 못했어요.",
+        syncError,
+      );
+      setRecommendationError("추천 카드 공개 상태를 확인하지 못했어요.");
+      return;
+    }
+
+    if (
+      confirmedDraw.drawId !== recommendationDraw.drawId ||
+      !isDrawCardRevealed(confirmedDraw, selectedCardId)
+    ) {
+      setRecommendationError("카드 1장을 공개한 뒤 다시 시도해주세요.");
+      return;
+    }
+
+    if (selectedCardId === null) {
+      return;
+    }
+
     setIsShuffleLocked(true);
     setRecommendationError(null);
     markRecommendationRequested();
     const previousRevealedRecommendations = revealedRecommendations;
-    const nextDrawPromise = shuffleRecommendationDraw(
-      recommendationDraw.drawId,
-    );
+    const nextDrawPromise = shuffleRecommendationDraw(confirmedDraw.drawId);
 
     setRevealedRecommendations({});
     if (selectedCardId !== null) {
       setIsPreparingShuffle(true);
       setSelectedCardId(null);
-      setCardOrder(getCardOrder(recommendationDraw));
+      setCardOrder(getCardOrder(confirmedDraw));
       await wait(CARD_RESET_DURATION_MS + CARD_RESET_SETTLE_BUFFER_MS);
       if (!isMountedRef.current) {
         await nextDrawPromise.catch(() => undefined);
@@ -659,9 +729,10 @@ export function RecommendPage() {
       setCardOrder(getCardOrder(recommendationDraw));
       setSelectedCardId(null);
       setRecommendationError(
-        isRateLimitError(error)
-          ? "요청이 많아요. 잠시 후 다시 시도해주세요."
-          : "추천 카드를 섞지 못했어요.",
+        getApiErrorMessage(error) ??
+          (isRateLimitError(error)
+            ? "요청이 많아요. 잠시 후 다시 시도해주세요."
+            : "추천 카드를 섞지 못했어요."),
       );
     } finally {
       clearShuffleInterval();
@@ -692,6 +763,10 @@ export function RecommendPage() {
     !isPreparingShuffle &&
     !isShuffling &&
     !isShuffleLocked;
+  const canShuffleSelectedCard = isDrawCardRevealed(
+    recommendationDraw,
+    selectedCardId,
+  );
 
   return (
     <>
@@ -872,7 +947,8 @@ export function RecommendPage() {
                                     isShuffling ||
                                     isShuffleLocked ||
                                     isPreparingShuffle ||
-                                    revealingCardId !== null
+                                    revealingCardId !== null ||
+                                    !canShuffleSelectedCard
                                   }
                                   className="mt-1 self-center rounded-full border border-border-medium px-3 py-1 text-[10.5px] text-text-muted transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
                                 >
