@@ -973,7 +973,7 @@ export function RecommendPage() {
               <div className="flex flex-none flex-col overflow-hidden border-t border-border-light pt-2 md:min-h-[180px] md:flex-1">
                 <div className="flex items-center justify-between mb-2 flex-shrink-0">
                   <div className="text-[12px] tracking-[2px] text-[var(--text-page-label)] uppercase">
-                    추천 히스토리
+                    추천 기록
                   </div>
                 </div>
 
