@@ -894,7 +894,7 @@ export function RecommendPage() {
                           />
                         </div>
 
-                        <div className="absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-5 shadow-[0_18px_34px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                        <div className="absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-4 shadow-[0_18px_34px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform:rotateY(180deg)] md:p-5">
                           <div className="absolute inset-0 opacity-20 paper-texture" />
                           <div className="absolute inset-3 rounded-md border border-border-medium" />
                           <div className="pointer-events-none absolute inset-3 z-[2]">
@@ -910,37 +910,40 @@ export function RecommendPage() {
                               <X className="h-3.5 w-3.5" />
                             </button>
                           </div>
-                          <div className="relative z-[1] flex h-full flex-col gap-2.5 overflow-x-hidden overflow-y-auto text-text-heading">
+                          <div className="relative z-[1] flex h-full flex-col overflow-hidden text-text-heading">
                             {revealingCardId === selectedCardId ? (
                               <div className="flex h-full items-center justify-center text-center text-[13px] leading-[1.7] text-text-muted">
                                 추천을 펼치는 중...
                               </div>
                             ) : selectedRecommendationDetail ? (
                               <>
-                                <div className="flex items-center gap-2 text-[10px] tracking-[1.4px] text-text-secondary">
-                                  <span className="truncate">
-                                    {getRecommendationCategoryLabel(
-                                      selectedRecommendationDetail,
-                                    )}
-                                    {selectedRecommendationDetail.subCategory
-                                      ? ` / ${selectedRecommendationDetail.subCategory}`
-                                      : ""}
-                                  </span>
-                                </div>
-                                <div className="text-[15px] font-bold leading-[1.35]">
-                                  {selectedRecommendationDetail.title}
-                                </div>
-                                <div className="text-[11.5px] leading-[1.6] text-text-muted">
-                                  {selectedRecommendationDetail.description}
-                                </div>
-                                <div className="border-t border-border-medium pt-2 text-[10.5px] leading-[1.6] text-text-secondary">
-                                  {selectedRecommendationDetail.reason}
-                                </div>
-                                {selectedRecommendationDetail.searchKeyword && (
-                                  <div className="truncate text-[9.5px] text-text-secondary">
-                                    #{selectedRecommendationDetail.searchKeyword}
+                                <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pb-2 pr-1 pt-3">
+                                  <div className="flex items-center gap-2 text-[10px] tracking-[1.2px] text-text-secondary">
+                                    <span className="line-clamp-2 break-words leading-[1.45]">
+                                      {getRecommendationCategoryLabel(
+                                        selectedRecommendationDetail,
+                                      )}
+                                      {selectedRecommendationDetail.subCategory
+                                        ? ` / ${selectedRecommendationDetail.subCategory}`
+                                        : ""}
+                                    </span>
                                   </div>
-                                )}
+                                  <div className="text-[14px] font-bold leading-[1.35] md:text-[15px]">
+                                    {selectedRecommendationDetail.title}
+                                  </div>
+                                  <div className="border-t border-border-medium" />
+                                  <div className="pt-1 text-[11.5px] leading-[1.55] text-text-muted">
+                                    {selectedRecommendationDetail.description}
+                                  </div>
+                                  <div className="pt-1 text-[11.5px] leading-[1.55] text-text-secondary">
+                                    {selectedRecommendationDetail.reason}
+                                  </div>
+                                  {selectedRecommendationDetail.searchKeyword && (
+                                    <div className="line-clamp-2 break-words pb-1 pt-1.5 text-[9.5px] leading-[1.45] text-text-secondary">
+                                      #{selectedRecommendationDetail.searchKeyword}
+                                    </div>
+                                  )}
+                                </div>
                                 <button
                                   type="button"
                                   onClick={(event) => {
@@ -954,7 +957,7 @@ export function RecommendPage() {
                                     revealingCardId !== null ||
                                     !canShuffleSelectedCard
                                   }
-                                  className="mt-1 self-center rounded-full border border-border-medium px-3 py-1 text-[10.5px] text-text-muted transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
+                                  className="mt-1 flex-shrink-0 self-center rounded-full border border-border-medium px-3 py-1 text-[10.5px] text-text-muted transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
                                 >
                                   {isShuffling || isPreparingShuffle
                                     ? "뽑는 중..."
@@ -1022,7 +1025,7 @@ export function RecommendPage() {
                             className="w-[150px] flex-shrink-0 rounded-md border border-border-light bg-bg-beige-subtle px-2.5 py-2 text-left transition-colors md:w-full md:px-3"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <div className="min-w-0 flex-1 truncate text-[12px] font-bold text-text-heading">
+                              <div className="min-w-0 flex-1 line-clamp-2 break-words text-[12px] font-bold leading-[1.35] text-text-heading">
                                 {item.title}
                               </div>
                               <div className="flex-shrink-0 text-[11px] text-text-secondary">
@@ -1420,7 +1423,9 @@ export function RecommendPage() {
                         className="mb-2 max-h-40 w-full rounded-md object-contain bg-notebook-page"
                       />
                       <span className="flex items-center justify-between gap-2 text-[12px]">
-                        <span className="truncate">{file.name}</span>
+                        <span className="line-clamp-2 min-w-0 break-all leading-[1.35]">
+                          {file.name}
+                        </span>
                         <span className="flex-shrink-0 text-text-heading">
                           열기
                         </span>
