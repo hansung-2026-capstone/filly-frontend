@@ -16,6 +16,7 @@ export type RecommendationContentType =
   | "MUSIC"
   | "FOOD"
   | "PLACE"
+  | "ACTIVITY"
   | "ADVICE";
 
 export type RecommendationDetail = {

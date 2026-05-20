@@ -60,14 +60,35 @@ const initialCaptureTargetSelection: Record<CaptureTarget, boolean> = {
   keywordCloud: false,
 };
 
-const contentTypeLabels: Record<RecommendationDetail["contentType"], string> = {
+const contentTypeLabels: Partial<Record<string, string>> = {
   MOVIE: "영화",
   BOOK: "책",
   MUSIC: "음악",
   FOOD: "음식",
   PLACE: "장소",
+  ACTIVITY: "활동",
   ADVICE: "조언",
 };
+
+function getContentTypeLabel(contentType: string | null | undefined) {
+  const rawContentType = contentType?.trim();
+  if (!rawContentType) return "";
+
+  return contentTypeLabels[rawContentType.toUpperCase()] ?? rawContentType;
+}
+
+function getRecommendationCategoryLabel(item: RecommendationDetail) {
+  return item.category?.trim() || getContentTypeLabel(item.contentType);
+}
+
+function getRecommendationTypeLabel(item: RecommendationDetail) {
+  return (
+    getContentTypeLabel(item.contentType) ||
+    item.category?.trim() ||
+    item.subCategory?.trim() ||
+    "추천"
+  );
+}
 
 function getCardOrder(draw: RecommendationDraw | null) {
   if (!draw) return Array.from({ length: CARD_COUNT }, (_, index) => index);
@@ -898,7 +919,9 @@ export function RecommendPage() {
                               <>
                                 <div className="flex items-center gap-2 text-[10px] tracking-[1.4px] text-text-secondary">
                                   <span className="truncate">
-                                    {selectedRecommendationDetail.category}
+                                    {getRecommendationCategoryLabel(
+                                      selectedRecommendationDetail,
+                                    )}
                                     {selectedRecommendationDetail.subCategory
                                       ? ` / ${selectedRecommendationDetail.subCategory}`
                                       : ""}
@@ -1003,7 +1026,7 @@ export function RecommendPage() {
                                 {item.title}
                               </div>
                               <div className="flex-shrink-0 text-[11px] text-text-secondary">
-                                {contentTypeLabels[item.contentType]}
+                                {getRecommendationTypeLabel(item)}
                               </div>
                             </div>
                             <div className="mt-1 line-clamp-2 text-[12px] leading-[1.45] text-text-muted">
@@ -1169,8 +1192,8 @@ export function RecommendPage() {
         meta={
           selectedRecommendationHistory ? (
             <span>
-              {contentTypeLabels[selectedRecommendationHistory.contentType]} ·{" "}
-              {selectedRecommendationHistory.category}
+              {getRecommendationTypeLabel(selectedRecommendationHistory)} ·{" "}
+              {getRecommendationCategoryLabel(selectedRecommendationHistory)}
               {selectedRecommendationHistory.subCategory
                 ? ` / ${selectedRecommendationHistory.subCategory}`
                 : ""}
@@ -1187,7 +1210,7 @@ export function RecommendPage() {
                   유형
                 </div>
                 <div className="mt-1 text-[12px] font-bold text-text-heading">
-                  {contentTypeLabels[selectedRecommendationHistory.contentType]}
+                  {getRecommendationTypeLabel(selectedRecommendationHistory)}
                 </div>
               </div>
               <div className="rounded-[16px] border border-border-light bg-bg-beige-subtle px-3 py-2.5">
