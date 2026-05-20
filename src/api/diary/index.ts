@@ -22,7 +22,7 @@ export const getDiaries = async (year: number, month: number) => {
 
 export const createDraft = async (form: FormData) => {
   const { data } = await api.post<{ data: DraftData }>(
-    "/api/v1/diaries/draft",
+    "/api/v2/diaries/draft",
     form,
     MULTIPART_HEADERS,
   );
