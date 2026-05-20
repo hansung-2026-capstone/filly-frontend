@@ -300,6 +300,13 @@ export function RecommendPage() {
   }, []);
 
   useEffect(() => {
+    const cardBackImage = new Image();
+    cardBackImage.decoding = "async";
+    cardBackImage.src = tarotCardImage;
+    void cardBackImage.decode().catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
     let ignore = false;
 
     async function loadRecommendations() {
@@ -829,6 +836,8 @@ export function RecommendPage() {
                               alt={
                                 recommendationLoading ? "LOADING" : cardLabel
                               }
+                              decoding="async"
+                              loading="eager"
                               className="h-full w-full object-cover"
                             />
                           </div>
@@ -858,6 +867,8 @@ export function RecommendPage() {
                           <img
                             src={tarotCardImage}
                             alt="선택된 추천 카드"
+                            decoding="async"
+                            loading="eager"
                             className="h-full w-full object-cover"
                           />
                         </div>
