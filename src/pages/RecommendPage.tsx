@@ -156,6 +156,32 @@ async function dataUrlToFile(dataUrl: string, filename: string) {
   return new File([blob], filename, { type: blob.type || "image/png" });
 }
 
+function blobToDataUrl(blob: Blob) {
+  return new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result === "string") resolve(reader.result);
+      else reject(new Error("이미지 변환에 실패했어요."));
+    };
+    reader.onerror = () => reject(new Error("이미지 변환에 실패했어요."));
+    reader.readAsDataURL(blob);
+  });
+}
+
+async function imageUrlToDataUrl(url: string) {
+  if (url.startsWith("data:")) return url;
+
+  const response = await fetch(url, {
+    cache: "force-cache",
+    credentials: "same-origin",
+  });
+  if (!response.ok) {
+    throw new Error("프로필 이미지를 불러오지 못했어요.");
+  }
+
+  return blobToDataUrl(await response.blob());
+}
+
 function isShareCancel(error: unknown) {
   return error instanceof Error && error.name === "AbortError";
 }
@@ -428,12 +454,65 @@ export function RecommendPage() {
     return dataUrlToFile(dataUrl, filename);
   }
 
-  async function captureElementAsShown(element: HTMLElement, filename: string) {
-    const dataUrl = await toPng(element, {
-      cacheBust: true,
-      pixelRatio: 2,
-    });
-    return dataUrlToFile(dataUrl, filename);
+  async function inlineImagesForCapture(element: HTMLElement) {
+    const images = Array.from(element.querySelectorAll("img"));
+    const restores: Array<() => void> = [];
+
+    await Promise.all(
+      images.map(async (image) => {
+        const originalSrc = image.getAttribute("src");
+        const originalSrcset = image.getAttribute("srcset");
+        const sourceUrl = image.currentSrc || image.src;
+        if (!sourceUrl) return;
+
+        try {
+          const dataUrl = await imageUrlToDataUrl(sourceUrl);
+          restores.push(() => {
+            if (originalSrc === null) image.removeAttribute("src");
+            else image.setAttribute("src", originalSrc);
+
+            if (originalSrcset === null) image.removeAttribute("srcset");
+            else image.setAttribute("srcset", originalSrcset);
+          });
+
+          image.removeAttribute("srcset");
+          image.src = dataUrl;
+          await image.decode().catch(
+            () =>
+              new Promise<void>((resolve, reject) => {
+                image.onload = () => resolve();
+                image.onerror = () => reject(new Error("이미지 로드 실패"));
+              }),
+          );
+        } catch (error) {
+          console.warn("[capture] 이미지 인라인 변환 실패", error);
+        }
+      }),
+    );
+
+    return () => {
+      restores.forEach((restore) => restore());
+    };
+  }
+
+  async function captureElementAsShown(
+    element: HTMLElement,
+    filename: string,
+    options?: { inlineImages?: boolean },
+  ) {
+    const restoreImages = options?.inlineImages
+      ? await inlineImagesForCapture(element)
+      : undefined;
+
+    try {
+      const dataUrl = await toPng(element, {
+        cacheBust: true,
+        pixelRatio: 2,
+      });
+      return dataUrlToFile(dataUrl, filename);
+    } finally {
+      restoreImages?.();
+    }
   }
 
   function getCaptureTargetAvailability(target: CaptureTarget) {
@@ -487,7 +566,9 @@ export function RecommendPage() {
         ?.firstElementChild as HTMLElement | null;
       if (targets.includes("idCard") && idCardEl) {
         files.push(
-          await captureElementAsShown(idCardEl, `${prefix}-사원증.png`),
+          await captureElementAsShown(idCardEl, `${prefix}-사원증.png`, {
+            inlineImages: true,
+          }),
         );
       }
 
