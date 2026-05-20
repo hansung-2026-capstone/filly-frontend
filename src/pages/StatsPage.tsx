@@ -15,6 +15,12 @@ const EMOTION_COLORS = [
   "var(--emotion-chart-5)",
   "var(--emotion-chart-6)",
 ];
+const DAILY_PATTERN_EXCLUDED_VALUES = new Set([
+  "언급없음",
+  "없음",
+  "false",
+  "보통",
+]);
 
 function buildEmotionGradient(entries: [string, number][]) {
   const total = entries.reduce((sum, [, value]) => sum + value, 0);
@@ -40,6 +46,10 @@ function moveMonth(year: number, month: number, delta: number) {
   };
 }
 
+function isMeaningfulPatternValue(value: string) {
+  return !DAILY_PATTERN_EXCLUDED_VALUES.has(value.trim().toLowerCase());
+}
+
 export function StatsPage() {
   const { current, history, loading: personaLoading, error } = usePersona();
   const now = new Date();
@@ -58,13 +68,29 @@ export function StatsPage() {
     .sort(([, a], [, b]) => b - a);
   const dailyPatternEntries = Object.entries(stat?.dailyPattern ?? {})
     .flatMap(([day, times]) =>
-      Object.entries(times).map(([time, count]) => ({
-        label: `${day} ${time}`,
-        count,
-      })),
+      Object.entries(times)
+        .filter(([time, count]) => count > 0 && isMeaningfulPatternValue(time))
+        .map(([time, count]) => ({
+          label: `${day} ${time}`,
+          count,
+        })),
     )
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
+  const personalPatternEntries = Object.entries(
+    stat?.dailyPattern?.personalPatternCandidates ??
+      stat?.personalPatternCandidates ??
+      {},
+  )
+    .filter(([label, count]) => label.trim() && count > 0)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 4);
+  const monthlyPatternEntries =
+    personalPatternEntries.length > 0
+      ? personalPatternEntries.map(([label]) => ({ label }))
+      : dailyPatternEntries.map(({ label, count }) => ({
+          label: `${label} ${count}회`,
+        }));
   const nextMonth = moveMonth(selectedYear, selectedMonth, 1);
   const handlePreviousMonth = () => {
     const previous = moveMonth(selectedYear, selectedMonth, -1);
@@ -316,25 +342,27 @@ export function StatsPage() {
             )}
           </div>
         </div>
-        <div className="min-h-[144px] rounded-lg border border-border-medium bg-bg-beige-subtle p-4 md:h-[144px] md:flex-shrink-0 md:overflow-hidden">
+        <div className="min-h-[156px] rounded-lg border border-border-medium bg-bg-beige-subtle p-4 md:h-[156px] md:flex-shrink-0 md:overflow-hidden">
           <div className="text-[16px] text-[var(--text-stats-primary)] mb-3">
-            일상 패턴
+            이번 달 나의 패턴
           </div>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-2">
             {statLoading ? (
               Array.from({ length: 4 }).map((_, i) => (
                 <div key={i} className="h-3 rounded bg-[var(--bg-stats-skeleton)] animate-pulse" />
               ))
-            ) : dailyPatternEntries.length > 0 ? (
-              dailyPatternEntries.map(({ label, count }) => (
-                <div key={label} className="flex justify-between text-[12px]">
-                  <span className="text-[var(--text-stats-muted)]">{label}</span>
-                  <span className="text-[var(--text-stats-primary)]">{count}</span>
+            ) : monthlyPatternEntries.length > 0 ? (
+              monthlyPatternEntries.map(({ label }) => (
+                <div key={label} className="flex items-start gap-2 text-[12px]">
+                  <span className="mt-[0.45em] h-1 w-1 flex-shrink-0 rounded-full bg-[var(--text-stats-primary)]" />
+                  <span className="line-clamp-2 leading-[1.55] text-[var(--text-stats-muted)]">
+                    {label}
+                  </span>
                 </div>
               ))
             ) : (
               <span className="h-[72px] flex items-center justify-center text-center text-[12px] text-[var(--text-soft-label)]">
-                아직 일상 패턴 기록이 없어요.
+                아직 발견된 패턴이 없어요.
               </span>
             )}
           </div>
