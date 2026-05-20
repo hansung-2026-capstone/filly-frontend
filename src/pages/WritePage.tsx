@@ -47,7 +47,6 @@ export function WritePage() {
     editDiary?.rawContent ?? undefined,
   );
 
-  const aiPhotos = usePhotoUpload();
   const diaryPhotos = usePhotoUpload();
   const voiceRecorder = useVoiceRecorder();
   const diaryMutations = useDiaryMutations(selectedDate);
@@ -79,13 +78,11 @@ export function WritePage() {
       form.append("gender", user?.gender ?? DEFAULT_PREFERENCE);
       form.append("ageGroup", user?.ageGroup ?? DEFAULT_PREFERENCE);
       form.append("aiDraftTone", user?.aiDraftTone ?? DEFAULT_PREFERENCE);
-      appendPhotos(form, aiPhotos.photos);
       if (voiceRecorder.record) form.append("voice", voiceRecorder.record.file);
 
       const draft = await diaryMutations.createDraft(form);
       setDraftContent(draft.generatedText);
       setFinalText(draft.generatedText);
-      diaryPhotos.replacePhotos(aiPhotos.photos);
     } finally {
       setIsDraftGenerating(false);
     }
@@ -177,8 +174,6 @@ export function WritePage() {
             onChange={setShortText}
           />
         </div>
-
-        <PhotoUploadSection title="사진" {...aiPhotos} />
 
         <div className="flex flex-col gap-2.5">
           <VoiceRecorderSection
