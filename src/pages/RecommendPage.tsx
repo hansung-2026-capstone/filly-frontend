@@ -261,6 +261,7 @@ export function RecommendPage() {
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [capturing, setCapturing] = useState(false);
   const idCardRef = useRef<HTMLDivElement>(null);
+  const idCardDownloadRef = useRef<HTMLDivElement>(null);
   const receiptScrollRef = useRef<HTMLDivElement>(null);
   const receiptWrapRef = useRef<HTMLDivElement>(null);
   const keywordCloudRef = useRef<HTMLDivElement>(null);
@@ -481,8 +482,8 @@ export function RecommendPage() {
     try {
       const files: File[] = [];
 
-      // 사원증: 첫 번째 자식(IdCard div, rounded-2xl)을 직접 캡처 → 투명 배경으로 라운딩 살림
-      const idCardEl = idCardRef.current
+      // 사원증: 다운로드용 세로형 카드 캡처
+      const idCardEl = idCardDownloadRef.current
         ?.firstElementChild as HTMLElement | null;
       if (targets.includes("idCard") && idCardEl) {
         files.push(
@@ -1099,6 +1100,20 @@ export function RecommendPage() {
                   />
                 ) : null}
               </div>
+              {idCard && (
+                <div
+                  ref={idCardDownloadRef}
+                  className="pointer-events-none fixed left-[-10000px] top-0 w-[320px]"
+                  aria-hidden="true"
+                >
+                  <IdCard
+                    avatarUrl={idCard.avatarUrl}
+                    nickname={idCard.nickname}
+                    keywords={idCard.keywords}
+                    variant="story"
+                  />
+                </div>
+              )}
             </div>
 
             {/* 영수증 컬럼 */}
