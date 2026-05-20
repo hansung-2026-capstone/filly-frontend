@@ -78,7 +78,7 @@ export function ArchivePage() {
     <div className="flex h-auto w-full flex-col font-['Nanum_Myeongjo'] md:h-full md:flex-row">
       <div className="flex h-auto flex-col gap-2 px-4 py-4 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:px-5 md:py-3">
         <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
-          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+          <div className="text-base font-bold text-[var(--text-stats-heading)] tracking-wide">
             아카이브
           </div>
           <div
@@ -207,7 +207,7 @@ export function ArchivePage() {
                 <ArrowLeft className="w-4 h-4" />
               </button>
             )}
-            <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+            <div className="text-base font-bold text-[var(--text-stats-heading)] tracking-wide">
               {getArchiveName()}
             </div>
           </div>

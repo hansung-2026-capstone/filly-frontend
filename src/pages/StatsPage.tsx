@@ -83,7 +83,7 @@ export function StatsPage() {
       {/* Left page - Persona */}
       <div className="flex h-auto flex-col gap-2 px-4 py-4 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:px-5 md:py-3">
         <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
-          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+          <div className="text-base font-bold text-[var(--text-stats-heading)] tracking-wide">
             페르소나
           </div>
           <div
@@ -186,7 +186,7 @@ export function StatsPage() {
       <div className="flex h-auto flex-col gap-3 border-t border-border-light px-4 py-4 md:h-full md:max-h-[680px] md:flex-1 md:gap-2 md:overflow-hidden md:border-t-0 md:px-5 md:py-3">
         {/* 헤더 */}
         <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
-          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+          <div className="text-base font-bold text-[var(--text-stats-heading)] tracking-wide">
             월간 리포트
           </div>
           <div className="flex items-center rounded-md border border-border-light overflow-hidden">

@@ -636,7 +636,7 @@ export function RecommendPage() {
         <div className="flex h-auto flex-col gap-3 px-3 py-4 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:py-3">
           <div className="flex flex-col md:min-h-0 md:flex-1">
             <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
-              <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+              <div className="text-base font-bold text-[var(--text-stats-heading)] tracking-wide">
                 추천 컨텐츠
               </div>
               <div
@@ -896,7 +896,7 @@ export function RecommendPage() {
         <div className="flex h-auto flex-col gap-3 border-t border-border-light px-3 py-4 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:border-t-0 md:py-3">
           {/* 헤더 */}
           <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
-            <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
+            <div className="text-base font-bold text-[var(--text-stats-heading)] tracking-wide">
               공유용 컨텐츠 (Shared Content)
             </div>
             <div className="flex items-center rounded-md border border-border-light overflow-hidden">
