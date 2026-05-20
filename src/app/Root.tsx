@@ -268,11 +268,11 @@ export function Root() {
                 aria-label={tab.label}
                 title={tab.label}
                 className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
-                  font-['Nanum_Pen_Script'] text-[15px] tracking-wider relative transition-all duration-[0.25s]
+                  font-['Gaegu'] text-[18px] tracking-wider relative transition-all duration-[0.25s]
                   shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
                   hover:w-14 hover:shadow-[var(--shadow-tab-hover)]
                   ${tab.path === "settings" ? "mt-auto" : ""}
-                  ${isTabActive(tab.path) ? "active shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
+                  ${isTabActive(tab.path) ? "active shadow-[var(--shadow-tab-active)]" : ""}`}
                 style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
               >
                 <div
@@ -323,9 +323,9 @@ export function Root() {
               key={tab.path}
               type="button"
               onClick={() => handleTabClick(tab.path)}
-              className={`relative flex min-h-12 items-center justify-center rounded-b-md border-none px-1 pb-2 pt-4 font-['Nanum_Pen_Script'] text-[16px] tracking-wider shadow-[var(--shadow-tab)] transition-all duration-[0.25s] ${tab.bgClass} ${tab.textClass} ${
+              className={`relative flex min-h-12 items-center justify-center rounded-b-md border-none px-1 pb-2 pt-4 font-['Gaegu'] text-[19px] tracking-wider shadow-[var(--shadow-tab)] transition-all duration-[0.25s] ${tab.bgClass} ${tab.textClass} ${
                 isTabActive(tab.path)
-                  ? "shadow-[var(--shadow-tab-active)] font-bold"
+                  ? "shadow-[var(--shadow-tab-active)]"
                   : "hover:shadow-[var(--shadow-tab-hover)]"
               }`}
               aria-current={isTabActive(tab.path) ? "page" : undefined}
