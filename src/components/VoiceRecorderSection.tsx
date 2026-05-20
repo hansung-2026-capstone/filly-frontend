@@ -1,6 +1,10 @@
 import { Mic, Pause, Play, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { VoiceRecord } from "../hook/useVoiceRecorder";
+import {
+  formatVoiceRecordingDuration,
+  VOICE_RECORDING_MAX_SECONDS,
+  type VoiceRecord,
+} from "../hook/useVoiceRecorder";
 
 interface VoiceRecorderSectionProps {
   title?: string;
@@ -141,7 +145,7 @@ export function VoiceRecorderSection({
   onToggle,
   onRemove,
   errorMessage,
-  maxSeconds = 10,
+  maxSeconds = VOICE_RECORDING_MAX_SECONDS,
 }: VoiceRecorderSectionProps) {
   const [elapsed, setElapsed] = useState(0);
 
@@ -164,7 +168,7 @@ export function VoiceRecorderSection({
           {title}
         </h3>
         <span className="text-[12px] text-text-subtle">
-          최대 {maxSeconds}초
+          최대 {formatVoiceRecordingDuration(maxSeconds)}
         </span>
       </div>
 

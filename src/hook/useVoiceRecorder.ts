@@ -11,6 +11,20 @@ export type VoiceRecord = {
 
 type RecorderFormat = { mimeType: string; extension: string };
 
+export const VOICE_RECORDING_MAX_SECONDS = 60;
+
+export function formatVoiceRecordingDuration(seconds: number) {
+  const safeSeconds = Math.max(0, Math.floor(seconds));
+  const minutes = Math.floor(safeSeconds / 60);
+  const remainingSeconds = safeSeconds % 60;
+
+  if (minutes > 0 && remainingSeconds > 0) {
+    return `${minutes}분 ${remainingSeconds}초`;
+  }
+  if (minutes > 0) return `${minutes}분`;
+  return `${remainingSeconds}초`;
+}
+
 const RECORDER_FORMATS: RecorderFormat[] = [
   { mimeType: "audio/webm;codecs=opus", extension: "webm" },
   { mimeType: "audio/webm", extension: "webm" },
@@ -51,7 +65,7 @@ function getRecorderErrorMessage(error: unknown) {
   return "알 수 없는 이유로 녹음을 시작하지 못했어요. 마이크 권한과 브라우저 설정을 확인해주세요.";
 }
 
-export function useVoiceRecorder(maxSeconds = 10) {
+export function useVoiceRecorder(maxSeconds = VOICE_RECORDING_MAX_SECONDS) {
   const [record, setRecord] = useState<VoiceRecord | null>(null);
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -97,7 +111,9 @@ export function useVoiceRecorder(maxSeconds = 10) {
         stream.getTracks().forEach((t) => t.stop());
 
         if (durationSec > maxSeconds) {
-          setErrorMessage(`녹음은 최대 ${maxSeconds}초까지 가능합니다.`);
+          setErrorMessage(
+            `녹음은 최대 ${formatVoiceRecordingDuration(maxSeconds)}까지 가능합니다.`,
+          );
           return;
         }
 
