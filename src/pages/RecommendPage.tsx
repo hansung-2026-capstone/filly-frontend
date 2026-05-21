@@ -168,6 +168,15 @@ function blobToDataUrl(blob: Blob) {
   });
 }
 
+function loadImageElement(src: string) {
+  return new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("이미지 로드 실패"));
+    image.src = src;
+  });
+}
+
 async function imageUrlToDataUrl(url: string) {
   if (url.startsWith("data:")) return url;
 
@@ -180,6 +189,27 @@ async function imageUrlToDataUrl(url: string) {
   }
 
   return blobToDataUrl(await response.blob());
+}
+
+async function compositeCaptureBackground(dataUrl: string, element: HTMLElement) {
+  const backgroundSource = element.dataset.captureBgSrc;
+  if (!backgroundSource) return dataUrl;
+
+  const backgroundDataUrl = await imageUrlToDataUrl(backgroundSource);
+  const [capturedImage, backgroundImage] = await Promise.all([
+    loadImageElement(dataUrl),
+    loadImageElement(backgroundDataUrl),
+  ]);
+  const canvas = document.createElement("canvas");
+  canvas.width = capturedImage.naturalWidth || capturedImage.width;
+  canvas.height = capturedImage.naturalHeight || capturedImage.height;
+
+  const context = canvas.getContext("2d");
+  if (!context) return dataUrl;
+
+  context.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+  context.drawImage(capturedImage, 0, 0, canvas.width, canvas.height);
+  return canvas.toDataURL("image/png");
 }
 
 function isShareCancel(error: unknown) {
@@ -475,6 +505,12 @@ export function RecommendPage() {
 
   async function inlineImagesForCapture(element: HTMLElement) {
     const images = Array.from(element.querySelectorAll("img"));
+    const backgroundElements = Array.from(
+      element.querySelectorAll<HTMLElement>("[data-capture-bg-src]"),
+    );
+    const elementsWithBackground = element.matches("[data-capture-bg-src]")
+      ? [element, ...backgroundElements]
+      : backgroundElements;
     const restores: Array<() => void> = [];
 
     await Promise.all(
@@ -509,6 +545,32 @@ export function RecommendPage() {
       }),
     );
 
+    await Promise.all(
+      elementsWithBackground.map(async (backgroundElement) => {
+        const sourceUrl = backgroundElement.dataset.captureBgSrc;
+        if (!sourceUrl) return;
+
+        const previousBackgroundImage =
+          backgroundElement.style.backgroundImage;
+
+        try {
+          const dataUrl = await imageUrlToDataUrl(sourceUrl);
+          restores.push(() => {
+            backgroundElement.style.backgroundImage = previousBackgroundImage;
+          });
+          backgroundElement.style.backgroundImage = `url(${dataUrl})`;
+        } catch (error) {
+          console.warn("[capture] 배경 이미지 인라인 변환 실패", error);
+        }
+      }),
+    );
+
+    await new Promise<void>((resolve) => {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => resolve());
+      });
+    });
+
     return () => {
       restores.forEach((restore) => restore());
     };
@@ -528,7 +590,10 @@ export function RecommendPage() {
         cacheBust: true,
         pixelRatio: 2,
       });
-      return dataUrlToFile(dataUrl, filename);
+      return dataUrlToFile(
+        await compositeCaptureBackground(dataUrl, element),
+        filename,
+      );
     } finally {
       restoreImages?.();
     }
@@ -1077,7 +1142,7 @@ export function RecommendPage() {
               <div className="flex flex-none flex-col overflow-hidden border-t border-border-light pt-2 md:min-h-[180px] md:flex-1">
                 <div className="flex items-center justify-between mb-2 flex-shrink-0">
                   <div className="text-[12px] tracking-[2px] text-[var(--text-page-label)] uppercase">
-                    추천 기록
+                    추천 보관함
                   </div>
                 </div>
 
