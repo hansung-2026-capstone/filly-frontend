@@ -1214,11 +1214,11 @@ export function RecommendPage() {
               </div>
               <div
                 ref={receiptWrapRef}
-                className="relative h-[280px] max-h-[56vh] md:max-h-none"
+                className="relative aspect-[5/7] w-full overflow-hidden max-h-[56vh] md:max-h-none"
               >
                 <div
                   ref={receiptScrollRef}
-                  className="h-full overflow-y-auto"
+                  className="absolute inset-0 overflow-y-auto"
                   onScroll={handleReceiptScroll}
                 >
                   {receiptLoading ? (
