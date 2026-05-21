@@ -264,7 +264,7 @@ export function ArchivePage() {
               aria-hidden="true"
             />
             <input
-              type="search"
+              type="text"
               value={searchQuery}
               onChange={(event) => setSearchQuery(event.target.value)}
               placeholder="일기 검색"
