@@ -198,6 +198,24 @@ function moveMonth(year: number, month: number, delta: number) {
   };
 }
 
+function getIdCardIssuedDate(year: number, month: number) {
+  const now = new Date();
+  const nowYear = now.getFullYear();
+  const nowMonth = now.getMonth() + 1;
+  const pad = (n: number) => String(n).padStart(2, "0");
+
+  let day: number;
+  if (year > nowYear || (year === nowYear && month > nowMonth)) {
+    day = 1;
+  } else if (year === nowYear && month === nowMonth) {
+    day = now.getDate();
+  } else {
+    day = new Date(year, month, 0).getDate();
+  }
+
+  return `${year}.${pad(month)}.${pad(day)}`;
+}
+
 function getRevealedDrawDetail(
   draw: RecommendationDraw,
   history: RecommendationDetail[],
@@ -283,6 +301,7 @@ export function RecommendPage() {
     selectedYear,
     selectedMonth,
   );
+  const idCardIssuedDate = getIdCardIssuedDate(selectedYear, selectedMonth);
   const [receiptAtBottom, setReceiptAtBottom] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
   const [capturing, setCapturing] = useState(false);
@@ -1181,6 +1200,8 @@ export function RecommendPage() {
                     avatarUrl={idCard.avatarUrl}
                     nickname={idCard.nickname}
                     keywords={idCard.keywords}
+                    persona={receipt?.personaTitle}
+                    issuedDate={idCardIssuedDate}
                   />
                 ) : null}
               </div>
@@ -1194,6 +1215,8 @@ export function RecommendPage() {
                     avatarUrl={idCard.avatarUrl}
                     nickname={idCard.nickname}
                     keywords={idCard.keywords}
+                    persona={receipt?.personaTitle}
+                    issuedDate={idCardIssuedDate}
                     variant="story"
                   />
                 </div>

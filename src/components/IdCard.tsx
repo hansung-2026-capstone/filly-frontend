@@ -4,6 +4,8 @@ interface IdCardProps {
   avatarUrl: string;
   nickname: string;
   keywords: string[];
+  persona?: string | null;
+  issuedDate?: string;
   variant?: "compact" | "story";
 }
 
