@@ -153,6 +153,7 @@ export function useVoiceRecorder(maxSeconds = VOICE_RECORDING_MAX_SECONDS) {
   const audioChunksRef = useRef<Float32Array[]>([]);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const recordRef = useRef(record);
+  const recordingStateRef = useRef(recordingState);
   const sourceRef = useRef<MediaStreamAudioSourceNode | null>(null);
   const startTimeRef = useRef<number>(0);
   const streamRef = useRef<MediaStream | null>(null);
@@ -160,6 +161,10 @@ export function useVoiceRecorder(maxSeconds = VOICE_RECORDING_MAX_SECONDS) {
   useEffect(() => {
     recordRef.current = record;
   }, [record]);
+
+  useEffect(() => {
+    recordingStateRef.current = recordingState;
+  }, [recordingState]);
 
   useEffect(
     () => () => {
@@ -196,8 +201,10 @@ export function useVoiceRecorder(maxSeconds = VOICE_RECORDING_MAX_SECONDS) {
 
       source.connect(processor);
       processor.connect(audioContext.destination);
+      recordingStateRef.current = "recording";
       setRecordingState("recording");
     } catch (error) {
+      recordingStateRef.current = "idle";
       setRecordingState("idle");
       setErrorMessage(getRecorderErrorMessage(error));
     }
@@ -219,6 +226,7 @@ export function useVoiceRecorder(maxSeconds = VOICE_RECORDING_MAX_SECONDS) {
     sourceRef.current = null;
     streamRef.current = null;
     audioContextRef.current = null;
+    recordingStateRef.current = "idle";
     setRecordingState("idle");
 
     if (durationSec > maxSeconds) {
@@ -237,6 +245,21 @@ export function useVoiceRecorder(maxSeconds = VOICE_RECORDING_MAX_SECONDS) {
     setRecord({ id: Date.now(), file, url, durationSeconds: durationSec });
     audioChunksRef.current = [];
   }, [maxSeconds]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden && recordingStateRef.current === "recording") {
+        stop();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (recordingStateRef.current === "recording") stop();
+    };
+  }, [stop]);
 
   const toggle = useCallback(() => {
     if (recordingState === "recording") stop();
