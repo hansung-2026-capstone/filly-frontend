@@ -1,3 +1,4 @@
+import idCardHolderImage from "../assets/id-card-holder.png";
 import { UserAvatar } from "./UserAvatar";
 
 interface IdCardProps {
@@ -24,21 +25,23 @@ export function IdCard({
     visibleKeywords.length > 0 ? visibleKeywords.join(", ") : "신입 사원";
   const cardNumber = `FL-${issuedDate?.replaceAll(".", "") ?? "20260521"}`;
 
-  return (
+  const card = (
     <div
-      className={`relative w-full overflow-hidden rounded-[22px] border border-[rgba(137,130,120,0.28)] bg-[#f8f4ee] shadow-medium ${
-        isStory ? "aspect-[9/16]" : "aspect-[5/7]"
+      className={`relative w-full overflow-hidden ${
+        isStory
+          ? "h-full bg-transparent"
+          : "aspect-[5/7] rounded-[22px] border border-[rgba(137,130,120,0.28)] bg-[#f8f4ee] shadow-medium"
       }`}
     >
       <div
         className={`absolute inset-y-0 right-0 flex items-center justify-center bg-[#948c82] text-[#f8f4ee] ${
-          isStory ? "w-[26%]" : "w-[24%]"
+          isStory ? "w-[23%] rounded-r-[22px]" : "w-[24%]"
         }`}
       >
         <span
           className={`font-['Nanum_Myeongjo'] font-bold uppercase [writing-mode:vertical-rl] ${
             isStory
-              ? "text-[34px] tracking-[18px]"
+              ? "text-[26px] tracking-[12px]"
               : "text-[16px] tracking-[8px]"
           }`}
         >
@@ -47,16 +50,16 @@ export function IdCard({
       </div>
 
       <div
-        className={`relative z-10 flex h-full flex-col ${
-          isStory
-            ? "mr-[26%] px-[9%] pb-[9%] pt-[13%]"
+          className={`relative z-10 flex h-full flex-col ${
+            isStory
+            ? "mr-[23%] px-[9%] pb-[9%] pt-[13%]"
             : "mr-[24%] px-[8%] pb-[7%] pt-[7%]"
         }`}
       >
         <UserAvatar
           avatarUrl={avatarUrl}
           className={`mx-auto border border-[#b4ada4] bg-[#948c82] ${
-            isStory ? "h-[330px] w-[240px]" : "h-[118px] w-[88px]"
+            isStory ? "h-[190px] w-[142px]" : "h-[118px] w-[88px]"
           }`}
           imageClassName="scale-100"
           captureSafe={isStory}
@@ -64,7 +67,7 @@ export function IdCard({
 
         <div
           className={`flex min-h-0 flex-1 flex-col justify-end ${
-            isStory ? "gap-4 pt-9" : "gap-1 pt-2"
+            isStory ? "gap-2 pt-5" : "gap-1 pt-2"
           }`}
         >
           <CardField label="NAME." value={nickname} isStory={isStory} strong />
@@ -85,13 +88,29 @@ export function IdCard({
             <Barcode isStory={isStory} />
             <span
               className={`font-mono tracking-[2px] text-[#948c82] ${
-                isStory ? "text-[15px]" : "text-[6px]"
+                isStory ? "text-[10px]" : "text-[6px]"
               }`}
             >
               {cardNumber}
             </span>
           </div>
         </div>
+      </div>
+    </div>
+  );
+
+  if (!isStory) return card;
+
+  return (
+    <div className="relative aspect-[1055/1491] w-full overflow-hidden">
+      <img
+        src={idCardHolderImage}
+        alt=""
+        className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
+        draggable={false}
+      />
+      <div className="absolute left-[20.4%] top-[20.6%] z-10 h-[74.2%] w-[61.2%] overflow-hidden">
+        {card}
       </div>
     </div>
   );
@@ -111,19 +130,19 @@ function CardField({
   return (
     <div
       className={`border-b border-[#c0b8ad] ${
-        isStory ? "pb-2.5" : "pb-0.5"
+        isStory ? "pb-1.5" : "pb-0.5"
       }`}
     >
       <div
         className={`font-bold tracking-[1px] text-[#948c82] ${
-          isStory ? "text-[17px]" : "text-[7px]"
+          isStory ? "text-[11px]" : "text-[7px]"
         }`}
       >
         {label}
       </div>
       <div
         className={`mt-0.5 break-keep font-['Nanum_Myeongjo'] leading-[1.15] text-[#25272d] ${
-          isStory ? "text-[25px]" : "text-[10px]"
+          isStory ? "text-[16px]" : "text-[10px]"
         } ${strong ? "font-bold" : "font-normal"}`}
       >
         {value}
@@ -136,7 +155,7 @@ function Barcode({ isStory }: { isStory: boolean }) {
   return (
     <div
       className={`flex items-end gap-[2px] ${
-        isStory ? "h-9" : "h-[13px]"
+        isStory ? "h-5" : "h-[13px]"
       }`}
     >
       {[
@@ -145,7 +164,7 @@ function Barcode({ isStory }: { isStory: boolean }) {
       ].map((h, i) => (
         <div
           key={i}
-          className={`bg-[#948c82] ${isStory ? "w-[3px]" : "w-[1px]"}`}
+          className={`bg-[#948c82] ${isStory ? "w-[2px]" : "w-[1px]"}`}
           style={{ height: `${h * 20}%` }}
         />
       ))}
