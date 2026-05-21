@@ -8,7 +8,9 @@ interface ReceiptProps {
 }
 
 export function Receipt({ receipt, nickname, year, month }: ReceiptProps) {
-  const emotions = Object.entries(receipt.emotionDistribution);
+  const emotions = Object.entries(receipt.emotionDistribution)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3);
   const persona = receipt.personaTitle ?? "감정을 탐험하는 신입 사원";
   const now = new Date();
   const nowYear = now.getFullYear();
