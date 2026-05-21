@@ -3,9 +3,11 @@ import { useEffect, useState, type CSSProperties } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
 import { useCurrentUser } from "../hook/common/useCurrentUser";
 import {
+  BACKGROUND_THEME_PREVIEW_EVENT,
   DEFAULT_BACKGROUND_THEME,
   getBackgroundThemeId,
   getStoredBackgroundThemeId,
+  type BackgroundThemeId,
 } from "../lib/backgroundTheme";
 
 type TabConfig = {
@@ -124,11 +126,15 @@ export function Root() {
   const [notebookScale, setNotebookScale] = useState(getNotebookScale);
   const [isMobileLayout, setIsMobileLayout] = useState(getIsMobileLayout);
   const [initialStoredTheme] = useState(() => getStoredBackgroundThemeId());
+  const [previewTheme, setPreviewTheme] = useState<BackgroundThemeId | null>(
+    null,
+  );
   const activePage =
     location.pathname === "/" ? "home" : location.pathname.slice(1);
-  const backgroundTheme = getBackgroundThemeId(
+  const savedBackgroundTheme = getBackgroundThemeId(
     user?.backgroundTheme ?? initialStoredTheme ?? DEFAULT_BACKGROUND_THEME,
   );
+  const backgroundTheme = previewTheme ?? savedBackgroundTheme;
 
   useEffect(() => {
     const rootElement = document.documentElement;
@@ -144,6 +150,26 @@ export function Root() {
       }
     };
   }, [backgroundTheme]);
+
+  useEffect(() => {
+    const updatePreviewTheme = (event: Event) => {
+      const nextPreviewTheme = (event as CustomEvent<BackgroundThemeId | null>)
+        .detail;
+
+      setPreviewTheme(
+        nextPreviewTheme ? getBackgroundThemeId(nextPreviewTheme) : null,
+      );
+    };
+
+    window.addEventListener(BACKGROUND_THEME_PREVIEW_EVENT, updatePreviewTheme);
+
+    return () => {
+      window.removeEventListener(
+        BACKGROUND_THEME_PREVIEW_EVENT,
+        updatePreviewTheme,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     const updateNotebookScale = () => {
