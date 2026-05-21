@@ -19,7 +19,7 @@ export function IdCard({
   return (
     <div
       className={`paper-texture w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium ${
-        isStory ? "aspect-[9/16]" : ""
+        "aspect-[5/7]"
       }`}
     >
       {/* 상단 헤더 */}
@@ -45,7 +45,7 @@ export function IdCard({
         className={`flex flex-col items-center bg-notebook-page ${
           isStory
             ? "flex-1 justify-center gap-5 px-5 py-6"
-            : "gap-3 px-4 pb-3 pt-4"
+            : "flex-1 justify-center gap-3 px-4 pb-3 pt-4"
         }`}
       >
         {/* 아바타 */}
@@ -139,7 +139,7 @@ export function IdCard({
 
 export function IdCardSkeleton() {
   return (
-    <div className="paper-texture w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium">
+    <div className="paper-texture aspect-[5/7] w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium">
       <div className="bg-tab-recommend opacity-60 h-9" />
       <div className="bg-notebook-page flex flex-col items-center px-4 pt-4 pb-3 gap-3">
         <div className="w-[72px] h-[72px] rounded-full bg-bg-hover animate-pulse" />
