@@ -1,7 +1,8 @@
 import { type FormEvent, useEffect, useState } from "react";
-import { ArrowLeft, MoreVertical, Plus, X } from "lucide-react";
+import { ArrowLeft, MoreVertical, Plus, Search, X } from "lucide-react";
 import { Portal } from "../components/Portal";
 import { DiaryDetailModal } from "../components/DiaryDetailModal";
+import { MonthPickerModal } from "../components/MonthPickerModal";
 import { useArchive } from "../hook/common/useArchive";
 import type { Archive } from "../types/archive";
 import type { Diary } from "../types/diary";
@@ -23,6 +24,10 @@ interface ArchiveModalState {
   archive: Archive | null;
 }
 
+function formatMonthKey(year: number, month: number) {
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
 export function ArchivePage() {
   const {
     archives,
@@ -42,6 +47,36 @@ export function ArchivePage() {
   const [modalState, setModalState] = useState<ArchiveModalState | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [selectedDiary, setSelectedDiary] = useState<Diary | null>(null);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMonthFilter, setSelectedMonthFilter] = useState<{
+    year: number;
+    month: number;
+  } | null>(null);
+  const today = new Date();
+  const pickerYear = selectedMonthFilter?.year ?? today.getFullYear();
+  const pickerMonth = selectedMonthFilter?.month ?? today.getMonth() + 1;
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const filteredDiaries = diaries.filter((entry) => {
+    const matchesMonth = selectedMonthFilter
+      ? entry.writtenAt.startsWith(
+          formatMonthKey(selectedMonthFilter.year, selectedMonthFilter.month),
+        )
+      : true;
+
+    if (!matchesMonth) return false;
+    if (!normalizedSearchQuery) return true;
+
+    const searchableText = [
+      entry.writtenAt,
+      entry.emoji,
+      getDiaryPreview(entry),
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return searchableText.includes(normalizedSearchQuery);
+  });
 
   useEffect(() => {
     if (openMenuId === null) return;
@@ -57,6 +92,11 @@ export function ArchivePage() {
 
   function handleDiaryClick(entry: Diary) {
     setSelectedDiary(entry);
+  }
+
+  function getMonthFilterLabel() {
+    if (!selectedMonthFilter) return "전체 기간";
+    return `${selectedMonthFilter.year}년 ${selectedMonthFilter.month}월`;
   }
 
   function openCreateModal() {
@@ -217,6 +257,82 @@ export function ArchivePage() {
           />
         </div>
 
+        <div className="flex flex-shrink-0 items-center gap-1.5 pb-1">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-subtle"
+              aria-hidden="true"
+            />
+            <input
+              type="search"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="일기 검색"
+              className="h-8 w-full rounded-full border border-border-light bg-bg-surface-muted
+                px-8 font-['Nanum_Myeongjo'] text-[12px] text-text-muted outline-none
+                transition-colors placeholder:text-text-subtle hover:bg-bg-surface-muted-hover
+                focus:border-[var(--border-input-focus)] focus:bg-bg-editor-panel"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2
+                  items-center justify-center rounded-full border-none bg-[var(--bg-black-subtle)]
+                  text-text-muted transition-colors hover:bg-[var(--bg-black-subtle-hover)]
+                  hover:text-text-strong"
+                aria-label="검색어 지우기"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+          <div className="flex flex-shrink-0 items-center">
+            {selectedMonthFilter ? (
+              <button
+                type="button"
+                onClick={() => setShowMonthPicker(true)}
+                className="flex h-8 items-center gap-1.5 rounded-full border border-border-light
+                  bg-transparent px-3 font-['Nanum_Myeongjo'] text-[12px]
+                  text-text-muted transition-colors hover:bg-bg-hover
+                  hover:text-text-strong"
+              >
+                <span>{getMonthFilterLabel()}</span>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSelectedMonthFilter(null);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setSelectedMonthFilter(null);
+                  }}
+                  className="flex h-4 w-4 items-center justify-center rounded-full
+                    bg-[var(--bg-black-subtle)] text-text-muted transition-colors
+                    hover:bg-[var(--bg-black-subtle-hover)] hover:text-text-strong"
+                  aria-label="월 필터 해제"
+                >
+                  <X className="h-2.5 w-2.5" />
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowMonthPicker(true)}
+                className="h-8 rounded-full border border-border-light bg-transparent px-3
+                  font-['Nanum_Myeongjo'] text-[12px] text-text-muted
+                  transition-colors hover:bg-bg-hover hover:text-text-strong"
+              >
+                전체 기간
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="overflow-y-auto md:min-h-0 md:flex-1">
           {loadingDiaries && (
             <div className="py-8 text-center text-xs text-text-secondary">
@@ -224,14 +340,16 @@ export function ArchivePage() {
             </div>
           )}
 
-          {!loadingDiaries && diaries.length === 0 && (
+          {!loadingDiaries && filteredDiaries.length === 0 && (
             <div className="py-8 text-center text-xs text-text-secondary">
-              표시할 일기가 없습니다.
+              {selectedMonthFilter || normalizedSearchQuery
+                ? "조건에 맞는 일기가 없습니다."
+                : "표시할 일기가 없습니다."}
             </div>
           )}
 
           {!loadingDiaries &&
-            diaries.map((entry) => (
+            filteredDiaries.map((entry) => (
               <div
                 key={entry.id}
                 className="flex items-center gap-3 py-2.5 px-3 border-b border-[var(--border-faint)]
@@ -300,6 +418,16 @@ export function ArchivePage() {
           }}
         />
       )}
+
+      <MonthPickerModal
+        isOpen={showMonthPicker}
+        selectedYear={pickerYear}
+        selectedMonth={pickerMonth}
+        onSelect={(year, month) => {
+          setSelectedMonthFilter({ year, month });
+        }}
+        onClose={() => setShowMonthPicker(false)}
+      />
     </div>
   );
 }
