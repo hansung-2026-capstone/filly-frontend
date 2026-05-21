@@ -260,32 +260,43 @@ export function Root() {
           </div>
 
           <div className="absolute left-full top-10 bottom-10 flex flex-col items-start gap-1.5 z-20">
-            {TABS.map((tab) => (
-              <button
-                key={tab.path}
-                onClick={() => handleTabClick(tab.path)}
-                data-page={tab.path}
-                aria-label={tab.label}
-                title={tab.label}
-                className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
-                  font-['Gaegu'] text-[18px] tracking-wider relative transition-all duration-[0.25s]
-                  shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
-                  hover:w-14 hover:shadow-[var(--shadow-tab-hover)]
-                  ${tab.path === "settings" ? "mt-auto" : ""}
-                  ${isTabActive(tab.path) ? "active shadow-[var(--shadow-tab-active)]" : ""}`}
-                style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-              >
-                <div
-                  className="absolute inset-0 rounded-r-md pointer-events-none"
-                  style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
-                />
-                {tab.icon ? (
-                  <tab.icon className="h-5 w-5" aria-hidden="true" />
-                ) : (
-                  tab.label
-                )}
-              </button>
-            ))}
+            {TABS.map((tab) => {
+              const isActive = isTabActive(tab.path);
+
+              return (
+                <button
+                  key={tab.path}
+                  onClick={() => handleTabClick(tab.path)}
+                  data-page={tab.path}
+                  aria-current={isActive ? "page" : undefined}
+                  aria-label={`${tab.label} 탭${isActive ? ", 현재 선택됨" : ""}`}
+                  title={tab.label}
+                  className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
+                    font-['Gaegu'] text-[18px] tracking-wider relative transition-all duration-[0.25s]
+                    shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
+                    ${tab.path === "settings" ? "mt-auto" : ""}
+                    ${
+                      isActive
+                        ? "active z-30 w-16 font-bold shadow-[var(--shadow-tab-active)]"
+                        : "hover:w-14 hover:shadow-[var(--shadow-tab-hover)]"
+                    }`}
+                  style={{
+                    writingMode: "vertical-rl",
+                    textOrientation: "mixed",
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 rounded-r-md pointer-events-none"
+                    style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
+                  />
+                  {tab.icon ? (
+                    <tab.icon className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    tab.label
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
@@ -318,32 +329,37 @@ export function Root() {
         </div>
 
         <nav className="relative z-20 mx-4 -mt-4 grid grid-cols-5 gap-1 px-2">
-          {TABS.map((tab) => (
-            <button
-              key={tab.path}
-              type="button"
-              onClick={() => handleTabClick(tab.path)}
-              className={`relative flex min-h-12 items-center justify-center rounded-b-md border-none px-1 pb-2 pt-4 font-['Gaegu'] text-[19px] tracking-wider shadow-[var(--shadow-tab)] transition-all duration-[0.25s] ${tab.bgClass} ${tab.textClass} ${
-                isTabActive(tab.path)
-                  ? "shadow-[var(--shadow-tab-active)]"
-                  : "hover:shadow-[var(--shadow-tab-hover)]"
-              }`}
-              aria-current={isTabActive(tab.path) ? "page" : undefined}
-              title={tab.label}
-            >
-              <div
-                className="absolute inset-0 rounded-b-md pointer-events-none"
-                style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
-              />
-              {tab.path === "settings" ? (
-                <span>{tab.label}</span>
-              ) : tab.icon ? (
-                <tab.icon className="h-4 w-4" aria-hidden="true" />
-              ) : (
-                <span>{tab.label}</span>
-              )}
-            </button>
-          ))}
+          {TABS.map((tab) => {
+            const isActive = isTabActive(tab.path);
+
+            return (
+              <button
+                key={tab.path}
+                type="button"
+                onClick={() => handleTabClick(tab.path)}
+                className={`relative flex min-h-10 self-start items-center justify-center rounded-b-md border-none px-1 pb-1.5 pt-3 font-['Gaegu'] text-[18px] tracking-wider shadow-[var(--shadow-tab)] transition-all duration-[0.25s] ${tab.bgClass} ${tab.textClass} ${
+                  isActive
+                    ? "z-30 min-h-14 pb-3 pt-3 font-bold shadow-[var(--shadow-tab-active)]"
+                    : "hover:shadow-[var(--shadow-tab-hover)]"
+                }`}
+                aria-current={isActive ? "page" : undefined}
+                aria-label={`${tab.label} 탭${isActive ? ", 현재 선택됨" : ""}`}
+                title={tab.label}
+              >
+                <div
+                  className="absolute inset-0 rounded-b-md pointer-events-none"
+                  style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
+                />
+                {tab.path === "settings" ? (
+                  <span>{tab.label}</span>
+                ) : tab.icon ? (
+                  <tab.icon className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <span>{tab.label}</span>
+                )}
+              </button>
+            );
+          })}
         </nav>
       </div>
       )}
