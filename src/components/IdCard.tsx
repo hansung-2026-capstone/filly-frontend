@@ -55,10 +55,11 @@ export function IdCard({
         {/* 아바타 */}
         <UserAvatar
           avatarUrl={avatarUrl}
-          className={`border-[3px] border-border-medium shadow-small ${
+          className={`border-[3px] border-border-medium ${
             isStory ? "h-[150px] w-[150px]" : "h-[72px] w-[72px]"
-          }`}
+          } ${isStory ? "" : "shadow-small"}`}
           imageClassName={isStory ? "scale-100" : undefined}
+          captureSafe={isStory}
         />
 
         {/* 닉네임 */}
