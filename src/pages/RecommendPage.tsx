@@ -1170,7 +1170,10 @@ export function RecommendPage() {
               <span className="text-[12px] tracking-[1.5px] text-text-secondary uppercase">
                 사원증 <span className="normal-case">(ID Card)</span>
               </span>
-              <div ref={idCardRef} className="flex-1">
+              <div
+                ref={idCardRef}
+                className="mx-auto w-full max-w-[240px] flex-1 md:max-w-none"
+              >
                 {idCardLoading ? (
                   <IdCardSkeleton />
                 ) : idCard ? (
@@ -1214,7 +1217,7 @@ export function RecommendPage() {
               </div>
               <div
                 ref={receiptWrapRef}
-                className="relative aspect-[5/7] w-full overflow-hidden max-h-[56vh] md:max-h-none"
+                className="relative mx-auto aspect-[5/7] w-full max-w-[240px] overflow-hidden max-h-[56vh] md:max-w-none md:max-h-none"
               >
                 <div
                   ref={receiptScrollRef}
