@@ -4,11 +4,13 @@ import { UserRound } from "lucide-react";
 interface UserAvatarProps {
   avatarUrl: string | null;
   className?: string;
+  imageClassName?: string;
 }
 
 export function UserAvatar({
   avatarUrl,
   className = "w-16 h-16",
+  imageClassName = "scale-110",
 }: UserAvatarProps) {
   const [failedAvatarUrl, setFailedAvatarUrl] = useState<string | null>(null);
   const profileImageUrl =
@@ -24,7 +26,7 @@ export function UserAvatar({
           alt="프로필 이미지"
           loading="eager"
           decoding="sync"
-          className="w-full h-full object-cover object-center scale-110"
+          className={`w-full h-full object-cover object-center ${imageClassName}`}
           onError={() => setFailedAvatarUrl(profileImageUrl)}
         />
       ) : (
