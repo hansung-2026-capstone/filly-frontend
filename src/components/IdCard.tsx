@@ -19,23 +19,27 @@ export function IdCard({
   return (
     <div
       className={`paper-texture w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium ${
-        "aspect-[5/7]"
+        isStory ? "aspect-[9/16]" : "aspect-[5/7]"
       }`}
     >
       {/* 상단 헤더 */}
       <div
         className={`flex flex-none items-center justify-between bg-tab-recommend px-4 ${
-          isStory ? "py-3" : "py-2.5"
+          isStory ? "px-7 py-7" : "py-2.5"
         }`}
       >
         <span
           className={`font-black tracking-[3px] text-tab-recommend-text ${
-            isStory ? "text-[16px]" : "text-[15px]"
+            isStory ? "text-[28px]" : "text-[15px]"
           }`}
         >
           FILLY
         </span>
-        <span className="text-[10px] font-bold tracking-[1.5px] text-tab-recommend-text opacity-70 uppercase">
+        <span
+          className={`font-bold tracking-[1.5px] text-tab-recommend-text opacity-70 uppercase ${
+            isStory ? "text-[17px]" : "text-[10px]"
+          }`}
+        >
           ID Card
         </span>
       </div>
@@ -44,7 +48,7 @@ export function IdCard({
       <div
         className={`flex flex-col items-center bg-notebook-page ${
           isStory
-            ? "flex-1 justify-center gap-5 px-5 py-6"
+            ? "flex-1 justify-center gap-9 px-9 py-10"
             : "flex-1 justify-center gap-3 px-4 pb-3 pt-4"
         }`}
       >
@@ -52,20 +56,25 @@ export function IdCard({
         <UserAvatar
           avatarUrl={avatarUrl}
           className={`border-[3px] border-border-medium shadow-small ${
-            isStory ? "h-[92px] w-[92px]" : "h-[72px] w-[72px]"
+            isStory ? "h-[150px] w-[150px]" : "h-[72px] w-[72px]"
           }`}
+          imageClassName={isStory ? "scale-100" : undefined}
         />
 
         {/* 닉네임 */}
         <div className="text-center">
           <div
             className={`font-bold text-text-strong leading-tight ${
-              isStory ? "text-[18px]" : "text-[14px]"
+              isStory ? "text-[30px]" : "text-[14px]"
             }`}
           >
             {nickname}
           </div>
-          <div className="text-[10px] tracking-[2px] text-text-secondary uppercase mt-1">
+          <div
+            className={`tracking-[2px] text-text-secondary uppercase ${
+              isStory ? "mt-4 text-[17px]" : "mt-1 text-[10px]"
+            }`}
+          >
             Member
           </div>
         </div>
@@ -77,15 +86,19 @@ export function IdCard({
         {visibleKeywords.length > 0 ? (
           <div
             className={`flex w-full flex-col ${
-              isStory ? "items-center gap-2" : "gap-1.5"
+              isStory ? "items-center gap-5" : "gap-1.5"
             }`}
           >
-            <span className="text-[10px] tracking-[2px] text-text-secondary uppercase">
+            <span
+              className={`tracking-[2px] text-text-secondary uppercase ${
+                isStory ? "text-[17px]" : "text-[10px]"
+              }`}
+            >
               취향 키워드
             </span>
             <div
               className={`flex flex-wrap ${
-                isStory ? "justify-center gap-1.5" : "gap-1"
+                isStory ? "justify-center gap-3" : "gap-1"
               }`}
             >
               {visibleKeywords.map((kw, i) => (
@@ -93,7 +106,7 @@ export function IdCard({
                   key={i}
                   className={`whitespace-nowrap rounded-full border border-border-light bg-bg-beige-subtle leading-none text-text-muted ${
                     isStory
-                      ? "px-2.5 py-1 text-[12px]"
+                      ? "px-5 py-2.5 text-[18px]"
                       : "px-2 py-0.5 text-[11px]"
                   }`}
                 >
@@ -112,11 +125,11 @@ export function IdCard({
       {/* 하단 바코드 */}
       <div
         className={`flex flex-none flex-col items-center bg-bg-beige-subtle px-4 ${
-          isStory ? "gap-2 py-4" : "gap-1.5 py-2.5"
+          isStory ? "gap-5 py-10" : "gap-1.5 py-2.5"
         }`}
       >
         <div
-          className={`flex items-end gap-[2px] ${isStory ? "h-6" : "h-4"}`}
+          className={`flex items-end gap-[2px] ${isStory ? "h-8" : "h-4"}`}
         >
           {[
             3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1,
@@ -129,7 +142,11 @@ export function IdCard({
             />
           ))}
         </div>
-        <span className="text-[10px] tracking-[2px] text-text-secondary">
+        <span
+          className={`tracking-[2px] text-text-secondary ${
+            isStory ? "text-[17px]" : "text-[10px]"
+          }`}
+        >
           FL-2026-FILLY
         </span>
       </div>
