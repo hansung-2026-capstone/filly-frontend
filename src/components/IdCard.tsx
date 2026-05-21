@@ -1,9 +1,12 @@
+import idCardHolderImage from "../assets/id-card-holder.png";
 import { UserAvatar } from "./UserAvatar";
 
 interface IdCardProps {
   avatarUrl: string;
   nickname: string;
   keywords: string[];
+  persona?: string | null;
+  issuedDate?: string;
   variant?: "compact" | "story";
 }
 
@@ -11,173 +14,187 @@ export function IdCard({
   avatarUrl,
   nickname,
   keywords,
+  persona,
+  issuedDate,
   variant = "compact",
 }: IdCardProps) {
   const visibleKeywords = keywords.slice(0, 3);
   const isStory = variant === "story";
+  const personaText = persona?.trim() || "감정을 탐험하는 신입 사원";
+  const keywordText =
+    visibleKeywords.length > 0 ? visibleKeywords.join(", ") : "신입 사원";
+  const cardNumber = `FL-${issuedDate?.replaceAll(".", "") ?? "20260521"}`;
 
-  return (
+  const card = (
     <div
-      className={`paper-texture w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium ${
-        isStory ? "aspect-[9/16]" : "aspect-[5/7]"
+      className={`relative w-full overflow-hidden ${
+        isStory
+          ? "h-full bg-transparent"
+          : "aspect-[5/7] rounded-[22px] border border-[rgba(137,130,120,0.28)] bg-[#f8f4ee] shadow-medium"
       }`}
     >
-      {/* 상단 헤더 */}
       <div
-        className={`flex flex-none items-center justify-between bg-tab-recommend px-4 ${
-          isStory ? "px-7 py-7" : "py-2.5"
+        className={`absolute inset-y-0 right-0 flex items-center justify-center bg-[#948c82] text-[#f8f4ee] ${
+          isStory ? "w-[23%] rounded-r-[22px]" : "w-[24%]"
         }`}
       >
         <span
-          className={`font-black tracking-[3px] text-tab-recommend-text ${
-            isStory ? "text-[28px]" : "text-[15px]"
+          className={`font-['Nanum_Myeongjo'] font-bold uppercase [writing-mode:vertical-rl] ${
+            isStory
+              ? "text-[26px] tracking-[12px]"
+              : "text-[16px] tracking-[8px]"
           }`}
         >
-          FILLY
-        </span>
-        <span
-          className={`font-bold tracking-[1.5px] text-tab-recommend-text opacity-70 uppercase ${
-            isStory ? "text-[17px]" : "text-[10px]"
-          }`}
-        >
-          ID Card
+          FILLY CARD
         </span>
       </div>
 
-      {/* 본문 */}
       <div
-        className={`flex flex-col items-center bg-notebook-page ${
-          isStory
-            ? "flex-1 justify-center gap-9 px-9 py-10"
-            : "flex-1 justify-center gap-3 px-4 pb-3 pt-4"
+          className={`relative z-10 flex h-full flex-col ${
+            isStory
+            ? "mr-[23%] px-[9%] pb-[9%] pt-[13%]"
+            : "mr-[24%] px-[8%] pb-[7%] pt-[7%]"
         }`}
       >
-        {/* 아바타 */}
         <UserAvatar
           avatarUrl={avatarUrl}
-          className={`border-[3px] border-border-medium ${
-            isStory ? "h-[150px] w-[150px]" : "h-[72px] w-[72px]"
-          } ${isStory ? "" : "shadow-small"}`}
-          imageClassName={isStory ? "scale-100" : undefined}
+          className={`mx-auto border border-[#b4ada4] bg-[#948c82] ${
+            isStory ? "h-[190px] w-[142px]" : "h-[118px] w-[88px]"
+          }`}
+          imageClassName="scale-100"
           captureSafe={isStory}
         />
 
-        {/* 닉네임 */}
-        <div className="text-center">
-          <div
-            className={`font-bold text-text-strong leading-tight ${
-              isStory ? "text-[30px]" : "text-[14px]"
-            }`}
-          >
-            {nickname}
-          </div>
-          <div
-            className={`tracking-[2px] text-text-secondary uppercase ${
-              isStory ? "mt-4 text-[17px]" : "mt-1 text-[10px]"
-            }`}
-          >
-            Member
-          </div>
-        </div>
-
-        {/* 구분선 */}
-        <div className="w-full border-t border-border-light" />
-
-        {/* 취향 키워드 */}
-        {visibleKeywords.length > 0 ? (
-          <div
-            className={`flex w-full flex-col ${
-              isStory ? "items-center gap-5" : "gap-1.5"
-            }`}
-          >
-            <span
-              className={`tracking-[2px] text-text-secondary uppercase ${
-                isStory ? "text-[17px]" : "text-[10px]"
-              }`}
-            >
-              취향 키워드
-            </span>
-            <div
-              className={`flex flex-wrap ${
-                isStory ? "justify-center gap-3" : "gap-1"
-              }`}
-            >
-              {visibleKeywords.map((kw, i) => (
-                <span
-                  key={i}
-                  className={`whitespace-nowrap rounded-full border border-border-light bg-bg-beige-subtle leading-none text-text-muted ${
-                    isStory
-                      ? "px-5 py-2.5 text-[18px]"
-                      : "px-2 py-0.5 text-[11px]"
-                  }`}
-                >
-                  {kw}
-                </span>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <span className="text-[12px] text-text-secondary italic">
-            신입 사원
-          </span>
-        )}
-      </div>
-
-      {/* 하단 바코드 */}
-      <div
-        className={`flex flex-none flex-col items-center bg-bg-beige-subtle px-4 ${
-          isStory ? "gap-5 py-10" : "gap-1.5 py-2.5"
-        }`}
-      >
         <div
-          className={`flex items-end gap-[2px] ${isStory ? "h-8" : "h-4"}`}
-        >
-          {[
-            3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1,
-            2,
-          ].map((h, i) => (
-            <div
-              key={i}
-              className="w-[2px] bg-text-primary opacity-25"
-              style={{ height: `${h * 20}%` }}
-            />
-          ))}
-        </div>
-        <span
-          className={`tracking-[2px] text-text-secondary ${
-            isStory ? "text-[17px]" : "text-[10px]"
+          className={`flex min-h-0 flex-1 flex-col justify-end ${
+            isStory ? "gap-2 pt-5" : "gap-1 pt-2"
           }`}
         >
-          FL-2026-FILLY
-        </span>
+          <CardField label="NAME." value={nickname} isStory={isStory} strong />
+          <CardField label="PERSONA." value={personaText} isStory={isStory} />
+          <CardField
+            label="ISSUED DATE."
+            value={issuedDate ?? "2026.05.21"}
+            isStory={isStory}
+            strong
+          />
+          <CardField label="KEYWORD." value={keywordText} isStory={isStory} />
+
+          <div
+            className={`flex flex-col ${
+              isStory ? "gap-3 pt-3" : "gap-0.5 pt-0.5"
+            }`}
+          >
+            <Barcode isStory={isStory} />
+            <span
+              className={`font-mono tracking-[2px] text-[#948c82] ${
+                isStory ? "text-[10px]" : "text-[6px]"
+              }`}
+            >
+              {cardNumber}
+            </span>
+          </div>
+        </div>
       </div>
+    </div>
+  );
+
+  if (!isStory) return card;
+
+  return (
+    <div
+      className="relative aspect-[1055/1491] w-full overflow-hidden bg-[length:100%_100%] bg-no-repeat"
+      data-capture-bg-src={idCardHolderImage}
+      style={{ backgroundImage: `url(${idCardHolderImage})` }}
+    >
+      <img
+        src={idCardHolderImage}
+        alt=""
+        className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
+        draggable={false}
+      />
+      <div className="absolute left-[20.4%] top-[20.6%] z-10 h-[74.2%] w-[61.2%] overflow-hidden">
+        {card}
+      </div>
+    </div>
+  );
+}
+
+function CardField({
+  label,
+  value,
+  isStory,
+  strong = false,
+}: {
+  label: string;
+  value: string;
+  isStory: boolean;
+  strong?: boolean;
+}) {
+  return (
+    <div
+      className={`border-b border-[#c0b8ad] ${
+        isStory ? "pb-1.5" : "pb-0.5"
+      }`}
+    >
+      <div
+        className={`font-bold tracking-[1px] text-[#948c82] ${
+          isStory ? "text-[11px]" : "text-[7px]"
+        }`}
+      >
+        {label}
+      </div>
+      <div
+        className={`mt-0.5 break-keep font-['Nanum_Myeongjo'] leading-[1.15] text-[#25272d] ${
+          isStory ? "text-[16px]" : "text-[10px]"
+        } ${strong ? "font-bold" : "font-normal"}`}
+      >
+        {value}
+      </div>
+    </div>
+  );
+}
+
+function Barcode({ isStory }: { isStory: boolean }) {
+  return (
+    <div
+      className={`flex items-end gap-[2px] ${
+        isStory ? "h-5" : "h-[13px]"
+      }`}
+    >
+      {[
+        3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1,
+        2, 3, 1, 1, 2, 3, 1, 2,
+      ].map((h, i) => (
+        <div
+          key={i}
+          className={`bg-[#948c82] ${isStory ? "w-[2px]" : "w-[1px]"}`}
+          style={{ height: `${h * 20}%` }}
+        />
+      ))}
     </div>
   );
 }
 
 export function IdCardSkeleton() {
   return (
-    <div className="paper-texture aspect-[5/7] w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium">
-      <div className="bg-tab-recommend opacity-60 h-9" />
-      <div className="bg-notebook-page flex flex-col items-center px-4 pt-4 pb-3 gap-3">
-        <div className="w-[72px] h-[72px] rounded-full bg-bg-hover animate-pulse" />
-        <div className="flex flex-col items-center gap-1.5">
-          <div className="h-3 w-20 rounded bg-bg-hover animate-pulse" />
-          <div className="h-2 w-10 rounded bg-bg-hover animate-pulse" />
-        </div>
-        <div className="w-full border-t border-border-light" />
-        <div className="w-full flex flex-wrap gap-1">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-4 w-12 rounded-full bg-bg-hover animate-pulse"
-            />
+    <div className="relative aspect-[5/7] w-full overflow-hidden rounded-[22px] border border-border-medium bg-[#f8f4ee]">
+      <div className="absolute inset-y-0 right-0 w-[24%] bg-[#948c82] opacity-70" />
+      <div className="relative z-10 mr-[24%] flex h-full flex-col px-[8%] pb-[7%] pt-[7%]">
+        <div className="mx-auto h-[118px] w-[88px] rounded-full bg-bg-hover animate-pulse" />
+        <div className="flex flex-1 flex-col justify-end gap-1 pt-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="border-b border-border-light pb-0.5">
+              <div className="h-2 w-14 rounded bg-bg-hover animate-pulse" />
+              <div
+                className={`mt-1 h-3 rounded bg-bg-hover animate-pulse ${
+                  i === 1 ? "w-full" : "w-20"
+                }`}
+              />
+            </div>
           ))}
+          <div className="h-[13px] w-24 bg-bg-hover animate-pulse opacity-50" />
         </div>
-      </div>
-      <div className="bg-bg-beige-subtle px-4 py-2.5 flex flex-col items-center gap-1.5">
-        <div className="h-4 w-full rounded bg-bg-hover animate-pulse opacity-40" />
-        <div className="h-2 w-14 rounded bg-bg-hover animate-pulse" />
       </div>
     </div>
   );
