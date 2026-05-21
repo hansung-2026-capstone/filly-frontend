@@ -2,11 +2,12 @@ import { Check } from "lucide-react";
 import {
   BACKGROUND_THEME_PRESETS,
   getBackgroundThemeId,
+  setPreviewBackgroundThemeId,
   type BackgroundThemeId,
 } from "../lib/backgroundTheme";
 import { useCurrentUser } from "../hook/common/useCurrentUser";
 import { useUpdateBackgroundTheme } from "../hook/common/useUpdateBackgroundTheme";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 function getThemeCardClass(isSelected: boolean) {
   return `rounded-xl border px-3 py-3 text-left transition-all ${
@@ -27,16 +28,28 @@ export function SettingsThemeSection() {
 
   const selectTheme = (themeId: BackgroundThemeId) => {
     clearError();
-    setDraftTheme(themeId);
+    const nextDraftTheme = themeId === savedTheme ? null : themeId;
+
+    setDraftTheme(nextDraftTheme);
+    setPreviewBackgroundThemeId(nextDraftTheme);
   };
 
   const saveTheme = async () => {
     if (!isDirty || saving) return;
 
     await updateBackgroundTheme(selectedTheme)
-      .then(() => setDraftTheme(null))
+      .then(() => {
+        setDraftTheme(null);
+        setPreviewBackgroundThemeId(null);
+      })
       .catch(() => undefined);
   };
+
+  useEffect(() => {
+    return () => {
+      setPreviewBackgroundThemeId(null);
+    };
+  }, []);
 
   return (
     <section className="w-full pt-6" aria-label="테마 선택">
@@ -46,7 +59,7 @@ export function SettingsThemeSection() {
             테마
           </h3>
           <p className="mt-1 text-[12px] leading-[1.6] text-text-secondary">
-            공책의 배경과 종이 분위기를 골라요.
+            고르면 먼저 미리보기로 바뀌고, 저장하면 최종 반영돼요.
           </p>
         </div>
         <button
