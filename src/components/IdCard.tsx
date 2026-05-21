@@ -26,12 +26,12 @@ export function IdCard({
 
   return (
     <div
-      className={`relative w-full overflow-hidden rounded-[22px] border border-[rgba(122,141,126,0.28)] bg-[#f8f4ea] shadow-medium ${
+      className={`relative w-full overflow-hidden rounded-[22px] border border-[rgba(137,130,120,0.28)] bg-[#f8f4ee] shadow-medium ${
         isStory ? "aspect-[9/16]" : "aspect-[5/7]"
       }`}
     >
       <div
-        className={`absolute inset-y-0 right-0 flex items-center justify-center bg-[#738779] text-[#f8f4ea] ${
+        className={`absolute inset-y-0 right-0 flex items-center justify-center bg-[#948c82] text-[#f8f4ee] ${
           isStory ? "w-[26%]" : "w-[24%]"
         }`}
       >
@@ -55,7 +55,7 @@ export function IdCard({
       >
         <UserAvatar
           avatarUrl={avatarUrl}
-          className={`mx-auto border border-[#9aa99a] bg-[#738779] ${
+          className={`mx-auto border border-[#b4ada4] bg-[#948c82] ${
             isStory ? "h-[330px] w-[240px]" : "h-[118px] w-[88px]"
           }`}
           imageClassName="scale-100"
@@ -84,7 +84,7 @@ export function IdCard({
           >
             <Barcode isStory={isStory} />
             <span
-              className={`font-mono tracking-[2px] text-[#738779] ${
+              className={`font-mono tracking-[2px] text-[#948c82] ${
                 isStory ? "text-[15px]" : "text-[6px]"
               }`}
             >
@@ -110,12 +110,12 @@ function CardField({
 }) {
   return (
     <div
-      className={`border-b border-[#a9b2a6] ${
+      className={`border-b border-[#c0b8ad] ${
         isStory ? "pb-2.5" : "pb-0.5"
       }`}
     >
       <div
-        className={`font-bold tracking-[1px] text-[#738779] ${
+        className={`font-bold tracking-[1px] text-[#948c82] ${
           isStory ? "text-[17px]" : "text-[7px]"
         }`}
       >
@@ -145,7 +145,7 @@ function Barcode({ isStory }: { isStory: boolean }) {
       ].map((h, i) => (
         <div
           key={i}
-          className={`bg-[#738779] ${isStory ? "w-[3px]" : "w-[1px]"}`}
+          className={`bg-[#948c82] ${isStory ? "w-[3px]" : "w-[1px]"}`}
           style={{ height: `${h * 20}%` }}
         />
       ))}
@@ -155,8 +155,8 @@ function Barcode({ isStory }: { isStory: boolean }) {
 
 export function IdCardSkeleton() {
   return (
-    <div className="relative aspect-[5/7] w-full overflow-hidden rounded-[22px] border border-border-medium bg-[#f8f4ea]">
-      <div className="absolute inset-y-0 right-0 w-[24%] bg-[#738779] opacity-70" />
+    <div className="relative aspect-[5/7] w-full overflow-hidden rounded-[22px] border border-border-medium bg-[#f8f4ee]">
+      <div className="absolute inset-y-0 right-0 w-[24%] bg-[#948c82] opacity-70" />
       <div className="relative z-10 mr-[24%] flex h-full flex-col px-[8%] pb-[7%] pt-[7%]">
         <div className="mx-auto h-[118px] w-[88px] rounded-full bg-bg-hover animate-pulse" />
         <div className="flex flex-1 flex-col justify-end gap-1 pt-2">
