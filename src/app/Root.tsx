@@ -363,7 +363,7 @@ export function Root() {
                 key={tab.path}
                 type="button"
                 onClick={() => handleTabClick(tab.path)}
-                className={`relative flex min-h-10 self-start items-center justify-center rounded-b-md border-none px-1 pb-1.5 pt-3 font-['Gaegu'] text-[18px] tracking-wider shadow-[var(--shadow-tab)] transition-all duration-[0.25s] ${tab.bgClass} ${tab.textClass} ${
+                className={`relative flex min-h-10 self-start items-center justify-center rounded-b-md border-none px-1 pb-1.5 pt-3 font-['Gaegu'] text-[16px] tracking-[0.06em] shadow-[var(--shadow-tab)] transition-all duration-[0.25s] ${tab.bgClass} ${tab.textClass} ${
                   isActive
                     ? "z-30 min-h-14 pb-3 pt-3 font-bold shadow-[var(--shadow-tab-active)]"
                     : "hover:shadow-[var(--shadow-tab-hover)]"
@@ -377,11 +377,11 @@ export function Root() {
                   style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
                 />
                 {tab.path === "settings" ? (
-                  <span>{tab.label}</span>
+                  <span className="whitespace-nowrap leading-none">{tab.label}</span>
                 ) : tab.icon ? (
                   <tab.icon className="h-4 w-4" aria-hidden="true" />
                 ) : (
-                  <span>{tab.label}</span>
+                  <span className="whitespace-nowrap leading-none">{tab.label}</span>
                 )}
               </button>
             );
