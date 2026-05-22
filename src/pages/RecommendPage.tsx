@@ -96,9 +96,8 @@ function getCardOrder(draw: RecommendationDraw | null) {
   return Array.from({ length: CARD_COUNT }, (_, index) => {
     const position = index + 1;
     return (
-      draw.cards.find(
-        (card) => card.position === position && !card.revealed,
-      ) ?? draw.cards.find((card) => card.position === position)
+      draw.cards.find((card) => card.position === position && !card.revealed) ??
+      draw.cards.find((card) => card.position === position)
     )?.cardId;
   }).filter((cardId): cardId is number => typeof cardId === "number");
 }
@@ -323,10 +322,7 @@ export function RecommendPage() {
       ? Number(firstRevealedCardId)
       : null;
 
-    if (
-      activeCardId === null ||
-      !cardOrder.includes(activeCardId)
-    ) {
+    if (activeCardId === null || !cardOrder.includes(activeCardId)) {
       return null;
     }
 
@@ -694,7 +690,11 @@ export function RecommendPage() {
           recommendationDraw.cards.some((card) => card.cardId === item.cardId),
       );
 
-      if (isAxiosError(error) && error.response?.status === 400 && existingDetail) {
+      if (
+        isAxiosError(error) &&
+        error.response?.status === 400 &&
+        existingDetail
+      ) {
         setRevealedRecommendations({ [cardId]: existingDetail });
         setRecommendationError(null);
         return;
@@ -760,7 +760,9 @@ export function RecommendPage() {
     setRecommendationError(null);
     markRecommendationRequested();
     const previousRevealedRecommendations = revealedRecommendations;
-    const nextDrawPromise = shuffleRecommendationDraw(recommendationDraw.drawId);
+    const nextDrawPromise = shuffleRecommendationDraw(
+      recommendationDraw.drawId,
+    );
 
     setRevealedRecommendations({});
     setIsPreparingShuffle(true);
@@ -913,9 +915,7 @@ export function RecommendPage() {
                         aria-label={cardLabel}
                         className={`group relative z-[1] h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
                           isWaitingForInitialRecommendation ? "opacity-55" : ""
-                        } ${
-                          isSelectedCardPopped ? "opacity-0" : ""
-                        } ${
+                        } ${isSelectedCardPopped ? "opacity-0" : ""} ${
                           showCardFilter ? "pointer-events-none" : ""
                         } ${
                           isCardDisabled ? "cursor-default" : "cursor-pointer"
@@ -930,9 +930,7 @@ export function RecommendPage() {
                         }}
                         style={{ zIndex: 1 }}
                       >
-                        <div
-                          className="relative left-1/2 top-1/2 aspect-[1023/1537] h-full -translate-x-1/2 -translate-y-1/2"
-                        >
+                        <div className="relative left-1/2 top-1/2 aspect-[1023/1537] h-full -translate-x-1/2 -translate-y-1/2">
                           <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]">
                             <img
                               src={tarotCardImage}
@@ -1022,7 +1020,10 @@ export function RecommendPage() {
                                   </div>
                                   {selectedRecommendationDetail.searchKeyword && (
                                     <div className="line-clamp-2 break-words pb-1 pt-1.5 text-[9.5px] leading-[1.45] text-text-secondary">
-                                      #{selectedRecommendationDetail.searchKeyword}
+                                      #
+                                      {
+                                        selectedRecommendationDetail.searchKeyword
+                                      }
                                     </div>
                                   )}
                                 </div>
@@ -1133,7 +1134,7 @@ export function RecommendPage() {
           {/* 헤더 */}
           <div className="flex items-center justify-between pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
             <div className="text-base font-bold text-[var(--text-stats-heading)] tracking-wide">
-              공유용 컨텐츠 (Shared Content)
+              공유용 컨텐츠
             </div>
             <div className="flex items-center rounded-md border border-border-light overflow-hidden">
               <button
