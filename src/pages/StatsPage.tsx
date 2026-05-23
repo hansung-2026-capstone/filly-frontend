@@ -65,7 +65,11 @@ export function StatsPage() {
   );
   const emotionEntries = Object.entries(stat?.emotionDistribution ?? {})
     .filter(([, value]) => value > 0)
-    .sort(([, a], [, b]) => b - a);
+    .sort(([emotionA, valueA], [emotionB, valueB]) => {
+      if (valueA !== valueB) return valueB - valueA;
+      return emotionA.localeCompare(emotionB, "ko");
+    });
+  const visibleEmotionEntries = emotionEntries.slice(0, 5);
   const dailyPatternEntries = Object.entries(stat?.dailyPattern ?? {})
     .flatMap(([day, times]) =>
       Object.entries(times)
@@ -286,16 +290,16 @@ export function StatsPage() {
                   ))}
                 </div>
               </div>
-            ) : emotionEntries.length > 0 ? (
+            ) : visibleEmotionEntries.length > 0 ? (
               <div className="flex flex-col items-center justify-center gap-5 md:flex-row md:gap-9">
                 <div
                   className="w-[125px] h-[125px] rounded-full relative flex-shrink-0"
-                  style={{ background: buildEmotionGradient(emotionEntries) }}
+                  style={{ background: buildEmotionGradient(visibleEmotionEntries) }}
                 >
                   <div className="absolute inset-[18px] rounded-full bg-notebook-page" />
                 </div>
                 <div className="w-[110px] flex flex-col gap-2">
-                  {emotionEntries.slice(0, 5).map(([emotion, value], index) => (
+                  {visibleEmotionEntries.map(([emotion, value], index) => (
                     <div key={emotion} className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span
