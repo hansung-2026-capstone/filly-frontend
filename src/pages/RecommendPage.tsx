@@ -1046,7 +1046,7 @@ export function RecommendPage() {
                           duration: 0.95,
                           ease: [0.22, 0.61, 0.36, 1],
                         }}
-                        className="pointer-events-auto relative aspect-[1023/1537] h-[238px] [transform-style:preserve-3d] md:h-[348px]"
+                        className="pointer-events-auto relative aspect-[1023/1537] h-[324px] [transform-style:preserve-3d] md:h-[348px]"
                       >
                         <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] [backface-visibility:hidden]">
                           <img
@@ -1058,7 +1058,7 @@ export function RecommendPage() {
                           />
                         </div>
 
-                        <div className="absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-4 shadow-[0_18px_34px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform:rotateY(180deg)] md:p-5">
+                        <div className="absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-5 shadow-[0_18px_34px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
                           <div className="absolute inset-0 opacity-20 paper-texture" />
                           <div className="absolute inset-3 rounded-md border border-border-medium" />
                           <div className="pointer-events-none absolute inset-3 z-[2]">
@@ -1076,13 +1076,13 @@ export function RecommendPage() {
                           </div>
                           <div className="relative z-[1] flex h-full flex-col overflow-hidden text-text-heading">
                             {revealingCardId === selectedCardId ? (
-                              <div className="flex h-full items-center justify-center text-center text-[13px] leading-[1.7] text-text-muted">
+                              <div className="flex h-full items-center justify-center text-center text-[14px] leading-[1.7] text-text-muted">
                                 추천을 펼치는 중...
                               </div>
                             ) : selectedRecommendationDetail ? (
                               <>
-                                <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pb-2 pr-1 pt-3">
-                                  <div className="flex items-center gap-2 text-[10px] tracking-[1.2px] text-text-secondary">
+                                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pb-2 pr-1 pt-3">
+                                  <div className="flex items-center gap-2 text-[10.5px] tracking-[1.2px] text-text-secondary">
                                     <span className="line-clamp-2 break-words leading-[1.45]">
                                       {getRecommendationCategoryLabel(
                                         selectedRecommendationDetail,
@@ -1092,18 +1092,18 @@ export function RecommendPage() {
                                         : ""}
                                     </span>
                                   </div>
-                                  <div className="text-[14px] font-bold leading-[1.35] md:text-[15px]">
+                                  <div className="text-[15px] font-bold leading-[1.35]">
                                     {selectedRecommendationDetail.title}
                                   </div>
                                   <div className="border-t border-border-medium" />
-                                  <div className="pt-1 text-[11.5px] leading-[1.55] text-text-muted">
+                                  <div className="pt-1 text-[12.5px] leading-[1.55] text-text-muted">
                                     {selectedRecommendationDetail.description}
                                   </div>
-                                  <div className="pt-1 text-[11.5px] leading-[1.55] text-text-secondary">
+                                  <div className="pt-1 text-[12.5px] leading-[1.55] text-text-secondary">
                                     {selectedRecommendationDetail.reason}
                                   </div>
                                   {selectedRecommendationDetail.searchKeyword && (
-                                    <div className="line-clamp-2 break-words pb-1 pt-1.5 text-[9.5px] leading-[1.45] text-text-secondary">
+                                    <div className="break-words pb-1 pt-1.5 text-[10px] leading-[1.45] text-text-secondary">
                                       #
                                       {
                                         selectedRecommendationDetail.searchKeyword
