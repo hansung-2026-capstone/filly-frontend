@@ -1175,7 +1175,7 @@ export function RecommendPage() {
                   ) : (
                     <div className="flex gap-2 md:block md:space-y-2">
                       {recommendationError && (
-                        <div className="min-w-[150px] rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2 text-[12px] leading-[1.5] text-text-muted md:min-w-0">
+                        <div className="min-w-[220px] rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2 text-[12px] leading-[1.5] text-text-muted md:min-w-0">
                           {recommendationError}
                         </div>
                       )}
@@ -1189,17 +1189,17 @@ export function RecommendPage() {
                             onClick={() =>
                               setSelectedRecommendationHistory(item)
                             }
-                            className="w-[150px] flex-shrink-0 rounded-md border border-border-light bg-bg-beige-subtle px-2.5 py-2 text-left transition-colors md:w-full md:px-3"
+                            className="w-[220px] flex-shrink-0 rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2.5 text-left transition-colors md:w-full md:py-2"
                           >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="min-w-0 flex-1 line-clamp-2 break-words text-[12px] font-bold leading-[1.35] text-text-heading">
+                            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-2">
+                              <div className="min-w-0 line-clamp-2 break-words text-[13px] font-bold leading-[1.4] text-text-heading md:flex-1 md:text-[12px] md:leading-[1.35]">
                                 {item.title}
                               </div>
-                              <div className="flex-shrink-0 text-[11px] text-text-secondary">
+                              <div className="flex-shrink-0 text-[11px] leading-none text-text-secondary">
                                 {getRecommendationTypeLabel(item)}
                               </div>
                             </div>
-                            <div className="mt-1 line-clamp-2 text-[12px] leading-[1.45] text-text-muted">
+                            <div className="mt-1.5 line-clamp-2 text-[12.5px] leading-[1.5] text-text-muted md:mt-1 md:text-[12px] md:leading-[1.45]">
                               {item.reason}
                             </div>
                           </button>
