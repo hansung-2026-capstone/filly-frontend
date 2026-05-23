@@ -952,7 +952,7 @@ export function RecommendPage() {
 
             <div className="flex flex-col gap-4 pt-5 md:min-h-0 md:flex-1">
               <div className="flex flex-col gap-4 flex-shrink-0">
-                <div className="relative flex h-[164px] w-full gap-2 px-1 md:h-[232px] md:gap-3 md:px-2">
+                <div className="relative flex min-h-[164px] w-full justify-center gap-3 px-2 md:h-[232px] md:gap-3 md:px-2">
                   {cardOrder.map((cardId, slotIndex) => {
                     const card = recommendationDraw?.cards.find(
                       (item) => item.cardId === cardId,
@@ -997,7 +997,7 @@ export function RecommendPage() {
                         aria-pressed={isSelected}
                         aria-disabled={isCardDisabled}
                         aria-label={cardLabel}
-                        className={`group relative z-[1] h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
+                        className={`group relative z-[1] aspect-[1023/1537] w-[31%] max-w-[142px] flex-none self-center text-left [perspective:1000px] focus:outline-none md:w-[136px] md:max-w-none lg:w-[144px] ${
                           isWaitingForInitialRecommendation ? "opacity-55" : ""
                         } ${isSelectedCardPopped ? "opacity-0" : ""} ${
                           showCardFilter ? "pointer-events-none" : ""
@@ -1014,7 +1014,7 @@ export function RecommendPage() {
                         }}
                         style={{ zIndex: 1 }}
                       >
-                        <div className="relative left-1/2 top-1/2 aspect-[1023/1537] h-full -translate-x-1/2 -translate-y-1/2">
+                        <div className="relative h-full w-full">
                           <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]">
                             <img
                               src={tarotCardImage}
@@ -1046,7 +1046,7 @@ export function RecommendPage() {
                           duration: 0.95,
                           ease: [0.22, 0.61, 0.36, 1],
                         }}
-                        className="pointer-events-auto relative aspect-[1023/1537] h-[238px] [transform-style:preserve-3d] md:h-[348px]"
+                        className="pointer-events-auto relative aspect-[1023/1537] h-[324px] [transform-style:preserve-3d] md:h-[348px]"
                       >
                         <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] [backface-visibility:hidden]">
                           <img
@@ -1058,7 +1058,7 @@ export function RecommendPage() {
                           />
                         </div>
 
-                        <div className="absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-4 shadow-[0_18px_34px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform:rotateY(180deg)] md:p-5">
+                        <div className="absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-5 shadow-[0_18px_34px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
                           <div className="absolute inset-0 opacity-20 paper-texture" />
                           <div className="absolute inset-3 rounded-md border border-border-medium" />
                           <div className="pointer-events-none absolute inset-3 z-[2]">
@@ -1076,13 +1076,13 @@ export function RecommendPage() {
                           </div>
                           <div className="relative z-[1] flex h-full flex-col overflow-hidden text-text-heading">
                             {revealingCardId === selectedCardId ? (
-                              <div className="flex h-full items-center justify-center text-center text-[13px] leading-[1.7] text-text-muted">
+                              <div className="flex h-full items-center justify-center text-center text-[14px] leading-[1.7] text-text-muted">
                                 추천을 펼치는 중...
                               </div>
                             ) : selectedRecommendationDetail ? (
                               <>
-                                <div className="min-h-0 flex-1 space-y-1.5 overflow-y-auto pb-2 pr-1 pt-3">
-                                  <div className="flex items-center gap-2 text-[10px] tracking-[1.2px] text-text-secondary">
+                                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pb-2 pr-1 pt-3">
+                                  <div className="flex items-center gap-2 text-[10.5px] tracking-[1.2px] text-text-secondary">
                                     <span className="line-clamp-2 break-words leading-[1.45]">
                                       {getRecommendationCategoryLabel(
                                         selectedRecommendationDetail,
@@ -1092,18 +1092,18 @@ export function RecommendPage() {
                                         : ""}
                                     </span>
                                   </div>
-                                  <div className="text-[14px] font-bold leading-[1.35] md:text-[15px]">
+                                  <div className="text-[15px] font-bold leading-[1.35]">
                                     {selectedRecommendationDetail.title}
                                   </div>
                                   <div className="border-t border-border-medium" />
-                                  <div className="pt-1 text-[11.5px] leading-[1.55] text-text-muted">
+                                  <div className="pt-1 text-[12.5px] leading-[1.55] text-text-muted">
                                     {selectedRecommendationDetail.description}
                                   </div>
-                                  <div className="pt-1 text-[11.5px] leading-[1.55] text-text-secondary">
+                                  <div className="pt-1 text-[12.5px] leading-[1.55] text-text-secondary">
                                     {selectedRecommendationDetail.reason}
                                   </div>
                                   {selectedRecommendationDetail.searchKeyword && (
-                                    <div className="line-clamp-2 break-words pb-1 pt-1.5 text-[9.5px] leading-[1.45] text-text-secondary">
+                                    <div className="break-words pb-1 pt-1.5 text-[10px] leading-[1.45] text-text-secondary">
                                       #
                                       {
                                         selectedRecommendationDetail.searchKeyword
@@ -1175,7 +1175,7 @@ export function RecommendPage() {
                   ) : (
                     <div className="flex gap-2 md:block md:space-y-2">
                       {recommendationError && (
-                        <div className="min-w-[150px] rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2 text-[12px] leading-[1.5] text-text-muted md:min-w-0">
+                        <div className="min-w-[220px] rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2 text-[12px] leading-[1.5] text-text-muted md:min-w-0">
                           {recommendationError}
                         </div>
                       )}
@@ -1189,17 +1189,17 @@ export function RecommendPage() {
                             onClick={() =>
                               setSelectedRecommendationHistory(item)
                             }
-                            className="w-[150px] flex-shrink-0 rounded-md border border-border-light bg-bg-beige-subtle px-2.5 py-2 text-left transition-colors md:w-full md:px-3"
+                            className="w-[220px] flex-shrink-0 rounded-md border border-border-light bg-bg-beige-subtle px-3 py-2.5 text-left transition-colors md:w-full md:py-2"
                           >
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="min-w-0 flex-1 line-clamp-2 break-words text-[12px] font-bold leading-[1.35] text-text-heading">
+                            <div className="flex flex-col gap-1 md:flex-row md:items-center md:justify-between md:gap-2">
+                              <div className="min-w-0 line-clamp-2 break-words text-[13px] font-bold leading-[1.4] text-text-heading md:flex-1 md:text-[12px] md:leading-[1.35]">
                                 {item.title}
                               </div>
-                              <div className="flex-shrink-0 text-[11px] text-text-secondary">
+                              <div className="flex-shrink-0 text-[11px] leading-none text-text-secondary">
                                 {getRecommendationTypeLabel(item)}
                               </div>
                             </div>
-                            <div className="mt-1 line-clamp-2 text-[12px] leading-[1.45] text-text-muted">
+                            <div className="mt-1.5 line-clamp-2 text-[12.5px] leading-[1.5] text-text-muted md:mt-1 md:text-[12px] md:leading-[1.45]">
                               {item.reason}
                             </div>
                           </button>
