@@ -30,7 +30,7 @@ export function MonthPickerModal({
         onClick={onClose}
       >
         <div
-          className="bg-notebook-page rounded-xl w-[420px] shadow-[var(--shadow-modal)]
+          className="bg-notebook-page rounded-xl w-[420px] max-w-[calc(100vw-32px)] shadow-[var(--shadow-modal)]
             overflow-hidden font-['Nanum_Myeongjo']"
           onClick={(e) => e.stopPropagation()}
           style={{ animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}
@@ -47,7 +47,7 @@ export function MonthPickerModal({
                   <polyline points="15 18 9 12 15 6" />
                 </svg>
               </button>
-              <div className="text-[15px] text-text-primary tracking-[0.5px] min-w-[60px] text-center">
+              <div className="text-[16px] text-text-primary tracking-[0.5px] min-w-[60px] text-center">
                 {pickerYear}
               </div>
               <button
@@ -90,7 +90,7 @@ export function MonthPickerModal({
                     }}
                     disabled={disabled}
                     className={`py-3 px-3 border rounded-lg font-['Nanum_Myeongjo']
-                      text-[11px] transition-all duration-200 flex flex-col items-center gap-1
+                      text-[12px] transition-all duration-200 flex flex-col items-center gap-1
                       disabled:opacity-35 disabled:cursor-not-allowed
                       ${selectedYear === pickerYear && selectedMonth === month.num
                         ? "bg-bg-active border-border-strong text-text-heading"
@@ -100,7 +100,7 @@ export function MonthPickerModal({
                       }`}
                   >
                     <div className="text-[18px] leading-none">{String(month.num).padStart(2, "0")}</div>
-                    <div className="text-[9px] tracking-[0.5px] uppercase opacity-60">{month.name.slice(0, 3)}</div>
+                    <div className="text-[11px] tracking-[0.5px] uppercase opacity-75">{month.name.slice(0, 3)}</div>
                   </button>
                 );
               })}

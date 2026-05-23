@@ -1,126 +1,200 @@
-import { useState } from "react";
+import idCardHolderImage from "../assets/id-card-holder.png";
+import { UserAvatar } from "./UserAvatar";
 
 interface IdCardProps {
   avatarUrl: string;
   nickname: string;
   keywords: string[];
+  persona?: string | null;
+  issuedDate?: string;
+  variant?: "compact" | "story";
 }
 
-export function IdCard({ avatarUrl, nickname, keywords }: IdCardProps) {
-  const [profileImageUrl, setProfileImageUrl] = useState<string | null>(
-    avatarUrl,
+export function IdCard({
+  avatarUrl,
+  nickname,
+  keywords,
+  persona,
+  issuedDate,
+  variant = "compact",
+}: IdCardProps) {
+  const visibleKeywords = keywords.slice(0, 3);
+  const isStory = variant === "story";
+  const personaText = persona?.trim() || "감정을 탐험하는 신입 사원";
+  const keywordText =
+    visibleKeywords.length > 0 ? visibleKeywords.join(", ") : "신입 사원";
+  const cardNumber = `FL-${issuedDate?.replaceAll(".", "") ?? "20260521"}`;
+
+  const card = (
+    <div
+      className={`relative w-full overflow-hidden ${
+        isStory
+          ? "h-full bg-transparent"
+          : "aspect-[5/7] rounded-[22px] border border-[rgba(137,130,120,0.28)] bg-[#f8f4ee] shadow-medium"
+      }`}
+    >
+      <div
+        className={`absolute inset-y-0 right-0 flex items-center justify-center bg-[#948c82] text-[#f8f4ee] ${
+          isStory ? "w-[23%] rounded-r-[22px]" : "w-[24%]"
+        }`}
+      >
+        <span
+          className={`font-['Nanum_Myeongjo'] font-bold uppercase [writing-mode:vertical-rl] ${
+            isStory
+              ? "text-[26px] tracking-[12px]"
+              : "text-[16px] tracking-[8px]"
+          }`}
+        >
+          FILLY CARD
+        </span>
+      </div>
+
+      <div
+          className={`relative z-10 flex h-full flex-col ${
+            isStory
+            ? "mr-[23%] px-[9%] pb-[9%] pt-[13%]"
+            : "mr-[24%] px-[8%] pb-[7%] pt-[7%]"
+        }`}
+      >
+        <UserAvatar
+          avatarUrl={avatarUrl}
+          className={`mx-auto border border-[#b4ada4] bg-[#948c82] ${
+            isStory ? "h-[190px] w-[142px]" : "h-[118px] w-[88px]"
+          }`}
+          imageClassName="scale-100"
+          captureSafe={isStory}
+        />
+
+        <div
+          className={`flex min-h-0 flex-1 flex-col justify-end ${
+            isStory ? "gap-2 pt-5" : "gap-1 pt-2"
+          }`}
+        >
+          <CardField label="NAME." value={nickname} isStory={isStory} strong />
+          <CardField label="PERSONA." value={personaText} isStory={isStory} />
+          <CardField
+            label="ISSUED DATE."
+            value={issuedDate ?? "2026.05.21"}
+            isStory={isStory}
+            strong
+          />
+          <CardField label="KEYWORD." value={keywordText} isStory={isStory} />
+
+          <div
+            className={`flex flex-col ${
+              isStory ? "gap-3 pt-3" : "gap-0.5 pt-0.5"
+            }`}
+          >
+            <Barcode isStory={isStory} />
+            <span
+              className={`font-mono tracking-[2px] text-[#948c82] ${
+                isStory ? "text-[10px]" : "text-[6px]"
+              }`}
+            >
+              {cardNumber}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 
+  if (!isStory) return card;
+
   return (
-    <div className="w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium shadow-medium">
-      {/* 상단 헤더 */}
-      <div className="bg-tab-recommend px-4 py-2.5 flex items-center justify-between">
-        <span className="text-[14px] font-black tracking-[3px] text-tab-recommend-text">
-          FILLY
-        </span>
-        <span className="text-[7px] font-bold tracking-[1.5px] text-tab-recommend-text opacity-60 uppercase">
-          ID Card
-        </span>
+    <div
+      className="relative aspect-[1055/1491] w-full overflow-hidden bg-[length:100%_100%] bg-no-repeat"
+      data-capture-bg-src={idCardHolderImage}
+      style={{ backgroundImage: `url(${idCardHolderImage})` }}
+    >
+      <img
+        src={idCardHolderImage}
+        alt=""
+        className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
+        draggable={false}
+      />
+      <div className="absolute left-[20.4%] top-[20.6%] z-10 h-[74.2%] w-[61.2%] overflow-hidden">
+        {card}
       </div>
+    </div>
+  );
+}
 
-      {/* 본문 */}
-      <div className="bg-notebook-page flex flex-col items-center px-4 pt-4 pb-3 gap-3">
-        {/* 아바타 */}
-        <div className="w-[72px] h-[72px] rounded-full overflow-hidden border-[3px] border-border-medium bg-bg-hover flex items-center justify-center flex-shrink-0 shadow-small">
-          {profileImageUrl ? (
-            <img
-              src={profileImageUrl}
-              alt="avatar"
-              className="w-full h-full object-cover"
-              onError={() => setProfileImageUrl(null)}
-            />
-          ) : (
-            <span className="text-3xl">👤</span>
-          )}
-        </div>
-
-        {/* 닉네임 */}
-        <div className="text-center">
-          <div className="text-[13px] font-bold text-text-strong leading-tight">
-            {nickname}
-          </div>
-          <div className="text-[7px] tracking-[2px] text-text-secondary uppercase mt-1">
-            Member
-          </div>
-        </div>
-
-        {/* 구분선 */}
-        <div className="w-full border-t border-border-light" />
-
-        {/* 취향 키워드 */}
-        {keywords.length > 0 ? (
-          <div className="w-full flex flex-col gap-1.5">
-            <span className="text-[7px] tracking-[2px] text-text-secondary uppercase">
-              취향 키워드
-            </span>
-            <div className="flex flex-wrap gap-1">
-              {keywords.map((kw, i) => (
-                <span
-                  key={i}
-                  className="text-[8px] px-2 py-0.5 rounded-full border border-border-light text-text-muted bg-bg-beige-subtle"
-                >
-                  {kw}
-                </span>
-              ))}
-            </div>
-          </div>
-        ) : (
-          <span className="text-[10px] text-text-secondary italic">
-            신입 사원
-          </span>
-        )}
+function CardField({
+  label,
+  value,
+  isStory,
+  strong = false,
+}: {
+  label: string;
+  value: string;
+  isStory: boolean;
+  strong?: boolean;
+}) {
+  return (
+    <div
+      className={`border-b border-[#c0b8ad] ${
+        isStory ? "pb-1.5" : "pb-0.5"
+      }`}
+    >
+      <div
+        className={`font-bold tracking-[1px] text-[#948c82] ${
+          isStory ? "text-[11px]" : "text-[7px]"
+        }`}
+      >
+        {label}
       </div>
-
-      {/* 하단 바코드 */}
-      <div className="bg-bg-beige-subtle px-4 py-2.5 flex flex-col items-center gap-1.5">
-        <div className="flex items-end gap-[2px] h-4">
-          {[
-            3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1,
-            2,
-          ].map((h, i) => (
-            <div
-              key={i}
-              className="w-[2px] bg-text-primary opacity-25"
-              style={{ height: `${h * 20}%` }}
-            />
-          ))}
-        </div>
-        <span className="text-[7px] tracking-[2px] text-text-secondary">
-          FL-2026-FILLY
-        </span>
+      <div
+        className={`mt-0.5 break-keep font-['Nanum_Myeongjo'] leading-[1.15] text-[#25272d] ${
+          isStory ? "text-[16px]" : "text-[10px]"
+        } ${strong ? "font-bold" : "font-normal"}`}
+      >
+        {value}
       </div>
+    </div>
+  );
+}
+
+function Barcode({ isStory }: { isStory: boolean }) {
+  return (
+    <div
+      className={`flex items-end gap-[2px] ${
+        isStory ? "h-5" : "h-[13px]"
+      }`}
+    >
+      {[
+        3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1,
+        2, 3, 1, 1, 2, 3, 1, 2,
+      ].map((h, i) => (
+        <div
+          key={i}
+          className={`bg-[#948c82] ${isStory ? "w-[2px]" : "w-[1px]"}`}
+          style={{ height: `${h * 20}%` }}
+        />
+      ))}
     </div>
   );
 }
 
 export function IdCardSkeleton() {
   return (
-    <div className="w-full flex flex-col rounded-2xl overflow-hidden border border-border-medium">
-      <div className="bg-tab-recommend opacity-60 h-9" />
-      <div className="bg-notebook-page flex flex-col items-center px-4 pt-4 pb-3 gap-3">
-        <div className="w-[72px] h-[72px] rounded-full bg-bg-hover animate-pulse" />
-        <div className="flex flex-col items-center gap-1.5">
-          <div className="h-3 w-20 rounded bg-bg-hover animate-pulse" />
-          <div className="h-2 w-10 rounded bg-bg-hover animate-pulse" />
-        </div>
-        <div className="w-full border-t border-border-light" />
-        <div className="w-full flex flex-wrap gap-1">
-          {Array.from({ length: 3 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-4 w-12 rounded-full bg-bg-hover animate-pulse"
-            />
+    <div className="relative aspect-[5/7] w-full overflow-hidden rounded-[22px] border border-border-medium bg-[#f8f4ee]">
+      <div className="absolute inset-y-0 right-0 w-[24%] bg-[#948c82] opacity-70" />
+      <div className="relative z-10 mr-[24%] flex h-full flex-col px-[8%] pb-[7%] pt-[7%]">
+        <div className="mx-auto h-[118px] w-[88px] rounded-full bg-bg-hover animate-pulse" />
+        <div className="flex flex-1 flex-col justify-end gap-1 pt-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="border-b border-border-light pb-0.5">
+              <div className="h-2 w-14 rounded bg-bg-hover animate-pulse" />
+              <div
+                className={`mt-1 h-3 rounded bg-bg-hover animate-pulse ${
+                  i === 1 ? "w-full" : "w-20"
+                }`}
+              />
+            </div>
           ))}
+          <div className="h-[13px] w-24 bg-bg-hover animate-pulse opacity-50" />
         </div>
-      </div>
-      <div className="bg-bg-beige-subtle px-4 py-2.5 flex flex-col items-center gap-1.5">
-        <div className="h-4 w-full rounded bg-bg-hover animate-pulse opacity-40" />
-        <div className="h-2 w-14 rounded bg-bg-hover animate-pulse" />
       </div>
     </div>
   );

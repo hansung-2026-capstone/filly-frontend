@@ -24,7 +24,7 @@ export function KeywordCloud({
   height = HEIGHT,
   framed = true,
   emptyMessage = "아직 키워드 기록이 없어요",
-  emptyClassName = "text-[11px] text-text-secondary",
+  emptyClassName = "text-[12px] text-text-secondary",
 }: KeywordCloudProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
@@ -47,7 +47,7 @@ export function KeywordCloud({
       ref={containerRef}
       className={`overflow-hidden w-full ${
         framed
-          ? "rounded-lg border border-border-medium bg-bg-beige-subtle"
+          ? "rounded-lg border border-border-medium"
           : ""
       }`}
       style={{ height }}

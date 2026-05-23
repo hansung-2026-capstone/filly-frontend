@@ -77,6 +77,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
   const { label, dow } = formatDiaryDate(diary.writtenAt);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [archiveActionError, setArchiveActionError] = useState<string | null>(null);
@@ -100,10 +101,13 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
 
   const handleDelete = async () => {
     setIsDeleting(true);
+    setDeleteError(null);
     try {
       await deleteDiary();
       onDeleted?.();
       onClose();
+    } catch {
+      setDeleteError("일기를 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setIsDeleting(false);
     }
@@ -165,7 +169,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
         onClick={onClose}
       >
         <div
-          className="relative bg-notebook-page rounded-xl w-[480px] max-h-[78vh] flex flex-col
+          className="relative bg-notebook-page rounded-xl w-[480px] max-w-[calc(100vw-32px)] max-h-[78vh] flex flex-col
             shadow-[var(--shadow-modal)]
             overflow-hidden font-['Nanum_Myeongjo']"
           style={{ animation: "modalSlideUp 0.3s cubic-bezier(0.22,1,0.36,1)" }}
@@ -176,8 +180,8 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           {/* 날짜 헤더 */}
           <div className="relative z-10 flex items-center justify-between px-5 pt-5 pb-3">
             <div className="flex items-center gap-2">
-              <span className="text-[15px] text-text-heading tracking-wide">{label}</span>
-              <span className="text-[12px] text-[var(--text-soft-label)]">{dow}요일</span>
+              <span className="text-[16px] text-text-heading tracking-wide">{label}</span>
+              <span className="text-[13px] text-[var(--text-soft-label)]">{dow}요일</span>
               <span className="text-lg leading-none select-none">{diary.emoji}</span>
             </div>
             <button
@@ -207,7 +211,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                 className="flex-1 min-h-[80px]"
               />
             ) : (
-              <p className="text-[12px] text-text-secondary italic text-center py-2">
+              <p className="text-[13px] text-text-secondary italic text-center py-2">
                 작성된 내용이 없습니다.
               </p>
             )}
@@ -219,10 +223,10 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
               <>
                 <div />
                 <div className="flex items-center justify-end gap-2">
-                  <span className="text-[12px] text-text-muted mr-1">정말 삭제하시겠어요?</span>
+                  <span className="text-[13px] text-text-muted mr-1">정말 삭제하시겠어요?</span>
                   <button
                     onClick={() => setConfirmDelete(false)}
-                    className="px-4 py-1.5 text-[12px] text-text-muted bg-bg-hover
+                    className="px-4 py-1.5 text-[13px] text-text-muted bg-bg-hover
                       border border-border-medium rounded-md cursor-pointer
                       hover:bg-bg-selected-hover transition-all duration-150 font-['Nanum_Myeongjo']"
                   >
@@ -231,15 +235,15 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="px-4 py-1.5 text-[12px] text-white bg-[var(--bg-danger-confirm)]
+                    className="px-4 py-1.5 text-[13px] text-white bg-[var(--bg-danger-confirm)]
                       border border-transparent rounded-md cursor-pointer
                       hover:bg-[var(--bg-danger-confirm-hover)] transition-all duration-150 font-['Nanum_Myeongjo']
                       disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    {isDeleting ? "삭제 중..." : "삭제"}
-                  </button>
-                </div>
-              </>
+                    >
+                      {isDeleting ? "삭제 중..." : "삭제"}
+                    </button>
+                  </div>
+                </>
             ) : (
               <>
                 <button
@@ -266,14 +270,14 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                 <div className="flex gap-2">
                   <button
                     onClick={() => { onClose(); navigate('/write', { state: { diary } }); }}
-                    className="px-4 py-1.5 text-[12px] text-text-muted bg-bg-hover
+                    className="px-4 py-1.5 text-[13px] text-text-muted bg-bg-hover
                       border border-border-medium rounded-md cursor-pointer
                       hover:bg-bg-selected-hover transition-all duration-150 font-['Nanum_Myeongjo']">
                     수정
                   </button>
                   <button
                     onClick={() => setConfirmDelete(true)}
-                    className="px-4 py-1.5 text-[12px] text-[var(--text-danger-dark)] bg-[var(--bg-danger-weak)]
+                    className="px-4 py-1.5 text-[13px] text-[var(--text-danger-dark)] bg-[var(--bg-danger-weak)]
                       border border-[var(--border-danger-muted)] rounded-md cursor-pointer
                       hover:bg-[var(--bg-danger-weak-hover)] transition-all duration-150 font-['Nanum_Myeongjo']">
                     삭제
@@ -282,6 +286,14 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
               </>
             )}
           </div>
+
+          {deleteError && (
+            <div className="relative z-10 px-5 pb-3">
+              <div className="px-3 py-2 rounded-md bg-[var(--bg-error)] text-[12px] text-[var(--text-error)]">
+                {deleteError}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -291,7 +303,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           onClick={() => setShowArchiveModal(false)}
         >
           <div
-            className="bg-notebook-page rounded-xl w-[360px] shadow-[var(--shadow-modal)]
+            className="bg-notebook-page rounded-xl w-[360px] max-w-[calc(100vw-32px)] shadow-[var(--shadow-modal)]
               overflow-hidden font-['Nanum_Myeongjo']"
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -311,14 +323,14 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
 
             <div className="py-4 px-5 flex flex-col gap-2">
               {archiveError && (
-                <div className="px-3 py-2 rounded-md bg-[var(--bg-error)] text-[11px] text-[var(--text-error)]">
+                <div className="px-3 py-2 rounded-md bg-[var(--bg-error)] text-[12px] text-[var(--text-error)]">
                   {archiveError}
                 </div>
               )}
 
               {isAddingArchive ? (
                 <div className="w-full py-3 px-4 border rounded-lg
-                  font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
+                  font-['Nanum_Myeongjo'] text-[13px] transition-all duration-150
                   flex items-center gap-2.5 bg-bg-hover border-border-medium text-text-primary">
                   <input
                     type="text"
@@ -328,7 +340,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                       if (e.key === "Enter") void handleAddArchive();
                       if (e.key === "Escape") handleCancelAdd();
                     }}
-                    className="flex-1 bg-transparent outline-none font-['Nanum_Myeongjo'] text-[12px]"
+                    className="flex-1 bg-transparent outline-none font-['Nanum_Myeongjo'] text-[13px]"
                     placeholder="새 아카이브 이름"
                     autoFocus
                   />
@@ -358,7 +370,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                   onClick={() => setIsAddingArchive(true)}
                   disabled={archiving || mutating}
                   className="w-full py-3 px-4 border rounded-lg cursor-pointer
-                    font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
+                    font-['Nanum_Myeongjo'] text-[13px] transition-all duration-150
                     flex items-center gap-2.5 bg-transparent border-border-medium text-text-primary
                     hover:bg-bg-hover disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -368,7 +380,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
               )}
 
               {loadingArchives && (
-                <div className="py-4 text-center text-[12px] text-text-secondary">
+                <div className="py-4 text-center text-[13px] text-text-secondary">
                   불러오는 중
                 </div>
               )}
@@ -383,7 +395,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                       onClick={() => void handleArchiveToggle(archive)}
                       disabled={archiving || mutating}
                       className={`w-full py-3 px-4 border rounded-lg cursor-pointer
-                        font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
+                        font-['Nanum_Myeongjo'] text-[13px] transition-all duration-150
                         flex items-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed ${
                           archiveHasDiary
                             ? "bg-bg-active border-border-strong text-text-heading"
@@ -403,7 +415,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
                 })}
 
               {!loadingArchives && archives.length === 0 && !archiveError && (
-                <div className="py-4 text-center text-[12px] text-text-secondary">
+                <div className="py-4 text-center text-[13px] text-text-secondary">
                   아카이브가 없습니다.
                 </div>
               )}

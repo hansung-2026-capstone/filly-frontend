@@ -1,11 +1,55 @@
+import { Settings, type LucideIcon } from "lucide-react";
 import { useEffect, useState, type CSSProperties } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router";
+import { useCurrentUser } from "../hook/common/useCurrentUser";
+import {
+  BACKGROUND_THEME_PREVIEW_EVENT,
+  DEFAULT_BACKGROUND_THEME,
+  getBackgroundThemeId,
+  getStoredBackgroundThemeId,
+  type BackgroundThemeId,
+} from "../lib/backgroundTheme";
 
-const TABS = [
-  { path: "home", label: "홈", bgClass: "bg-[var(--tab-home)]", textClass: "text-[var(--tab-home-text)]" },
-  { path: "stats", label: "통계", bgClass: "bg-[var(--tab-stats)]", textClass: "text-[var(--tab-stats-text)]" },
-  { path: "recommend", label: "추천", bgClass: "bg-[var(--tab-recommend)]", textClass: "text-[var(--tab-recommend-text)]" },
-  { path: "archive", label: "아카이브", bgClass: "bg-[var(--tab-archive)]", textClass: "text-[var(--tab-archive-text)]" },
+type TabConfig = {
+  path: string;
+  label: string;
+  icon?: LucideIcon;
+  bgClass: string;
+  textClass: string;
+};
+
+const TABS: TabConfig[] = [
+  {
+    path: "home",
+    label: "홈",
+    bgClass: "bg-[var(--tab-home)]",
+    textClass: "text-[var(--tab-home-text)]",
+  },
+  {
+    path: "stats",
+    label: "통계",
+    bgClass: "bg-[var(--tab-stats)]",
+    textClass: "text-[var(--tab-stats-text)]",
+  },
+  {
+    path: "recommend",
+    label: "추천",
+    bgClass: "bg-[var(--tab-recommend)]",
+    textClass: "text-[var(--tab-recommend-text)]",
+  },
+  {
+    path: "archive",
+    label: "아카이브",
+    bgClass: "bg-[var(--tab-archive)]",
+    textClass: "text-[var(--tab-archive-text)]",
+  },
+  {
+    path: "settings",
+    label: "설정",
+    icon: Settings,
+    bgClass: "bg-[var(--tab-settings)]",
+    textClass: "text-[var(--tab-settings-text)]",
+  },
 ];
 
 const NOTEBOOK_LAYOUT = {
@@ -15,10 +59,10 @@ const NOTEBOOK_LAYOUT = {
   pageWidth: 1000,
   pageHeight: 680,
   shadowWidth: 1040,
-  shadowHeight: 720,
+  shadowHeight: 700,
   pageOffsetX: 20,
   pageOffsetY: 24,
-  shadowOffsetY: 4,
+  shadowOffsetY: 14,
   padding: 24,
 };
 
@@ -28,11 +72,19 @@ function getNotebookScale() {
   const availableWidth = window.innerWidth - NOTEBOOK_LAYOUT.padding;
   const availableHeight = window.innerHeight - NOTEBOOK_LAYOUT.padding;
 
-  return Math.max(0.25, Math.min(
-    NOTEBOOK_LAYOUT.maxScale,
-    availableWidth / NOTEBOOK_LAYOUT.baseWidth,
-    availableHeight / NOTEBOOK_LAYOUT.baseHeight,
-  ));
+  return Math.max(
+    0.25,
+    Math.min(
+      NOTEBOOK_LAYOUT.maxScale,
+      availableWidth / NOTEBOOK_LAYOUT.baseWidth,
+      availableHeight / NOTEBOOK_LAYOUT.baseHeight,
+    ),
+  );
+}
+
+function getIsMobileLayout() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(max-width: 767px)").matches;
 }
 
 function NotebookPage({ side }: { side: "left" | "right" }) {
@@ -70,12 +122,59 @@ function NotebookPage({ side }: { side: "left" | "right" }) {
 export function Root() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { data: user, isLoading } = useCurrentUser();
   const [notebookScale, setNotebookScale] = useState(getNotebookScale);
-  const activePage = location.pathname === "/" ? "home" : location.pathname.slice(1);
+  const [isMobileLayout, setIsMobileLayout] = useState(getIsMobileLayout);
+  const [initialStoredTheme] = useState(() => getStoredBackgroundThemeId());
+  const [previewTheme, setPreviewTheme] = useState<BackgroundThemeId | null>(
+    null,
+  );
+  const activePage =
+    location.pathname === "/" ? "home" : location.pathname.slice(1);
+  const savedBackgroundTheme = getBackgroundThemeId(
+    user?.backgroundTheme ?? initialStoredTheme ?? DEFAULT_BACKGROUND_THEME,
+  );
+  const backgroundTheme = previewTheme ?? savedBackgroundTheme;
+
+  useEffect(() => {
+    const rootElement = document.documentElement;
+    const previousTheme = rootElement.getAttribute("data-background-theme");
+
+    rootElement.setAttribute("data-background-theme", backgroundTheme);
+
+    return () => {
+      if (previousTheme) {
+        rootElement.setAttribute("data-background-theme", previousTheme);
+      } else {
+        rootElement.removeAttribute("data-background-theme");
+      }
+    };
+  }, [backgroundTheme]);
+
+  useEffect(() => {
+    const updatePreviewTheme = (event: Event) => {
+      const nextPreviewTheme = (event as CustomEvent<BackgroundThemeId | null>)
+        .detail;
+
+      setPreviewTheme(
+        nextPreviewTheme ? getBackgroundThemeId(nextPreviewTheme) : null,
+      );
+    };
+
+    window.addEventListener(BACKGROUND_THEME_PREVIEW_EVENT, updatePreviewTheme);
+
+    return () => {
+      window.removeEventListener(
+        BACKGROUND_THEME_PREVIEW_EVENT,
+        updatePreviewTheme,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     const updateNotebookScale = () => {
       setNotebookScale(getNotebookScale());
+      setIsMobileLayout(getIsMobileLayout());
     };
 
     updateNotebookScale();
@@ -90,6 +189,8 @@ export function Root() {
     navigate(path === "home" ? "/" : `/${path}`);
   };
 
+  const isTabActive = (path: string) => activePage === path;
+
   const shellStyle: CSSProperties = {
     width: NOTEBOOK_LAYOUT.baseWidth * notebookScale,
     height: NOTEBOOK_LAYOUT.baseHeight * notebookScale,
@@ -100,18 +201,32 @@ export function Root() {
     transformOrigin: "top left",
   };
 
+  if (isLoading && !user && !initialStoredTheme) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--bg-page-loading)]">
+        <div className="text-[12px] font-bold tracking-[2px] text-[var(--text-page-label)]">
+          불러오는 중
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--notebook-bg)] relative overflow-hidden p-3">
+    <div
+      data-background-theme={backgroundTheme}
+      className="flex min-h-[100dvh] items-center justify-center overflow-hidden bg-[var(--notebook-bg)] p-3 relative"
+    >
       <div
         className="absolute inset-0 opacity-50"
         style={{ background: "var(--notebook-bg-radial)" }}
       />
 
       <div
-        className="fixed inset-0 pointer-events-none z-0"
+        className="fixed inset-0 pointer-events-none z-0 opacity-40"
         style={{ background: "var(--notebook-texture-lines)" }}
       />
 
+      {!isMobileLayout && (
       <div className="relative z-[2]" style={shellStyle}>
         <div
           className="absolute left-0 rounded-xl z-[1] pointer-events-none"
@@ -120,7 +235,9 @@ export function Root() {
             top: NOTEBOOK_LAYOUT.shadowOffsetY * notebookScale,
             width: NOTEBOOK_LAYOUT.shadowWidth,
             height: NOTEBOOK_LAYOUT.shadowHeight,
-            boxShadow: "var(--notebook-desk-shadow)",
+            background: "var(--notebook-cover-background)",
+            backgroundSize: "var(--notebook-cover-background-size)",
+            boxShadow: "var(--notebook-cover-shadow)",
           }}
         />
 
@@ -162,35 +279,116 @@ export function Root() {
             }}
           />
 
-          <div className="absolute top-0 left-0 w-[1000px] h-[680px] z-[9] flex pointer-events-none">
+          <div className="absolute top-0 left-0 w-[1000px] h-[680px] z-[9] flex overflow-hidden rounded-md pointer-events-none">
             <div className="pointer-events-auto w-full h-full">
               <Outlet />
             </div>
           </div>
 
-          <div className="absolute left-full top-10 flex flex-col items-start gap-1.5 z-20">
-            {TABS.map((tab) => (
-              <button
-                key={tab.path}
-                onClick={() => handleTabClick(tab.path)}
-                data-page={tab.path}
-                className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
-                  font-['Nanum_Pen_Script'] text-sm tracking-wider relative transition-all duration-[0.25s]
-                  shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
-                  hover:w-14 hover:shadow-[var(--shadow-tab-hover)]
-                  ${activePage === tab.path ? "active shadow-[var(--shadow-tab-active)] font-bold" : ""}`}
-                style={{ writingMode: "vertical-rl", textOrientation: "mixed" }}
-              >
-                <div
-                  className="absolute inset-0 rounded-r-md pointer-events-none"
-                  style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
-                />
-                {tab.label}
-              </button>
-            ))}
+          <div className="absolute left-full top-10 bottom-10 flex flex-col items-start gap-1.5 z-20">
+            {TABS.map((tab) => {
+              const isActive = isTabActive(tab.path);
+
+              return (
+                <button
+                  key={tab.path}
+                  onClick={() => handleTabClick(tab.path)}
+                  data-page={tab.path}
+                  aria-current={isActive ? "page" : undefined}
+                  aria-label={`${tab.label} 탭${isActive ? ", 현재 선택됨" : ""}`}
+                  title={tab.label}
+                  className={`w-11 h-auto border-none rounded-r-md cursor-pointer flex items-center justify-center
+                    font-['Gaegu'] text-[18px] tracking-wider relative transition-all duration-[0.25s]
+                    shadow-[var(--shadow-tab)] py-4 px-3.5 ${tab.bgClass} ${tab.textClass}
+                    ${tab.path === "settings" ? "mt-auto" : ""}
+                    ${
+                      isActive
+                        ? "active z-30 w-16 font-bold shadow-[var(--shadow-tab-active)]"
+                        : "hover:w-14 hover:shadow-[var(--shadow-tab-hover)]"
+                    }`}
+                  style={{
+                    writingMode: "vertical-rl",
+                    textOrientation: "mixed",
+                  }}
+                >
+                  <div
+                    className="absolute inset-0 rounded-r-md pointer-events-none"
+                    style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
+                  />
+                  {tab.icon ? (
+                    <tab.icon className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    tab.label
+                  )}
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>
+      )}
+
+      {isMobileLayout && (
+      <div className="relative z-[2] flex h-[calc(100dvh-24px)] max-h-[calc(100dvh-24px)] w-full max-w-[430px] flex-col items-stretch">
+        <div className="relative min-h-0 flex-1">
+          <div
+            className="absolute left-1 right-1 top-1 bottom-1 rounded-[30px] pointer-events-none z-0"
+            style={{
+              background: "var(--notebook-cover-background)",
+              backgroundSize: "var(--notebook-cover-background-size)",
+              boxShadow: "var(--notebook-cover-shadow)",
+            }}
+          />
+          <main
+            className="relative z-10 mx-4 mt-4 h-[calc(100%-2rem)] overflow-hidden rounded-xl bg-notebook-page shadow-[var(--notebook-right-page-shadow)]"
+            style={{ background: "var(--notebook-page-gradient-right)" }}
+          >
+              <div
+                className="absolute left-0 top-2 bottom-2 w-[18px] pointer-events-none"
+                style={{ background: "var(--notebook-right-edge-gradient)" }}
+              />
+              <div className="paper-texture absolute inset-0 pointer-events-none rounded-xl" />
+              <div className="relative z-10 h-full overflow-y-auto overscroll-contain">
+                <Outlet />
+              </div>
+          </main>
+        </div>
+
+        <nav className="relative z-20 mx-4 -mt-4 grid grid-cols-5 gap-1 px-2">
+          {TABS.map((tab) => {
+            const isActive = isTabActive(tab.path);
+
+            return (
+              <button
+                key={tab.path}
+                type="button"
+                onClick={() => handleTabClick(tab.path)}
+                className={`relative flex min-h-10 self-start items-center justify-center rounded-b-md border-none px-1 pb-1.5 pt-3 font-['Gaegu'] text-[16px] tracking-[0.06em] shadow-[var(--shadow-tab)] transition-all duration-[0.25s] ${tab.bgClass} ${tab.textClass} ${
+                  isActive
+                    ? "z-30 min-h-14 pb-3 pt-3 font-bold shadow-[var(--shadow-tab-active)]"
+                    : "hover:shadow-[var(--shadow-tab-hover)]"
+                }`}
+                aria-current={isActive ? "page" : undefined}
+                aria-label={`${tab.label} 탭${isActive ? ", 현재 선택됨" : ""}`}
+                title={tab.label}
+              >
+                <div
+                  className="absolute inset-0 rounded-b-md pointer-events-none"
+                  style={{ boxShadow: "var(--notebook-tab-inset-shadow)" }}
+                />
+                {tab.path === "settings" ? (
+                  <span className="whitespace-nowrap leading-none">{tab.label}</span>
+                ) : tab.icon ? (
+                  <tab.icon className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <span className="whitespace-nowrap leading-none">{tab.label}</span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+      )}
     </div>
   );
 }

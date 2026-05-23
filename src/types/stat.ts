@@ -6,4 +6,5 @@ export interface MonthlyStat {
   keywordCloud: Record<string, number>
   topPeople: string[]
   dailyPattern: Record<string, Record<string, number>>
+  personalPatternCandidates?: Record<string, number>
 }

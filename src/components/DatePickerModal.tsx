@@ -67,7 +67,7 @@ export function DatePickerModal({
         onClick={onClose}
       >
         <div
-          className="relative z-[91] bg-notebook-page rounded-lg p-6 shadow-lg w-80"
+          className="relative z-[91] w-80 max-w-[calc(100vw-32px)] rounded-lg bg-notebook-page p-6 shadow-lg"
           onClick={(event) => event.stopPropagation()}
         >
           <div className="flex items-center justify-between mb-4">
@@ -93,7 +93,7 @@ export function DatePickerModal({
             {WEEK_DAYS_SHORT.map((day) => (
               <div
                 key={day}
-                className="text-center text-[11px] font-medium text-text-soft py-1"
+                className="text-center text-[12px] font-medium text-text-soft py-1"
               >
                 {day}
               </div>

@@ -17,17 +17,19 @@ export function CalendarCell({ day, diary, loading, dayTextClass, onClick }: Cal
         ${clickable ? 'cursor-pointer hover:bg-[var(--bg-editor-panel)] hover:border-[var(--border-calendar-hover)] hover:shadow-sm' : ''}`}
       onClick={() => clickable && onClick(diary)}
     >
-      <span className={`text-[11px] leading-none ${dayTextClass}`}>{day}</span>
+      <span className={`text-[12px] leading-none ${dayTextClass}`}>{day}</span>
       {diary && (
         <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden">
           {diary.mediaUrls?.[0] ? (
-            <img
-              src={diary.mediaUrls[0]}
-              alt=""
-              className="w-full h-full object-cover rounded shadow-[var(--shadow-thumbnail)]"
-            />
+            <div className="size-8 overflow-hidden rounded shadow-[var(--shadow-thumbnail)] sm:size-9 md:size-16">
+              <img
+                src={diary.mediaUrls[0]}
+                alt=""
+                className="h-full w-full object-cover"
+              />
+            </div>
           ) : (
-            <span className="text-4xl leading-none select-none">{diary.emoji}</span>
+            <span className="text-2xl leading-none select-none sm:text-3xl md:text-4xl">{diary.emoji}</span>
           )}
         </div>
       )}

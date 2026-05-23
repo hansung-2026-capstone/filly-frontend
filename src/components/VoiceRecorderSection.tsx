@@ -1,6 +1,10 @@
 import { Mic, Pause, Play, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { VoiceRecord } from "../hook/useVoiceRecorder";
+import {
+  formatVoiceRecordingDuration,
+  VOICE_RECORDING_MAX_SECONDS,
+  type VoiceRecord,
+} from "../hook/useVoiceRecorder";
 
 interface VoiceRecorderSectionProps {
   title?: string;
@@ -8,39 +12,62 @@ interface VoiceRecorderSectionProps {
   isRecording: boolean;
   onToggle: () => void;
   onRemove: () => void;
+  errorMessage?: string | null;
   maxSeconds?: number;
 }
 
-function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60);
-  const s = Math.floor(seconds % 60);
+function getSafeSeconds(seconds: number | undefined) {
+  return Number.isFinite(seconds) && seconds !== undefined
+    ? Math.max(0, seconds)
+    : 0;
+}
+
+function formatTime(seconds: number | undefined) {
+  const safeSeconds = getSafeSeconds(seconds);
+  const m = Math.floor(safeSeconds / 60);
+  const s = Math.floor(safeSeconds % 60);
   return m > 0 ? `${m}:${s.toString().padStart(2, "0")}` : `${s}초`;
 }
 
-function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
+function MiniPlayer({
+  url,
+  durationSeconds,
+  onRemove,
+}: {
+  url: string;
+  durationSeconds: number;
+  onRemove: () => void;
+}) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
+  const [duration, setDuration] = useState(durationSeconds);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoaded = () => setDuration(audio.duration);
+    const syncDuration = () => {
+      const metadataDuration = getSafeSeconds(audio.duration);
+      setDuration(metadataDuration || durationSeconds);
+    };
+    const onTimeUpdate = () => setCurrentTime(getSafeSeconds(audio.currentTime));
     const onEnded = () => {
       setIsPlaying(false);
       setCurrentTime(0);
     };
     audio.addEventListener("timeupdate", onTimeUpdate);
-    audio.addEventListener("loadedmetadata", onLoaded);
+    audio.addEventListener("loadedmetadata", syncDuration);
+    audio.addEventListener("durationchange", syncDuration);
     audio.addEventListener("ended", onEnded);
+    syncDuration();
+
     return () => {
       audio.removeEventListener("timeupdate", onTimeUpdate);
-      audio.removeEventListener("loadedmetadata", onLoaded);
+      audio.removeEventListener("loadedmetadata", syncDuration);
+      audio.removeEventListener("durationchange", syncDuration);
       audio.removeEventListener("ended", onEnded);
     };
-  }, []);
+  }, [durationSeconds, url]);
 
   const togglePlay = () => {
     const audio = audioRef.current;
@@ -49,10 +76,12 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
       audio.pause();
       setIsPlaying(false);
     } else {
-      audio.play();
+      void audio.play();
       setIsPlaying(true);
     }
   };
+
+  const safeCurrentTime = Math.min(getSafeSeconds(currentTime), duration);
 
   return (
     <div className="relative overflow-visible flex-1 min-w-0 h-[67px] bg-bg-surface-muted rounded-lg border border-border-medium flex items-center gap-3 px-4">
@@ -60,6 +89,7 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
 
       {/* 재생/일시정지 버튼 */}
       <button
+        type="button"
         onClick={togglePlay}
         className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-full bg-bg-control hover:bg-bg-control-hover transition-colors"
       >
@@ -78,27 +108,28 @@ function MiniPlayer({ url, onRemove }: { url: string; onRemove: () => void }) {
         <input
           type="range"
           min={0}
-          max={duration || 0}
+          max={duration}
           step={0.01}
-          value={currentTime}
+          value={safeCurrentTime}
           onChange={(e) => {
-            const t = Number(e.target.value);
+            const t = getSafeSeconds(Number(e.target.value));
             if (audioRef.current) audioRef.current.currentTime = t;
             setCurrentTime(t);
           }}
           className="flex-1 min-w-0 h-1 accent-[var(--accent-audio-progress)] cursor-pointer"
         />
-        <span className="text-[11px] text-text-muted tabular-nums flex-shrink-0">
-          {formatTime(currentTime)}/{formatTime(duration)}
+        <span className="text-[12px] text-text-muted tabular-nums flex-shrink-0">
+          {formatTime(safeCurrentTime)}/{formatTime(duration)}
         </span>
       </div>
 
       {/* X 버튼 */}
       <button
+        type="button"
         onClick={onRemove}
         className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-bg-strong-control
           border-2 border-notebook-page flex items-center justify-center
-          text-white cursor-pointer transition-all duration-150 hover:bg-bg-strong-control-hover
+          text-[var(--text-white-soft)] cursor-pointer transition-all duration-150 hover:bg-bg-strong-control-hover
           shadow-[var(--shadow-remove-button)]"
       >
         <X className="w-3 h-3" strokeWidth={2.5} />
@@ -113,7 +144,8 @@ export function VoiceRecorderSection({
   isRecording,
   onToggle,
   onRemove,
-  maxSeconds = 10,
+  errorMessage,
+  maxSeconds = VOICE_RECORDING_MAX_SECONDS,
 }: VoiceRecorderSectionProps) {
   const [elapsed, setElapsed] = useState(0);
 
@@ -135,13 +167,14 @@ export function VoiceRecorderSection({
         <h3 className="text-sm text-text-primary tracking-[0.5px] m-0 font-medium">
           {title}
         </h3>
-        <span className="text-[11px] text-text-subtle">
-          최대 {maxSeconds}초
+        <span className="text-[12px] text-text-subtle">
+          최대 {formatVoiceRecordingDuration(maxSeconds)}
         </span>
       </div>
 
       <div className="flex items-center gap-3 overflow-visible">
         <button
+          type="button"
           onClick={handleToggle}
           className={`w-[67px] h-[67px] flex-shrink-0 rounded-lg border-2 cursor-pointer
             flex items-center justify-center transition-all duration-150
@@ -168,9 +201,19 @@ export function VoiceRecorderSection({
         )}
 
         {record && !isRecording && (
-          <MiniPlayer url={record.url} onRemove={onRemove} />
+          <MiniPlayer
+            url={record.url}
+            durationSeconds={record.durationSeconds}
+            onRemove={onRemove}
+          />
         )}
       </div>
+
+      {errorMessage && (
+        <p className="m-0 rounded-md bg-[var(--bg-error)] px-3 py-2 text-[12px] text-[var(--text-error)]">
+          {errorMessage}
+        </p>
+      )}
     </div>
   );
 }

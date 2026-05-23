@@ -8,7 +8,9 @@ interface ReceiptProps {
 }
 
 export function Receipt({ receipt, nickname, year, month }: ReceiptProps) {
-  const emotions = Object.entries(receipt.emotionDistribution);
+  const emotions = Object.entries(receipt.emotionDistribution)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 3);
   const persona = receipt.personaTitle ?? "감정을 탐험하는 신입 사원";
   const now = new Date();
   const nowYear = now.getFullYear();
@@ -26,18 +28,18 @@ export function Receipt({ receipt, nickname, year, month }: ReceiptProps) {
   const dateStr = `${year}-${pad(month)}-${pad(day)}`;
 
   return (
-    <div className="w-full flex flex-col bg-white border border-border-light shadow-medium font-mono text-[9px] text-text-primary">
+    <div className="w-full flex flex-col bg-white border border-border-light shadow-medium font-mono text-[11px] text-text-primary">
       {/* 로고 */}
       <div className="flex flex-col items-center pt-4 pb-3">
-        <span className="text-[14px] font-black tracking-[3px] text-text-strong">✿ FILLY</span>
+        <span className="text-[15px] font-black tracking-[3px] text-text-strong">✿ FILLY</span>
       </div>
 
       <Dashed />
 
       {/* 주문번호 + 제목 */}
       <div className="flex flex-col items-center py-2.5 gap-0.5">
-        <span className="text-[8px] text-text-secondary">주문번호 {receipt.orderNumber}</span>
-        <span className="text-[11px] font-bold text-text-strong mt-1">{nickname}님의 결산내역</span>
+        <span className="text-[11px] text-text-secondary">주문번호 {receipt.orderNumber}</span>
+        <span className="text-[13px] font-bold text-text-strong mt-1">{nickname}님의 결산내역</span>
       </div>
 
       <Dashed />
@@ -143,7 +145,7 @@ function Barcode({ value }: { value: string }) {
           />
         ))}
       </div>
-      <span className="text-[7px] tracking-widest text-text-secondary">{value}</span>
+      <span className="text-[10px] tracking-widest text-text-secondary">{value}</span>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import type { User } from "../../types/user";
+import type { BackgroundThemeUpdateRequest, User, UserPreferencesUpdateRequest } from "../../types/user";
 import { api } from "../instance";
 
 export const getMe = async (): Promise<User> => {
@@ -8,4 +8,13 @@ export const getMe = async (): Promise<User> => {
 
 export const updateNickname = async (nickname: string): Promise<void> => {
   await api.patch("/api/v1/users/me/nickname", { nickname });
+};
+
+export const updatePreferences = async (preferences: UserPreferencesUpdateRequest): Promise<void> => {
+  await api.patch("/api/v1/users/me/preferences", preferences);
+};
+
+export const updateBackgroundTheme = async (backgroundTheme: string): Promise<void> => {
+  const request: BackgroundThemeUpdateRequest = { backgroundTheme };
+  await api.patch("/api/v1/users/me/background-theme", request);
 };

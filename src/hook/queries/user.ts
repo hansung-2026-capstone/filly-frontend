@@ -4,7 +4,7 @@ import {
   useQuery,
   type QueryClient,
 } from "@tanstack/react-query";
-import { getMe, updateNickname } from "../../api/user";
+import { getMe, updateBackgroundTheme, updateNickname, updatePreferences } from "../../api/user";
 import { queryKeys } from "./keys";
 
 export const currentUserQueryOptions = () =>
@@ -19,6 +19,14 @@ export function useCurrentUserQuery() {
 
 export function useUpdateNicknameMutation() {
   return useMutation({ mutationFn: updateNickname });
+}
+
+export function useUpdatePreferencesMutation() {
+  return useMutation({ mutationFn: updatePreferences });
+}
+
+export function useUpdateBackgroundThemeMutation() {
+  return useMutation({ mutationFn: updateBackgroundTheme });
 }
 
 export function invalidateUserQuery(queryClient: QueryClient) {

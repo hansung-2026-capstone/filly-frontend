@@ -1,5 +1,4 @@
-import React, { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
 import { FaBookOpen } from 'react-icons/fa';
 import { RiKakaoTalkFill } from 'react-icons/ri';
 import { SiNaver } from 'react-icons/si';
@@ -14,7 +13,7 @@ interface SocialButtonProps {
 
 const SocialButton: React.FC<SocialButtonProps> = ({ provider, children, onClick }) => {
   // 공급자별 기본 스타일
-  const baseStyle = "w-full h-12 flex items-center justify-center gap-3 rounded-xl text-[15px] font-medium transition-all duration-200 hover:shadow-md";
+  const baseStyle = "w-full h-12 flex items-center justify-center gap-3 rounded-xl text-[16px] font-medium transition-all duration-200 hover:shadow-md";
   
   const styles = {
     kakao: `${baseStyle} bg-[#FEE500] text-[#191919] hover:bg-[#FDD835]`,
@@ -39,24 +38,9 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, children, onClick
 };
 
 const LoginPage: React.FC = () => {
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const token = params.get('accessToken');
-        
-    if (token) {
-      localStorage.setItem('accessToken', token);
-      navigate('/', { replace: true });
-    }
-  }, [navigate]);
-
-  // 실제 로그인 동작을 구현할 함수들 (나중에 백엔드와 연결)
   const handleSocialLogin = (provider: string) => {
     console.log(`${provider} 로그인 시도`);
     
-    // const BACKEND_URL = `https://filly-backend-997421794532.asia-northeast3.run.app`;
     const BACKEND_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:8080' 
     : 'https://filly-diary.com';
@@ -80,7 +64,7 @@ const LoginPage: React.FC = () => {
       <div className="w-full max-w-[440px] bg-white p-10 md:p-8 rounded-[16px] shadow-lg flex flex-col items-center">
         {/* 소셜 로그인 버튼 구역 */}
         <div className="w-full flex flex-col gap-4 mb-4">
-          <p className="text-[#757575] text-[13px] text-center mb-2">
+          <p className="text-[#757575] text-[14px] text-center mb-2">
             소셜 계정으로 간편하게 시작하세요
           </p>
           <SocialButton provider="kakao" onClick={() => handleSocialLogin('kakao')}>
@@ -96,7 +80,7 @@ const LoginPage: React.FC = () => {
       </div>
 
       {/* 하단 약관 & 둘러보기 */}
-      <div className="w-full py-10 text-center text-[12px] text-[#A5A5A5] leading-relaxed">
+      <div className="w-full py-10 text-center text-[13px] text-[#A5A5A5] leading-relaxed">
         <p>
           로그인 시 <span className="underline cursor-pointer">서비스 이용약관</span> 및 <span className="underline cursor-pointer">개인정보 처리방침</span>에 동의하게 됩니다.
         </p>

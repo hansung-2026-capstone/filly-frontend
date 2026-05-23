@@ -8,6 +8,7 @@ import { TiptapEditor } from "../components/TiptapEditor";
 import { VoiceRecorderSection } from "../components/VoiceRecorderSection";
 import { usePhotoUpload } from "../hook/usePhotoUpload";
 import { useVoiceRecorder } from "../hook/useVoiceRecorder";
+import { useCurrentUser } from "../hook/common/useCurrentUser";
 import { useDiaryMutations } from "../hook/common/useDiaryMutations";
 import {
   formatDateKey,
@@ -20,12 +21,74 @@ import {
 import { hasDiaryText } from "../lib/diary";
 
 const EMOJIS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
+const DEFAULT_PREFERENCE = "none";
+const DRAFT_SPARKLES = [
+  { symbol: "✦", className: "left-3 top-8 text-[18px]", delay: "0ms" },
+  { symbol: "✧", className: "right-5 top-3 text-[24px]", delay: "180ms" },
+  { symbol: "✦", className: "left-12 bottom-4 text-[22px]", delay: "360ms" },
+  { symbol: "✧", className: "right-10 bottom-8 text-[16px]", delay: "540ms" },
+  { symbol: "✦", className: "left-1/2 top-1 text-[14px]", delay: "720ms" },
+];
+
 function getEditDiary(locationState: unknown) {
   return (locationState as { diary?: DiaryItem } | null)?.diary;
 }
 
 function appendPhotos(form: FormData, photos: { file: File }[]) {
   photos.forEach((photo) => form.append("images", photo.file));
+}
+
+function DraftSparkleOverlay() {
+  return (
+    <div
+      className="absolute inset-0 z-30 flex items-center justify-center rounded-r-md backdrop-blur-md pointer-events-auto"
+      style={{
+        backgroundColor:
+          "color-mix(in srgb, var(--bg-page-loading-soft) 55%, transparent)",
+      }}
+    >
+      <div
+        className="relative h-28 w-44 text-[var(--text-soft-label)]"
+        aria-label="AI 초안 만드는 중"
+      >
+        {DRAFT_SPARKLES.map((sparkle) => (
+          <SparkleShape
+            key={sparkle.className}
+            symbol={sparkle.symbol}
+            className={sparkle.className}
+            delay={sparkle.delay}
+          />
+        ))}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="rounded-full bg-[var(--bg-page-loading)] px-4 py-2 text-[12px] font-bold tracking-[0.8px] text-text-primary shadow-[var(--shadow-small)]">
+            AI 초안 생성 중
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SparkleShape({
+  symbol,
+  className = "",
+  delay,
+}: {
+  symbol: string;
+  className?: string;
+  delay: string;
+}) {
+  return (
+    <span
+      className={`absolute block leading-none animate-ping ${className}`}
+      style={{
+        animationDelay: delay,
+      }}
+      aria-hidden="true"
+    >
+      {symbol}
+    </span>
+  );
 }
 
 export function WritePage() {
@@ -44,10 +107,10 @@ export function WritePage() {
     editDiary?.rawContent ?? undefined,
   );
 
-  const aiPhotos = usePhotoUpload();
   const diaryPhotos = usePhotoUpload();
   const voiceRecorder = useVoiceRecorder();
   const diaryMutations = useDiaryMutations(selectedDate);
+  const { data: user } = useCurrentUser();
   const dateLabel = editDiary
     ? formatKoreanDateKey(editDiary.writtenAt)
     : formatKoreanDate(selectedDate);
@@ -72,13 +135,14 @@ export function WritePage() {
 
       if (shortText.trim()) form.append("content", shortText.trim());
       form.append("writtenAt", formatDateKey(selectedDate));
-      appendPhotos(form, aiPhotos.photos);
+      form.append("gender", user?.gender ?? DEFAULT_PREFERENCE);
+      form.append("ageGroup", user?.ageGroup ?? DEFAULT_PREFERENCE);
+      form.append("aiDraftTone", user?.aiDraftTone ?? DEFAULT_PREFERENCE);
       if (voiceRecorder.record) form.append("voice", voiceRecorder.record.file);
 
       const draft = await diaryMutations.createDraft(form);
       setDraftContent(draft.generatedText);
       setFinalText(draft.generatedText);
-      diaryPhotos.replacePhotos(aiPhotos.photos);
     } finally {
       setIsDraftGenerating(false);
     }
@@ -141,9 +205,9 @@ export function WritePage() {
   };
 
   return (
-    <div className="flex w-full h-full font-['Nanum_Myeongjo'] relative">
+    <div className="relative flex h-auto w-full flex-col font-['Nanum_Myeongjo'] md:h-full md:flex-row">
       {isSaving && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-page-loading z-20 gap-3">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-page-loading z-20 gap-3 rounded-md">
           <div className="w-6 h-6 border-2 border-[var(--border-spinner)] border-t-[var(--border-spinner-active)] rounded-full animate-spin" />
           <span className="text-sm text-text-primary tracking-wide">
             {editDiary ? "일기 수정 중..." : "일기 작성 중..."}
@@ -151,7 +215,7 @@ export function WritePage() {
         </div>
       )}
 
-      <div className={`flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto${editDiary ? " opacity-40 pointer-events-none select-none" : ""}`}>
+      <div className={`flex flex-col gap-5 px-4 py-5 md:min-h-0 md:flex-1 md:overflow-y-auto md:px-6${editDiary ? " opacity-40 pointer-events-none select-none" : ""}`}>
         <div className="pb-3 border-b border-[var(--border-subtle)]">
           <h2 className="text-base text-text-heading tracking-wide m-0 font-medium">
             {editDiary ? "수정 모드에서는 AI 기능 비활성" : "AI 작성 툴"}
@@ -166,12 +230,10 @@ export function WritePage() {
             placeholder="오늘 하루는 어땠나요? 자유롭게 기록해보세요..."
             maxLength={100}
             showToolbar={false}
-            className="flex-1"
+            className="min-h-[160px] flex-1"
             onChange={setShortText}
           />
         </div>
-
-        <PhotoUploadSection title="사진" {...aiPhotos} />
 
         <div className="flex flex-col gap-2.5">
           <VoiceRecorderSection
@@ -179,6 +241,7 @@ export function WritePage() {
             isRecording={voiceRecorder.isRecording}
             onToggle={voiceRecorder.toggle}
             onRemove={voiceRecorder.removeRecord}
+            errorMessage={voiceRecorder.errorMessage}
           />
           <div className="flex justify-end pt-2">
             <button
@@ -195,14 +258,14 @@ export function WritePage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col py-5 px-6 gap-5 overflow-y-auto relative">
+      <div
+        className={`relative flex flex-col gap-5 border-t border-border-light px-4 py-5 md:min-h-0 md:flex-1 md:overflow-y-auto md:border-t-0 md:px-6 ${
+          isDraftGenerating ? "pointer-events-none select-none" : ""
+        }`}
+        aria-busy={isDraftGenerating}
+      >
         {isDraftGenerating && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-[var(--bg-page-loading-soft)] z-10 gap-3 rounded-r-md">
-            <div className="w-6 h-6 border-2 border-[var(--border-spinner)] border-t-[var(--border-spinner-active)] rounded-full animate-spin" />
-            <span className="text-sm text-text-primary tracking-wide">
-              AI 초안 만드는 중...
-            </span>
-          </div>
+          <DraftSparkleOverlay />
         )}
 
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
@@ -250,7 +313,7 @@ export function WritePage() {
             placeholder="AI가 생성한 초안이 여기에 표시됩니다..."
             maxLength={500}
             showToolbar
-            className="flex-1"
+            className="min-h-[260px] flex-1"
             content={draftContent}
             onChange={setFinalText}
           />
@@ -282,7 +345,7 @@ export function WritePage() {
             {editDiary ? "일기 수정" : "일기 작성"}
           </button>
           {validationMessage && (
-            <p className="m-0 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[11px] text-[var(--text-error)]">
+            <p className="m-0 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[12px] text-[var(--text-error)]">
               {validationMessage}
             </p>
           )}

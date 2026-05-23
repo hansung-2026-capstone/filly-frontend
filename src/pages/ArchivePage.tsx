@@ -1,7 +1,8 @@
 import { type FormEvent, useEffect, useState } from "react";
-import { ArrowLeft, MoreVertical, Plus, X } from "lucide-react";
+import { ArrowLeft, MoreVertical, Plus, Search, X } from "lucide-react";
 import { Portal } from "../components/Portal";
 import { DiaryDetailModal } from "../components/DiaryDetailModal";
+import { MonthPickerModal } from "../components/MonthPickerModal";
 import { useArchive } from "../hook/common/useArchive";
 import type { Archive } from "../types/archive";
 import type { Diary } from "../types/diary";
@@ -23,6 +24,10 @@ interface ArchiveModalState {
   archive: Archive | null;
 }
 
+function formatMonthKey(year: number, month: number) {
+  return `${year}-${String(month).padStart(2, "0")}`;
+}
+
 export function ArchivePage() {
   const {
     archives,
@@ -42,6 +47,36 @@ export function ArchivePage() {
   const [modalState, setModalState] = useState<ArchiveModalState | null>(null);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [selectedDiary, setSelectedDiary] = useState<Diary | null>(null);
+  const [showMonthPicker, setShowMonthPicker] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedMonthFilter, setSelectedMonthFilter] = useState<{
+    year: number;
+    month: number;
+  } | null>(null);
+  const today = new Date();
+  const pickerYear = selectedMonthFilter?.year ?? today.getFullYear();
+  const pickerMonth = selectedMonthFilter?.month ?? today.getMonth() + 1;
+  const normalizedSearchQuery = searchQuery.trim().toLowerCase();
+  const filteredDiaries = diaries.filter((entry) => {
+    const matchesMonth = selectedMonthFilter
+      ? entry.writtenAt.startsWith(
+          formatMonthKey(selectedMonthFilter.year, selectedMonthFilter.month),
+        )
+      : true;
+
+    if (!matchesMonth) return false;
+    if (!normalizedSearchQuery) return true;
+
+    const searchableText = [
+      entry.writtenAt,
+      entry.emoji,
+      getDiaryPreview(entry),
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    return searchableText.includes(normalizedSearchQuery);
+  });
 
   useEffect(() => {
     if (openMenuId === null) return;
@@ -57,6 +92,11 @@ export function ArchivePage() {
 
   function handleDiaryClick(entry: Diary) {
     setSelectedDiary(entry);
+  }
+
+  function getMonthFilterLabel() {
+    if (!selectedMonthFilter) return "전체 기간";
+    return `${selectedMonthFilter.year}년 ${selectedMonthFilter.month}월`;
   }
 
   function openCreateModal() {
@@ -75,34 +115,40 @@ export function ArchivePage() {
   }
 
   return (
-    <div className="flex w-full h-full font-['Nanum_Myeongjo']">
-      <div className="flex-1 flex flex-col py-3 px-4 pl-5 overflow-y-auto">
-        <div className="text-[11px] tracking-[2px] text-[var(--text-page-label)] uppercase text-center py-1 pb-2.5 flex-shrink-0">
-          아카이브
+    <div className="flex h-auto w-full flex-col font-['Nanum_Myeongjo'] md:h-full md:flex-row">
+      <div className="flex h-auto flex-col gap-2 px-4 py-4 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:px-5 md:py-3">
+        <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
+          <div className="text-base font-bold text-[var(--text-stats-heading)] tracking-wide">
+            아카이브
+          </div>
+          <div
+            aria-hidden="true"
+            className="invisible h-7 w-[116px] rounded-md border border-border-light"
+          />
         </div>
 
         {error && (
-          <div className="mb-2 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[11px] text-[var(--text-error)]">
+          <div className="mb-2 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[12px] text-[var(--text-error)]">
             {error}
           </div>
         )}
 
-        <div className="grid grid-cols-3 gap-2.5 flex-1 content-start">
+        <div className="grid content-start gap-1.5 overflow-y-auto pt-1 grid-cols-4 md:min-h-0 md:flex-1 md:grid-cols-3 md:gap-2.5">
           <button
             type="button"
             onClick={openCreateModal}
             disabled={mutating}
             className="relative border-none cursor-pointer font-['Nanum_Pen_Script'] aspect-square
-              border-2 border-dashed border-border-dashed rounded-sm flex flex-col items-center
-              justify-center bg-bg-surface-muted transition-all duration-200 disabled:cursor-not-allowed
-              disabled:opacity-60 hover:bg-bg-surface-muted-hover hover:border-border-dashed-hover
+              border-2 border-dashed border-[var(--border-archive-add)] rounded-sm flex flex-col items-center
+              justify-center bg-[var(--bg-archive-add)] transition-all duration-200 disabled:cursor-not-allowed
+              disabled:opacity-60 hover:bg-[var(--bg-archive-add-hover)] hover:border-[var(--border-archive-add-hover)]
               hover:shadow-[var(--shadow-subtle)] hover:-translate-y-0.5"
           >
-            <Plus className="w-7 h-7 text-[var(--text-upload-plus-soft)]" />
+            <Plus className="h-4 w-4 text-[var(--text-archive-add)] md:h-7 md:w-7" />
           </button>
 
           {loadingArchives && (
-            <div className="col-span-2 flex items-center justify-center text-xs text-text-secondary">
+            <div className="col-span-4 flex items-center justify-center text-xs text-text-secondary md:col-span-3">
               불러오는 중
             </div>
           )}
@@ -131,15 +177,15 @@ export function ArchivePage() {
                   }}
                 >
                   <div
-                    className="absolute top-[-3px] left-1/2 -translate-x-1/2 w-[30px] h-2 bg-[var(--bg-paper-tape)]
-                      rounded-[1px] shadow-[var(--shadow-tape)]"
+                    className="absolute top-[-2px] left-1/2 h-1.5 w-[18px] -translate-x-1/2 bg-[var(--bg-paper-tape)]
+                      rounded-[1px] shadow-[var(--shadow-tape)] md:top-[-3px] md:h-2 md:w-[30px]"
                     style={{ transform: "translateX(-50%) rotate(-1deg)" }}
                   />
 
-                  <div className="text-[22px] text-[var(--text-black-title)] leading-none">
+                  <div className="text-[13px] text-[var(--text-black-title)] leading-none md:text-[22px]">
                     {archive.name}
                   </div>
-                  <div className="text-[20px] text-[var(--text-black-subtitle)] tracking-wide">
+                  <div className="text-[11px] text-[var(--text-black-subtitle)] tracking-wide md:text-[20px]">
                     {archive.entryCount}개
                   </div>
                 </button>
@@ -150,11 +196,11 @@ export function ArchivePage() {
                     event.stopPropagation();
                     setOpenMenuId(openMenuId === archive.id ? null : archive.id);
                   }}
-                  className="absolute top-1 right-1 z-[3] w-5 h-5 flex items-center justify-center
+                  className="absolute top-0.5 right-0.5 z-[3] flex h-4 w-4 items-center justify-center
                     rounded opacity-0 group-hover:opacity-100 transition-opacity duration-150
-                    bg-[var(--bg-black-subtle)] hover:bg-[var(--bg-black-subtle-hover)]"
+                    bg-[var(--bg-black-subtle)] hover:bg-[var(--bg-black-subtle-hover)] md:top-1 md:right-1 md:h-5 md:w-5"
                 >
-                  <MoreVertical className="w-3 h-3 text-[var(--text-black-icon)]" />
+                  <MoreVertical className="h-2.5 w-2.5 text-[var(--text-black-icon)] md:h-3 md:w-3" />
                 </button>
 
                 {openMenuId === archive.id && (
@@ -187,39 +233,123 @@ export function ArchivePage() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col py-3.5 px-6 pl-7 gap-0 overflow-hidden">
-        <div className="flex items-center gap-2 pb-2.5 border-b border-border-light mb-1 flex-shrink-0">
-          {selectedArchiveId !== null && (
-            <button
-              type="button"
-              onClick={() => setSelectedArchiveId(null)}
-              className="w-6 h-6 flex items-center justify-center rounded-md border-none bg-transparent
-                cursor-pointer text-text-muted hover:bg-bg-hover
-                transition-all duration-150"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-          )}
-          <div className="text-sm text-[var(--text-stats-heading)] tracking-wide">
-            {getArchiveName()}
+      <div className="flex h-auto flex-col gap-2 border-t border-border-light px-4 py-3 md:h-full md:max-h-[680px] md:flex-1 md:overflow-hidden md:border-t-0 md:px-5 md:py-3">
+        <div className="flex items-center justify-between pb-2 border-b border-border-light flex-shrink-0">
+          <div className="flex items-center gap-2 min-w-0">
+            {selectedArchiveId !== null && (
+              <button
+                type="button"
+                onClick={() => setSelectedArchiveId(null)}
+                className="w-7 h-7 flex items-center justify-center rounded-md border-none bg-transparent
+                  cursor-pointer text-text-muted hover:bg-bg-hover
+                  transition-all duration-150"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+            )}
+            <div className="text-base font-bold text-[var(--text-stats-heading)] tracking-wide">
+              {getArchiveName()}
+            </div>
+          </div>
+          <div
+            aria-hidden="true"
+            className="invisible h-7 w-[116px] rounded-md border border-border-light"
+          />
+        </div>
+
+        <div className="flex flex-shrink-0 items-center gap-1.5 pb-1">
+          <div className="relative min-w-0 flex-1">
+            <Search
+              className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-subtle"
+              aria-hidden="true"
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              placeholder="일기 검색"
+              className="h-8 w-full rounded-full border border-border-light bg-bg-surface-muted
+                px-8 font-['Nanum_Myeongjo'] text-[12px] text-text-muted outline-none
+                transition-colors placeholder:text-text-subtle hover:bg-bg-surface-muted-hover
+                focus:border-[var(--border-input-focus)] focus:bg-bg-editor-panel"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery("")}
+                className="absolute right-1.5 top-1/2 flex h-5 w-5 -translate-y-1/2
+                  items-center justify-center rounded-full border-none bg-[var(--bg-black-subtle)]
+                  text-text-muted transition-colors hover:bg-[var(--bg-black-subtle-hover)]
+                  hover:text-text-strong"
+                aria-label="검색어 지우기"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            )}
+          </div>
+          <div className="flex flex-shrink-0 items-center">
+            {selectedMonthFilter ? (
+              <button
+                type="button"
+                onClick={() => setShowMonthPicker(true)}
+                className="flex h-8 items-center gap-1.5 rounded-full border border-border-light
+                  bg-transparent px-3 font-['Nanum_Myeongjo'] text-[12px]
+                  text-text-muted transition-colors hover:bg-bg-hover
+                  hover:text-text-strong"
+              >
+                <span>{getMonthFilterLabel()}</span>
+                <span
+                  role="button"
+                  tabIndex={0}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSelectedMonthFilter(null);
+                  }}
+                  onKeyDown={(event) => {
+                    if (event.key !== "Enter" && event.key !== " ") return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    setSelectedMonthFilter(null);
+                  }}
+                  className="flex h-4 w-4 items-center justify-center rounded-full
+                    bg-[var(--bg-black-subtle)] text-text-muted transition-colors
+                    hover:bg-[var(--bg-black-subtle-hover)] hover:text-text-strong"
+                  aria-label="월 필터 해제"
+                >
+                  <X className="h-2.5 w-2.5" />
+                </span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowMonthPicker(true)}
+                className="h-8 rounded-full border border-border-light bg-transparent px-3
+                  font-['Nanum_Myeongjo'] text-[12px] text-text-muted
+                  transition-colors hover:bg-bg-hover hover:text-text-strong"
+              >
+                전체 기간
+              </button>
+            )}
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="overflow-y-auto md:min-h-0 md:flex-1">
           {loadingDiaries && (
             <div className="py-8 text-center text-xs text-text-secondary">
               일기를 불러오는 중
             </div>
           )}
 
-          {!loadingDiaries && diaries.length === 0 && (
+          {!loadingDiaries && filteredDiaries.length === 0 && (
             <div className="py-8 text-center text-xs text-text-secondary">
-              표시할 일기가 없습니다.
+              {selectedMonthFilter || normalizedSearchQuery
+                ? "조건에 맞는 일기가 없습니다."
+                : "표시할 일기가 없습니다."}
             </div>
           )}
 
           {!loadingDiaries &&
-            diaries.map((entry) => (
+            filteredDiaries.map((entry) => (
               <div
                 key={entry.id}
                 className="flex items-center gap-3 py-2.5 px-3 border-b border-[var(--border-faint)]
@@ -243,7 +373,7 @@ export function ArchivePage() {
                   </div>
                 )}
                 <div className="flex-1 flex flex-col gap-0.5 min-w-0">
-                  <div className="text-[10px] text-text-secondary tracking-[0.5px]">
+                  <div className="text-[12px] text-text-secondary tracking-[0.5px]">
                     {entry.writtenAt}
                   </div>
                   <div className="text-xs text-text-primary leading-[1.3] whitespace-nowrap overflow-hidden text-ellipsis">
@@ -288,6 +418,16 @@ export function ArchivePage() {
           }}
         />
       )}
+
+      <MonthPickerModal
+        isOpen={showMonthPicker}
+        selectedYear={pickerYear}
+        selectedMonth={pickerMonth}
+        onSelect={(year, month) => {
+          setSelectedMonthFilter({ year, month });
+        }}
+        onClose={() => setShowMonthPicker(false)}
+      />
     </div>
   );
 }
@@ -347,7 +487,7 @@ function ArchiveFormModal({
 
         <div className="py-4 px-5 flex flex-col gap-3">
           <div>
-            <div className="text-[11px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
+            <div className="text-[12px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
               아카이브 이름
             </div>
             <input
@@ -358,13 +498,13 @@ function ArchiveFormModal({
               autoFocus
               placeholder="행복했던 날"
               className="w-full py-2.5 px-3 border border-border-medium rounded-md
-                bg-bg-editor-panel font-['Nanum_Myeongjo'] text-[13px] text-[var(--text-input)]
+                bg-bg-editor-panel font-['Nanum_Myeongjo'] text-[14px] text-[var(--text-input)]
                 outline-none focus:border-[var(--border-input-focus)]"
             />
           </div>
 
           <div>
-            <div className="text-[11px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
+            <div className="text-[12px] text-[var(--text-soft-label)] tracking-wide mb-1.5">
               색상
             </div>
             <div className="flex gap-2">
@@ -391,7 +531,7 @@ function ArchiveFormModal({
               type="button"
               onClick={onClose}
               className="py-2 px-4 border border-border-medium bg-transparent rounded-md
-                cursor-pointer font-['Nanum_Myeongjo'] text-[11px] text-text-muted
+                cursor-pointer font-['Nanum_Myeongjo'] text-[12px] text-text-muted
                 transition-all duration-150 hover:bg-bg-hover"
             >
               취소
@@ -400,7 +540,7 @@ function ArchiveFormModal({
               type="submit"
               disabled={mutating || !name.trim()}
               className="py-2 px-4 bg-[var(--bg-save-button)] text-notebook-page border-none rounded-md
-                cursor-pointer font-['Nanum_Myeongjo'] text-[11px] transition-all duration-150
+                cursor-pointer font-['Nanum_Myeongjo'] text-[12px] transition-all duration-150
                 hover:bg-[var(--bg-save-button-hover)] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {mutating ? "저장 중" : "저장"}
