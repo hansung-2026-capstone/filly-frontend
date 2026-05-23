@@ -1037,7 +1037,7 @@ export function RecommendPage() {
                     );
                   })}
                   {showSelectedCardPopup && (
-                    <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
+                    <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center md:absolute md:inset-0 md:z-20">
                       <motion.div
                         key={selectedCardId}
                         initial={{ rotateY: 0 }}
