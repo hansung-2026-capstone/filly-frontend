@@ -39,7 +39,7 @@ export function IdCard({
         }`}
       >
         <span
-          className={`font-['Nanum_Myeongjo'] font-bold uppercase [writing-mode:vertical-rl] ${
+          className={`whitespace-nowrap font-['Nanum_Myeongjo'] font-bold uppercase [writing-mode:vertical-rl] ${
             isStory
               ? "text-[26px] tracking-[12px]"
               : "text-[16px] tracking-[8px]"
