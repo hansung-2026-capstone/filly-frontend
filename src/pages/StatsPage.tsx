@@ -263,7 +263,7 @@ export function StatsPage() {
             </div>
 
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1 px-2">
-              <span className="text-[12px] tracking-[1.5px] text-text-secondary">
+              <span className="whitespace-nowrap text-[12px] tracking-[0.5px] text-text-secondary md:tracking-[1.5px]">
                 자주 나온 사람
               </span>
               <span className="text-[18px] text-[var(--text-stats-primary)] text-center truncate max-w-full">
