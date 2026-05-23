@@ -997,7 +997,7 @@ export function RecommendPage() {
                         aria-pressed={isSelected}
                         aria-disabled={isCardDisabled}
                         aria-label={cardLabel}
-                        className={`group relative z-[1] aspect-[1023/1537] w-[28.5%] max-w-[128px] flex-none self-center text-left [perspective:1000px] focus:outline-none md:h-full md:w-auto md:max-w-none md:flex-1 ${
+                        className={`group relative z-[1] aspect-[1023/1537] w-[31%] max-w-[142px] flex-none self-center text-left [perspective:1000px] focus:outline-none md:w-[136px] md:max-w-none lg:w-[144px] ${
                           isWaitingForInitialRecommendation ? "opacity-55" : ""
                         } ${isSelectedCardPopped ? "opacity-0" : ""} ${
                           showCardFilter ? "pointer-events-none" : ""
