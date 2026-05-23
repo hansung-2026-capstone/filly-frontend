@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { X, Download, Check } from "lucide-react";
+import { X, Download, Check, ChevronDown } from "lucide-react";
 import { toPng } from "html-to-image";
 import { isAxiosError } from "axios";
 import tarotCardImage from "../assets/tarot/card.png";
@@ -1081,35 +1081,43 @@ export function RecommendPage() {
                               </div>
                             ) : selectedRecommendationDetail ? (
                               <>
-                                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pb-2 pr-1 pt-3">
-                                  <div className="flex items-center gap-2 text-[10.5px] tracking-[1.2px] text-text-secondary">
-                                    <span className="line-clamp-2 break-words leading-[1.45]">
-                                      {getRecommendationCategoryLabel(
-                                        selectedRecommendationDetail,
-                                      )}
-                                      {selectedRecommendationDetail.subCategory
-                                        ? ` / ${selectedRecommendationDetail.subCategory}`
-                                        : ""}
-                                    </span>
-                                  </div>
-                                  <div className="text-[15px] font-bold leading-[1.35]">
-                                    {selectedRecommendationDetail.title}
-                                  </div>
-                                  <div className="border-t border-border-medium" />
-                                  <div className="pt-1 text-[12.5px] leading-[1.55] text-text-muted">
-                                    {selectedRecommendationDetail.description}
-                                  </div>
-                                  <div className="pt-1 text-[12.5px] leading-[1.55] text-text-secondary">
-                                    {selectedRecommendationDetail.reason}
-                                  </div>
-                                  {selectedRecommendationDetail.searchKeyword && (
-                                    <div className="break-words pb-1 pt-1.5 text-[10px] leading-[1.45] text-text-secondary">
-                                      #
-                                      {
-                                        selectedRecommendationDetail.searchKeyword
-                                      }
+                                <div className="relative min-h-0 flex-1">
+                                  <div className="h-full space-y-2 overflow-y-auto pb-7 pr-1 pt-3">
+                                    <div className="flex items-center gap-2 text-[10.5px] tracking-[1.2px] text-text-secondary">
+                                      <span className="line-clamp-2 break-words leading-[1.45]">
+                                        {getRecommendationCategoryLabel(
+                                          selectedRecommendationDetail,
+                                        )}
+                                        {selectedRecommendationDetail.subCategory
+                                          ? ` / ${selectedRecommendationDetail.subCategory}`
+                                          : ""}
+                                      </span>
                                     </div>
-                                  )}
+                                    <div className="text-[15px] font-bold leading-[1.35]">
+                                      {selectedRecommendationDetail.title}
+                                    </div>
+                                    <div className="border-t border-border-medium" />
+                                    <div className="pt-1 text-[12.5px] leading-[1.55] text-text-muted">
+                                      {selectedRecommendationDetail.description}
+                                    </div>
+                                    <div className="pt-1 text-[12.5px] leading-[1.55] text-text-secondary">
+                                      {selectedRecommendationDetail.reason}
+                                    </div>
+                                    {selectedRecommendationDetail.searchKeyword && (
+                                      <div className="break-words pb-1 pt-1.5 text-[10px] leading-[1.45] text-text-secondary">
+                                        #
+                                        {
+                                          selectedRecommendationDetail.searchKeyword
+                                        }
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div
+                                    aria-hidden="true"
+                                    className="pointer-events-none absolute inset-x-0 bottom-0 flex h-8 items-end justify-center bg-gradient-to-t from-[#fefefe] via-[#fefefe]/90 to-transparent pb-0.5 text-text-secondary"
+                                  >
+                                    <ChevronDown className="h-3.5 w-3.5" />
+                                  </div>
                                 </div>
                                 <button
                                   type="button"
