@@ -952,7 +952,7 @@ export function RecommendPage() {
 
             <div className="flex flex-col gap-4 pt-5 md:min-h-0 md:flex-1">
               <div className="flex flex-col gap-4 flex-shrink-0">
-                <div className="relative flex h-[164px] w-full gap-2 px-1 md:h-[232px] md:gap-3 md:px-2">
+                <div className="relative flex min-h-[164px] w-full justify-center gap-3 px-2 md:h-[232px] md:gap-3 md:px-2">
                   {cardOrder.map((cardId, slotIndex) => {
                     const card = recommendationDraw?.cards.find(
                       (item) => item.cardId === cardId,
@@ -997,7 +997,7 @@ export function RecommendPage() {
                         aria-pressed={isSelected}
                         aria-disabled={isCardDisabled}
                         aria-label={cardLabel}
-                        className={`group relative z-[1] h-full flex-1 min-w-0 self-center text-left [perspective:1000px] focus:outline-none ${
+                        className={`group relative z-[1] aspect-[1023/1537] w-[28.5%] max-w-[128px] flex-none self-center text-left [perspective:1000px] focus:outline-none md:h-full md:w-auto md:max-w-none md:flex-1 ${
                           isWaitingForInitialRecommendation ? "opacity-55" : ""
                         } ${isSelectedCardPopped ? "opacity-0" : ""} ${
                           showCardFilter ? "pointer-events-none" : ""
@@ -1014,7 +1014,7 @@ export function RecommendPage() {
                         }}
                         style={{ zIndex: 1 }}
                       >
-                        <div className="relative left-1/2 top-1/2 aspect-[1023/1537] h-full -translate-x-1/2 -translate-y-1/2">
+                        <div className="relative h-full w-full">
                           <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] transition-[box-shadow,background-color] duration-200 [backface-visibility:hidden] group-hover:bg-[var(--bg-card-back-hover)]">
                             <img
                               src={tarotCardImage}
