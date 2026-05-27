@@ -45,57 +45,54 @@ export function KeywordCloud({
   return (
     <div
       ref={containerRef}
-      className={`relative overflow-hidden w-full bg-notebook-page ${
+      className={`overflow-hidden w-full ${
         framed
           ? "rounded-lg border border-border-medium"
           : ""
       }`}
       style={{ height }}
     >
-      <div className="paper-texture absolute inset-0 pointer-events-none opacity-30" />
-      <div className="relative z-[1] h-full">
-        {entries.length === 0 ? (
-          <div className="h-full flex items-center justify-center">
-            <span className={emptyClassName}>{emptyMessage}</span>
-          </div>
-        ) : width > 0 ? (
-          (() => {
-            const words = entries.map(([text, value]) => ({ text, value }));
-            const maxValue = Math.max(...words.map((w) => w.value));
-            const fontScale = scaleLog({ domain: [1, maxValue], range: [10, 26] });
-            return (
-              <Wordcloud
-                words={words}
-                width={width}
-                height={height}
-                fontSize={(w) => fontScale(w.value)}
-                font="Nanum Myeongjo, serif"
-                fontWeight="bold"
-                padding={3}
-                rotate={() => 0}
-                spiral="archimedean"
-                random={() => 0.5}
-              >
-                {(cloudWords) =>
-                  cloudWords.map((w, i) => (
-                    <Text
-                      key={w.text}
-                      fill={COLORS[i % COLORS.length]}
-                      textAnchor="middle"
-                      transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
-                      fontSize={w.size}
-                      fontFamily={w.font}
-                      fontWeight={w.weight}
-                    >
-                      {w.text}
-                    </Text>
-                  ))
-                }
-              </Wordcloud>
-            );
-          })()
-        ) : null}
-      </div>
+      {entries.length === 0 ? (
+        <div className="h-full flex items-center justify-center">
+          <span className={emptyClassName}>{emptyMessage}</span>
+        </div>
+      ) : width > 0 ? (
+        (() => {
+          const words = entries.map(([text, value]) => ({ text, value }));
+          const maxValue = Math.max(...words.map((w) => w.value));
+          const fontScale = scaleLog({ domain: [1, maxValue], range: [10, 26] });
+          return (
+            <Wordcloud
+              words={words}
+              width={width}
+              height={height}
+              fontSize={(w) => fontScale(w.value)}
+              font="Nanum Myeongjo, serif"
+              fontWeight="bold"
+              padding={3}
+              rotate={() => 0}
+              spiral="archimedean"
+              random={() => 0.5}
+            >
+              {(cloudWords) =>
+                cloudWords.map((w, i) => (
+                  <Text
+                    key={w.text}
+                    fill={COLORS[i % COLORS.length]}
+                    textAnchor="middle"
+                    transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
+                    fontSize={w.size}
+                    fontFamily={w.font}
+                    fontWeight={w.weight}
+                  >
+                    {w.text}
+                  </Text>
+                ))
+              }
+            </Wordcloud>
+          );
+        })()
+      ) : null}
     </div>
   );
 }
