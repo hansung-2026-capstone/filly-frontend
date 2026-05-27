@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { X, Download, Check } from "lucide-react";
+import { X, Download, Check, ChevronDown } from "lucide-react";
 import { toPng } from "html-to-image";
 import { isAxiosError } from "axios";
 import tarotCardImage from "../assets/tarot/card.png";
+import paperTextureImage from "../assets/textures/exclusive-paper.png";
 import {
   getRecommendationHistory,
   revealRecommendationCard,
@@ -31,6 +32,7 @@ const CARD_RESET_SETTLE_BUFFER_MS = 120;
 const SHUFFLE_MIN_VISIBLE_MS = 1200;
 const SHUFFLE_STEP_DURATION_MS = 600;
 const RECOMMENDATION_REQUEST_COOLDOWN_MS = 1800;
+const CAPTURE_PIXEL_RATIO = 2;
 
 type CaptureTarget = "idCard" | "receipt" | "keywordCloud";
 type CaptureResultFile = {
@@ -59,6 +61,12 @@ const initialCaptureTargetSelection: Record<CaptureTarget, boolean> = {
   receipt: false,
   keywordCloud: false,
 };
+
+async function waitForCaptureFonts() {
+  if (typeof document === "undefined" || !("fonts" in document)) return;
+
+  await document.fonts.ready;
+}
 
 const contentTypeLabels: Partial<Record<string, string>> = {
   MOVIE: "영화",
@@ -584,12 +592,10 @@ export function RecommendPage() {
     try {
       const dataUrl = await toPng(element, {
         cacheBust: true,
-        pixelRatio: 2,
+        pixelRatio: CAPTURE_PIXEL_RATIO,
       });
-      return dataUrlToFile(
-        await compositeCaptureBackground(dataUrl, element),
-        filename,
-      );
+      const compositedDataUrl = await compositeCaptureBackground(dataUrl, element);
+      return dataUrlToFile(compositedDataUrl, filename);
     } finally {
       restoreImages?.();
     }
@@ -637,16 +643,17 @@ export function RecommendPage() {
 
     setCapturing(true);
     const prefix = `filly-${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
-
     try {
-      const files: File[] = [];
+      await waitForCaptureFonts();
+
+      const captureTasks: Promise<File>[] = [];
 
       // 사원증: 다운로드용 세로형 카드 캡처
       const idCardEl = idCardDownloadRef.current
         ?.firstElementChild as HTMLElement | null;
       if (targets.includes("idCard") && idCardEl) {
-        files.push(
-          await captureElementAsShown(idCardEl, `${prefix}-사원증.png`, {
+        captureTasks.push(
+          captureElementAsShown(idCardEl, `${prefix}-사원증.png`, {
             inlineImages: true,
           }),
         );
@@ -655,45 +662,48 @@ export function RecommendPage() {
       // 영수증: 펼쳐진 스크롤 컨테이너 전체 캡처
       if (targets.includes("receipt") && receiptScrollRef.current) {
         const receiptEl = receiptScrollRef.current;
-        const prevHeight = receiptEl.style.height;
-        const prevOverflow = receiptEl.style.overflowY;
-        const width = receiptEl.scrollWidth;
-        const height = receiptEl.scrollHeight;
+        captureTasks.push(
+          (async () => {
+            const prevHeight = receiptEl.style.height;
+            const prevOverflow = receiptEl.style.overflowY;
+            const width = receiptEl.scrollWidth;
+            const height = receiptEl.scrollHeight;
 
-        receiptEl.style.height = `${height}px`;
-        receiptEl.style.overflowY = "visible";
+            receiptEl.style.height = `${height}px`;
+            receiptEl.style.overflowY = "visible";
 
-        try {
-          files.push(
-            await capturePngFile(receiptEl, `${prefix}-영수증.png`, {
-              backgroundColor:
-                getComputedStyle(document.documentElement)
-                  .getPropertyValue("--receipt-barcode-light")
-                  .trim() || "#ffffff",
-              height,
-              pixelRatio: 2,
-              style: {
-                height: `${height}px`,
-                overflowY: "visible",
-                width: `${width}px`,
-              },
-              width,
-            }),
-          );
-        } finally {
-          receiptEl.style.height = prevHeight;
-          receiptEl.style.overflowY = prevOverflow;
-        }
-      }
-
-      // 키워드 클라우드: 라운딩 영역만 캡처 → 투명 배경
-      const cloudEl = keywordCloudRef.current
-        ?.firstElementChild as HTMLElement | null;
-      if (targets.includes("keywordCloud") && cloudEl) {
-        files.push(
-          await captureElementAsShown(cloudEl, `${prefix}-키워드클라우드.png`),
+            try {
+              return await capturePngFile(receiptEl, `${prefix}-영수증.png`, {
+                backgroundColor:
+                  getComputedStyle(document.documentElement)
+                    .getPropertyValue("--receipt-barcode-light")
+                    .trim() || "#ffffff",
+                height,
+                pixelRatio: CAPTURE_PIXEL_RATIO,
+                style: {
+                  height: `${height}px`,
+                  overflowY: "visible",
+                  width: `${width}px`,
+                },
+                width,
+              });
+            } finally {
+              receiptEl.style.height = prevHeight;
+              receiptEl.style.overflowY = prevOverflow;
+            }
+          })(),
         );
       }
+
+      // 키워드 클라우드: 화면 UI는 그대로 두고 캡처 이미지에만 종이 배경 합성
+      const cloudEl = keywordCloudRef.current;
+      if (targets.includes("keywordCloud") && cloudEl) {
+        captureTasks.push(
+          captureElementAsShown(cloudEl, `${prefix}-키워드클라우드.png`),
+        );
+      }
+
+      const files = await Promise.all(captureTasks);
 
       if (files.length === 0) return;
 
@@ -1081,35 +1091,43 @@ export function RecommendPage() {
                               </div>
                             ) : selectedRecommendationDetail ? (
                               <>
-                                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pb-2 pr-1 pt-3">
-                                  <div className="flex items-center gap-2 text-[10.5px] tracking-[1.2px] text-text-secondary">
-                                    <span className="line-clamp-2 break-words leading-[1.45]">
-                                      {getRecommendationCategoryLabel(
-                                        selectedRecommendationDetail,
-                                      )}
-                                      {selectedRecommendationDetail.subCategory
-                                        ? ` / ${selectedRecommendationDetail.subCategory}`
-                                        : ""}
-                                    </span>
-                                  </div>
-                                  <div className="text-[15px] font-bold leading-[1.35]">
-                                    {selectedRecommendationDetail.title}
-                                  </div>
-                                  <div className="border-t border-border-medium" />
-                                  <div className="pt-1 text-[12.5px] leading-[1.55] text-text-muted">
-                                    {selectedRecommendationDetail.description}
-                                  </div>
-                                  <div className="pt-1 text-[12.5px] leading-[1.55] text-text-secondary">
-                                    {selectedRecommendationDetail.reason}
-                                  </div>
-                                  {selectedRecommendationDetail.searchKeyword && (
-                                    <div className="break-words pb-1 pt-1.5 text-[10px] leading-[1.45] text-text-secondary">
-                                      #
-                                      {
-                                        selectedRecommendationDetail.searchKeyword
-                                      }
+                                <div className="relative min-h-0 flex-1">
+                                  <div className="h-full space-y-2 overflow-y-auto pb-7 pr-1 pt-3">
+                                    <div className="flex items-center gap-2 text-[10.5px] tracking-[1.2px] text-text-secondary">
+                                      <span className="line-clamp-2 break-words leading-[1.45]">
+                                        {getRecommendationCategoryLabel(
+                                          selectedRecommendationDetail,
+                                        )}
+                                        {selectedRecommendationDetail.subCategory
+                                          ? ` / ${selectedRecommendationDetail.subCategory}`
+                                          : ""}
+                                      </span>
                                     </div>
-                                  )}
+                                    <div className="text-[15px] font-bold leading-[1.35]">
+                                      {selectedRecommendationDetail.title}
+                                    </div>
+                                    <div className="border-t border-border-medium" />
+                                    <div className="pt-1 text-[12.5px] leading-[1.55] text-text-muted">
+                                      {selectedRecommendationDetail.description}
+                                    </div>
+                                    <div className="pt-1 text-[12.5px] leading-[1.55] text-text-secondary">
+                                      {selectedRecommendationDetail.reason}
+                                    </div>
+                                    {selectedRecommendationDetail.searchKeyword && (
+                                      <div className="break-words pb-1 pt-1.5 text-[10px] leading-[1.45] text-text-secondary">
+                                        #
+                                        {
+                                          selectedRecommendationDetail.searchKeyword
+                                        }
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div
+                                    aria-hidden="true"
+                                    className="pointer-events-none absolute inset-x-0 bottom-0 flex h-8 items-end justify-center bg-gradient-to-t from-[#fefefe] via-[#fefefe]/90 to-transparent pb-0.5 text-text-secondary"
+                                  >
+                                    <ChevronDown className="h-3.5 w-3.5" />
+                                  </div>
                                 </div>
                                 <button
                                   type="button"
@@ -1343,7 +1361,11 @@ export function RecommendPage() {
               키워드 클라우드{" "}
               <span className="normal-case">(Keyword Cloud)</span>
             </span>
-            <div ref={keywordCloudRef}>
+            <div
+              ref={keywordCloudRef}
+              data-capture-bg-src={paperTextureImage}
+              className="rounded-lg"
+            >
               <KeywordCloud keywords={stat?.keywordCloud ?? null} />
             </div>
           </div>
