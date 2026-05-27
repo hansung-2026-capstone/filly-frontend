@@ -221,10 +221,7 @@ export function Root() {
         style={{ background: "var(--notebook-bg-radial)" }}
       />
 
-      <div
-        className="fixed inset-0 pointer-events-none z-0 opacity-40"
-        style={{ background: "var(--notebook-texture-lines)" }}
-      />
+      <div className="notebook-texture-lines fixed inset-0 pointer-events-none z-0 opacity-40" />
 
       {!isMobileLayout && (
       <div className="relative z-[2]" style={shellStyle}>

@@ -102,13 +102,11 @@ export function IdCard({
   if (!isStory) return card;
 
   return (
-    <div className="relative aspect-[1055/1491] w-full overflow-hidden">
-      <img
-        src={idCardHolderImage}
-        alt=""
-        className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
-        draggable={false}
-      />
+    <div
+      className="relative aspect-[1055/1491] w-full overflow-hidden bg-[length:100%_100%] bg-no-repeat"
+      data-capture-bg-src={idCardHolderImage}
+      style={{ backgroundImage: `url(${idCardHolderImage})` }}
+    >
       <div className="absolute left-[20.4%] top-[20.6%] z-10 h-[74.2%] w-[61.2%] overflow-hidden">
         {card}
       </div>
