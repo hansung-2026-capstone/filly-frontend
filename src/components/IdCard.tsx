@@ -107,12 +107,6 @@ export function IdCard({
       data-capture-bg-src={idCardHolderImage}
       style={{ backgroundImage: `url(${idCardHolderImage})` }}
     >
-      <img
-        src={idCardHolderImage}
-        alt=""
-        className="pointer-events-none absolute inset-0 h-full w-full select-none object-fill"
-        draggable={false}
-      />
       <div className="absolute left-[20.4%] top-[20.6%] z-10 h-[74.2%] w-[61.2%] overflow-hidden">
         {card}
       </div>

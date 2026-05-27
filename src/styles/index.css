@@ -1,12 +1,67 @@
 @import "tailwindcss";
 @import "./theme.css";
 
+@font-face {
+  font-family: "Gaegu";
+  src: url("../assets/fonts/Gaegu-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Gaegu";
+  src: url("../assets/fonts/Gaegu-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nanum Myeongjo";
+  src: url("../assets/fonts/NanumMyeongjo-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nanum Myeongjo";
+  src: url("../assets/fonts/NanumMyeongjo-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nanum Myeongjo";
+  src: url("../assets/fonts/NanumMyeongjo-ExtraBold.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Nanum Pen Script";
+  src: url("../assets/fonts/NanumPenScript-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+
 .paper-texture {
   background-color: var(--notebook-page);
-  background-image: url("https://www.transparenttextures.com/patterns/exclusive-paper.png");
-  background-size: 400px;
+  background-image: url("../assets/textures/exclusive-paper.png");
+  background-repeat: repeat;
+  background-size: 400px 400px;
   filter: contrast(100%) brightness(100%);
   mix-blend-mode: multiply;
+}
+
+.notebook-texture-lines {
+  background-image: url("../assets/textures/paper-fibers.png");
+  background-repeat: repeat;
 }
 
 /* 스크롤바 숨김 */
