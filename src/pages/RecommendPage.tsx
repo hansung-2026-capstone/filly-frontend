@@ -1292,7 +1292,7 @@ export function RecommendPage() {
               {idCard && (
                 <div
                   ref={idCardDownloadRef}
-                  className="pointer-events-none fixed left-[-560px] top-0 w-[540px]"
+                  className="pointer-events-none fixed left-[-10000px] top-0 w-[540px]"
                   aria-hidden="true"
                 >
                   <IdCard
