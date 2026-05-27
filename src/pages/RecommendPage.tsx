@@ -4,6 +4,7 @@ import { X, Download, Check, ChevronDown } from "lucide-react";
 import { toPng } from "html-to-image";
 import { isAxiosError } from "axios";
 import tarotCardImage from "../assets/tarot/card.png";
+import paperTextureImage from "../assets/textures/exclusive-paper.png";
 import {
   getRecommendationHistory,
   revealRecommendationCard,
@@ -694,9 +695,8 @@ export function RecommendPage() {
         );
       }
 
-      // 키워드 클라우드: 라운딩 영역만 캡처 → 투명 배경
-      const cloudEl = keywordCloudRef.current
-        ?.firstElementChild as HTMLElement | null;
+      // 키워드 클라우드: 화면 UI는 그대로 두고 캡처 이미지에만 종이 배경 합성
+      const cloudEl = keywordCloudRef.current;
       if (targets.includes("keywordCloud") && cloudEl) {
         captureTasks.push(
           captureElementAsShown(cloudEl, `${prefix}-키워드클라우드.png`),
@@ -1361,7 +1361,11 @@ export function RecommendPage() {
               키워드 클라우드{" "}
               <span className="normal-case">(Keyword Cloud)</span>
             </span>
-            <div ref={keywordCloudRef}>
+            <div
+              ref={keywordCloudRef}
+              data-capture-bg-src={paperTextureImage}
+              className="rounded-lg"
+            >
               <KeywordCloud keywords={stat?.keywordCloud ?? null} />
             </div>
           </div>
