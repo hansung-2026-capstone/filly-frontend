@@ -38,19 +38,41 @@ function appendPhotos(form: FormData, photos: { file: File }[]) {
   photos.forEach((photo) => form.append("images", photo.file));
 }
 
-function DraftSparkleOverlay() {
+function LoadingOverlay({
+  ariaLabel,
+  className = "",
+  children,
+}: {
+  ariaLabel: string;
+  className?: string;
+  children: React.ReactNode;
+}) {
   return (
     <div
-      className="absolute inset-0 z-30 flex items-center justify-center rounded-r-md backdrop-blur-md pointer-events-auto"
+      className={`absolute inset-0 z-30 flex items-center justify-center backdrop-blur-md pointer-events-auto ${className}`}
       style={{
         backgroundColor:
           "color-mix(in srgb, var(--bg-page-loading-soft) 55%, transparent)",
       }}
+      aria-label={ariaLabel}
     >
-      <div
-        className="relative h-28 w-44 text-[var(--text-soft-label)]"
-        aria-label="AI 초안 만드는 중"
-      >
+      {children}
+    </div>
+  );
+}
+
+function DraftSparkleOverlay({
+  label,
+  ariaLabel,
+  className = "",
+}: {
+  label: string;
+  ariaLabel: string;
+  className?: string;
+}) {
+  return (
+    <LoadingOverlay ariaLabel={ariaLabel} className={className}>
+      <div className="relative h-28 w-44 text-[var(--text-soft-label)]">
         {DRAFT_SPARKLES.map((sparkle) => (
           <SparkleShape
             key={sparkle.className}
@@ -61,11 +83,11 @@ function DraftSparkleOverlay() {
         ))}
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="rounded-full bg-[var(--bg-page-loading)] px-4 py-2 text-[12px] font-bold tracking-[0.8px] text-text-primary shadow-[var(--shadow-small)]">
-            AI 초안 생성 중
+            {label}
           </span>
         </div>
       </div>
-    </div>
+    </LoadingOverlay>
   );
 }
 
@@ -207,12 +229,17 @@ export function WritePage() {
   return (
     <div className="relative flex h-auto w-full flex-col font-['Nanum_Myeongjo'] md:h-full md:flex-row">
       {isSaving && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-bg-page-loading z-20 gap-3 rounded-md">
-          <div className="w-6 h-6 border-2 border-[var(--border-spinner)] border-t-[var(--border-spinner-active)] rounded-full animate-spin" />
-          <span className="text-sm text-text-primary tracking-wide">
-            {editDiary ? "일기 수정 중..." : "일기 작성 중..."}
-          </span>
-        </div>
+        <LoadingOverlay
+          ariaLabel={editDiary ? "일기 수정 중" : "일기 작성 중"}
+          className="rounded-md"
+        >
+          <div className="flex flex-col items-center justify-center gap-3">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-[var(--border-spinner)] border-t-[var(--border-spinner-active)]" />
+            <span className="text-sm tracking-wide text-text-primary">
+              {editDiary ? "일기 수정 중..." : "일기 작성 중..."}
+            </span>
+          </div>
+        </LoadingOverlay>
       )}
 
       <div className={`flex flex-col gap-5 px-4 py-5 md:min-h-0 md:flex-1 md:overflow-y-auto md:px-6${editDiary ? " opacity-40 pointer-events-none select-none" : ""}`}>
@@ -265,7 +292,11 @@ export function WritePage() {
         aria-busy={isDraftGenerating}
       >
         {isDraftGenerating && (
-          <DraftSparkleOverlay />
+          <DraftSparkleOverlay
+            label="AI 초안 생성 중"
+            ariaLabel="AI 초안 만드는 중"
+            className="rounded-r-md"
+          />
         )}
 
         <div className="flex items-center justify-between pb-3 border-b border-[var(--border-subtle)]">
