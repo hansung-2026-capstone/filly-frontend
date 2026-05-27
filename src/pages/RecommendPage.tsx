@@ -31,6 +31,7 @@ const CARD_RESET_SETTLE_BUFFER_MS = 120;
 const SHUFFLE_MIN_VISIBLE_MS = 1200;
 const SHUFFLE_STEP_DURATION_MS = 600;
 const RECOMMENDATION_REQUEST_COOLDOWN_MS = 1800;
+const CAPTURE_PIXEL_RATIO = 2;
 
 type CaptureTarget = "idCard" | "receipt" | "keywordCloud";
 type CaptureResultFile = {
@@ -59,6 +60,12 @@ const initialCaptureTargetSelection: Record<CaptureTarget, boolean> = {
   receipt: false,
   keywordCloud: false,
 };
+
+async function waitForCaptureFonts() {
+  if (typeof document === "undefined" || !("fonts" in document)) return;
+
+  await document.fonts.ready;
+}
 
 const contentTypeLabels: Partial<Record<string, string>> = {
   MOVIE: "영화",
@@ -584,12 +591,10 @@ export function RecommendPage() {
     try {
       const dataUrl = await toPng(element, {
         cacheBust: true,
-        pixelRatio: 2,
+        pixelRatio: CAPTURE_PIXEL_RATIO,
       });
-      return dataUrlToFile(
-        await compositeCaptureBackground(dataUrl, element),
-        filename,
-      );
+      const compositedDataUrl = await compositeCaptureBackground(dataUrl, element);
+      return dataUrlToFile(compositedDataUrl, filename);
     } finally {
       restoreImages?.();
     }
@@ -637,63 +642,68 @@ export function RecommendPage() {
 
     setCapturing(true);
     const prefix = `filly-${selectedYear}-${String(selectedMonth).padStart(2, "0")}`;
-
     try {
-      const files: File[] = [];
+      await waitForCaptureFonts();
+
+      const captureTasks: Promise<File>[] = [];
 
       // 사원증: 다운로드용 세로형 카드 캡처
       const idCardEl = idCardDownloadRef.current
         ?.firstElementChild as HTMLElement | null;
       if (targets.includes("idCard") && idCardEl) {
-        files.push(
-          await captureElementAsShown(idCardEl, `${prefix}-사원증.png`, {
+        captureTasks.push(
+          captureElementAsShown(idCardEl, `${prefix}-사원증.png`, {
             inlineImages: true,
-          }),
+          })(),
         );
       }
 
       // 영수증: 펼쳐진 스크롤 컨테이너 전체 캡처
       if (targets.includes("receipt") && receiptScrollRef.current) {
         const receiptEl = receiptScrollRef.current;
-        const prevHeight = receiptEl.style.height;
-        const prevOverflow = receiptEl.style.overflowY;
-        const width = receiptEl.scrollWidth;
-        const height = receiptEl.scrollHeight;
+        captureTasks.push(
+          (async () => {
+            const prevHeight = receiptEl.style.height;
+            const prevOverflow = receiptEl.style.overflowY;
+            const width = receiptEl.scrollWidth;
+            const height = receiptEl.scrollHeight;
 
-        receiptEl.style.height = `${height}px`;
-        receiptEl.style.overflowY = "visible";
+            receiptEl.style.height = `${height}px`;
+            receiptEl.style.overflowY = "visible";
 
-        try {
-          files.push(
-            await capturePngFile(receiptEl, `${prefix}-영수증.png`, {
-              backgroundColor:
-                getComputedStyle(document.documentElement)
-                  .getPropertyValue("--receipt-barcode-light")
-                  .trim() || "#ffffff",
-              height,
-              pixelRatio: 2,
-              style: {
-                height: `${height}px`,
-                overflowY: "visible",
-                width: `${width}px`,
-              },
-              width,
-            }),
-          );
-        } finally {
-          receiptEl.style.height = prevHeight;
-          receiptEl.style.overflowY = prevOverflow;
-        }
+            try {
+              return await capturePngFile(receiptEl, `${prefix}-영수증.png`, {
+                backgroundColor:
+                  getComputedStyle(document.documentElement)
+                    .getPropertyValue("--receipt-barcode-light")
+                    .trim() || "#ffffff",
+                height,
+                pixelRatio: CAPTURE_PIXEL_RATIO,
+                style: {
+                  height: `${height}px`,
+                  overflowY: "visible",
+                  width: `${width}px`,
+                },
+                width,
+              });
+            } finally {
+              receiptEl.style.height = prevHeight;
+              receiptEl.style.overflowY = prevOverflow;
+            }
+          }),
+        );
       }
 
       // 키워드 클라우드: 라운딩 영역만 캡처 → 투명 배경
       const cloudEl = keywordCloudRef.current
         ?.firstElementChild as HTMLElement | null;
       if (targets.includes("keywordCloud") && cloudEl) {
-        files.push(
-          await captureElementAsShown(cloudEl, `${prefix}-키워드클라우드.png`),
+        captureTasks.push(
+          captureElementAsShown(cloudEl, `${prefix}-키워드클라우드.png`),
         );
       }
+
+      const files = await Promise.all(captureTasks);
 
       if (files.length === 0) return;
 
