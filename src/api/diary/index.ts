@@ -20,11 +20,6 @@ export const getDiaries = async (year: number, month: number) => {
   return toDiaryList(data.data ?? []);
 };
 
-export const getDiary = async (id: number) => {
-  const { data } = await api.get<{ data: DiaryItem }>(`/api/v1/diaries/${id}`);
-  return normalizeDiaryMedia(data.data);
-};
-
 export const createDraft = async (form: FormData) => {
   const { data } = await api.post<{ data: DraftData }>(
     "/api/v2/diaries/draft",

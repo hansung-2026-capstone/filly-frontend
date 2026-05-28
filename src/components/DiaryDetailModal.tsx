@@ -6,7 +6,6 @@ import type { Archive } from "../types/archive";
 import { formatKoreanDateKey, getKoreanDayLabelFromKey } from "../lib/date";
 import { hasDiaryText } from "../lib/diary";
 import { useDiaryArchiveStatus } from "../hook/common/useDiaryArchiveStatus";
-import { useDiaryQuery } from "../hook/queries/diary";
 import { Portal } from "./Portal";
 import { TiptapEditor } from "./TiptapEditor";
 
@@ -75,9 +74,7 @@ function PhotoCarousel({ urls }: { urls: string[] }) {
 }
 
 export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: DiaryDetailModalProps) {
-  const detailQuery = useDiaryQuery(diary.id);
-  const detailDiary = detailQuery.data ?? diary;
-  const { label, dow } = formatDiaryDate(detailDiary.writtenAt);
+  const { label, dow } = formatDiaryDate(diary.writtenAt);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
@@ -185,7 +182,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
             <div className="flex items-center gap-2">
               <span className="text-[16px] text-text-heading tracking-wide">{label}</span>
               <span className="text-[13px] text-[var(--text-soft-label)]">{dow}요일</span>
-              <span className="text-lg leading-none select-none">{detailDiary.emoji}</span>
+              <span className="text-lg leading-none select-none">{diary.emoji}</span>
             </div>
             <button
               onClick={onClose}
@@ -203,20 +200,14 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
           <div className="relative z-10 flex-1 overflow-y-auto px-5 py-4 flex flex-col gap-4">
 
             {/* 사진 */}
-            <PhotoCarousel key={`${detailDiary.id}-${detailDiary.mediaUrls?.length ?? 0}`} urls={detailDiary.mediaUrls ?? []} />
-
-            {detailQuery.isLoading && (
-              <div className="rounded-md bg-bg-hover px-3 py-2 text-center text-[12px] text-text-secondary">
-                첨부 파일을 불러오는 중
-              </div>
-            )}
+            <PhotoCarousel key={diary.id} urls={diary.mediaUrls ?? []} />
 
             {/* 본문 */}
-            {hasDiaryText(detailDiary.rawContent) ? (
+            {hasDiaryText(diary.rawContent) ? (
               <TiptapEditor
                 showToolbar={false}
                 readOnly
-                content={detailDiary.rawContent}
+                content={diary.rawContent}
                 className="flex-1 min-h-[80px]"
               />
             ) : (
@@ -278,7 +269,7 @@ export function DiaryDetailModal({ diary, onClose, onDeleted, onArchived }: Diar
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() => { onClose(); navigate('/write', { state: { diary: detailDiary } }); }}
+                    onClick={() => { onClose(); navigate('/write', { state: { diary } }); }}
                     className="px-4 py-1.5 text-[13px] text-text-muted bg-bg-hover
                       border border-border-medium rounded-md cursor-pointer
                       hover:bg-bg-selected-hover transition-all duration-150 font-['Nanum_Myeongjo']">

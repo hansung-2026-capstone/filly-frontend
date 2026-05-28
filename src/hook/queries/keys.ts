@@ -9,7 +9,6 @@ export const queryKeys = {
   archiveStatus: (diaryId: number) => ["archive-status", diaryId] as const,
   diaries: {
     all: ["diaries"] as const,
-    detail: (id: number) => ["diaries", "detail", id] as const,
     month: (year: number, month: number) => ["diaries", year, month] as const,
   },
   idCard: ["id-card"] as const,

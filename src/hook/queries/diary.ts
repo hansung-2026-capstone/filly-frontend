@@ -7,7 +7,6 @@ import {
 import {
   createDraft,
   deleteDiary,
-  getDiary,
   getDiaries,
   saveDiary,
   updateDiary,
@@ -34,18 +33,8 @@ export const monthlyDiariesQueryOptions = (year: number, month: number) =>
     queryFn: () => getDiaries(year, month),
   });
 
-export const diaryDetailQueryOptions = (id: number) =>
-  queryOptions({
-    queryKey: queryKeys.diaries.detail(id),
-    queryFn: () => getDiary(id),
-  });
-
 export function useMonthlyDiariesQuery(year: number, month: number) {
   return useQuery(monthlyDiariesQueryOptions(year, month));
-}
-
-export function useDiaryQuery(id: number) {
-  return useQuery(diaryDetailQueryOptions(id));
 }
 
 export function useCreateDraftMutation() {
