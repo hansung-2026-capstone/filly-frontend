@@ -78,16 +78,6 @@ const LoginPage: React.FC = () => {
           </SocialButton>
         </div>
       </div>
-
-      {/* 하단 약관 & 둘러보기 */}
-      <div className="w-full py-10 text-center text-[13px] text-[#A5A5A5] leading-relaxed">
-        <p>
-          로그인 시 <span className="underline cursor-pointer">서비스 이용약관</span> 및 <span className="underline cursor-pointer">개인정보 처리방침</span>에 동의하게 됩니다.
-        </p>
-        <div className="mt-5">
-          <span className="underline cursor-pointer hover:text-[#757575]">둘러보기</span>
-        </div>
-      </div>
     </div>
   );
 };
