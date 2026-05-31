@@ -56,7 +56,7 @@ const LoginPage: React.FC = () => {
         </div>
         <h1 className="text-3xl font-bold text-[#191919] mb-3">Filly</h1>
         <p className="text-[#757575] text-sm leading-relaxed">
-            취향을 기록하고, 나를 발견하는 공간
+            가볍게 기록하고, 나를 발견하는 공간
         </p>
       </div>
       
