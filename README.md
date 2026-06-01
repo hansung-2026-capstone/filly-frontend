@@ -16,17 +16,25 @@ Filly는 AI를 활용해 사용자의 일기 작성을 돕고, 축적된 기록�
 
 짧은 메모와 음성을 바탕으로 AI 일기 초안을 생성합니다. 사용자는 생성된 초안을 TipTap 기반 에디터에서 수정하고, 감정 이모지와 사진을 함께 저장할 수 있습니다.
 
+<img src="./docs/images/AI 일기 작성.png" width="500" alt="AI 일기 작성" />
+
 ### 월간 통계로 나의 감정과 패턴을 돌아볼 수 있어요
 
 월별 감정 분포, 키워드 클라우드, 생활 패턴을 시각적으로 제공합니다. 최근 기록을 바탕으로 생성된 페르소나 리포트와 히스토리도 확인할 수 있습니다.
+
+<img src="./docs/images/통계.png" width="500" alt="통계" />
 
 ### 나에게 맞는 추천을 받을 수 있어요
 
 사용자의 일기와 통계 데이터를 기반으로 카드형 추천 콘텐츠를 제공합니다. 추천 결과와 함께 사원증, 영수증, 키워드 클라우드 이미지를 저장할 수 있습니다.
 
+<img src="./docs/images/추천컨텐츠.png" width="500" alt="추천콘텐츠" />
+
 ### 공유용 콘텐츠를 만들 수 있어요
 
 사용자의 분석 결과를 사원증, 영수증, 키워드 클라우드 같은 이미지 형태로 저장할 수 있습니다. 나의 기록과 취향을 SNS에 공유하기 쉬운 콘텐츠로 제공합니다.
+
+<img src="./docs/images/공유용컨텐츠.png" width="500" alt="공유용컨텐츠" />
 
 ## ⚙️ 기술 스택
 
@@ -59,7 +67,7 @@ src/
 
 ## 🧑‍💻 Team
 
-| [이주연](https://github.com/juyeon707) | [천일영](https://github.com/ilyeong34) |
-|------|-------|
-|<img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/4b563c45-9f7b-461f-b2eb-77bdf8172730" />|<img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/bf53908b-6909-4b50-8959-3ca07b20f2b5" />|
-| <div align="center">만두가 좋아~</div>| <div align="center">🫪</div> |
+| [이주연](https://github.com/juyeon707)                                                                                             | [천일영](https://github.com/ilyeong34)                                                                                             |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| <img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/4b563c45-9f7b-461f-b2eb-77bdf8172730" /> | <img width="225" height="225" alt="image" src="https://github.com/user-attachments/assets/bf53908b-6909-4b50-8959-3ca07b20f2b5" /> |
+| <div align="center">만두가 좋아~</div>                                                                                             | <div align="center">🫪</div>                                                                                                       |
