@@ -1,8 +1,8 @@
 import React from 'react';
-import { FaBookOpen } from 'react-icons/fa';
 import { RiKakaoTalkFill } from 'react-icons/ri';
 import { SiNaver } from 'react-icons/si';
 import { FcGoogle } from 'react-icons/fc';
+import fillyLogo from '../assets/logo/filly-logo.png';
 
 // 소셜 로그인 버튼 컴포넌트
 interface SocialButtonProps {
@@ -51,8 +51,12 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-4">
       {/* 로고 & 슬로건 구역 */}
       <div className="flex flex-col items-center mb-10 text-center">
-        <div className="w-16 h-16 bg-[#6C6052] rounded-2xl flex items-center justify-center mb-5 shadow-inner">
-          <FaBookOpen className="text-white text-3xl font-light" />
+        <div className="w-24 h-24 rounded-2xl flex items-center justify-center mb-5 overflow-hidden">
+          <img
+            src={fillyLogo}
+            alt="Filly 로고"
+            className="h-full w-full object-contain"
+          />
         </div>
         <h1 className="text-3xl font-bold text-[#191919] mb-3">Filly</h1>
         <p className="text-[#757575] text-sm leading-relaxed">
