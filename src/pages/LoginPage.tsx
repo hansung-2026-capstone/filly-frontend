@@ -1,8 +1,8 @@
 import React from 'react';
-import { FaBookOpen } from 'react-icons/fa';
 import { RiKakaoTalkFill } from 'react-icons/ri';
 import { SiNaver } from 'react-icons/si';
 import { FcGoogle } from 'react-icons/fc';
+import fillyLogo from '../assets/logo/filly-logo.png';
 
 // 소셜 로그인 버튼 컴포넌트
 interface SocialButtonProps {
@@ -51,12 +51,16 @@ const LoginPage: React.FC = () => {
     <div className="min-h-screen bg-[#F8F9FA] flex flex-col items-center justify-center p-4">
       {/* 로고 & 슬로건 구역 */}
       <div className="flex flex-col items-center mb-10 text-center">
-        <div className="w-16 h-16 bg-[#6C6052] rounded-2xl flex items-center justify-center mb-5 shadow-inner">
-          <FaBookOpen className="text-white text-3xl font-light" />
+        <div className="w-24 h-24 rounded-2xl flex items-center justify-center mb-5 overflow-hidden">
+          <img
+            src={fillyLogo}
+            alt="Filly 로고"
+            className="h-full w-full object-contain"
+          />
         </div>
         <h1 className="text-3xl font-bold text-[#191919] mb-3">Filly</h1>
         <p className="text-[#757575] text-sm leading-relaxed">
-            취향을 기록하고, 나를 발견하는 공간
+            가볍게 기록하고, 나를 발견하는 공간
         </p>
       </div>
       
@@ -76,16 +80,6 @@ const LoginPage: React.FC = () => {
           <SocialButton provider="google" onClick={() => handleSocialLogin('google')}>
             Google로 시작하기
           </SocialButton>
-        </div>
-      </div>
-
-      {/* 하단 약관 & 둘러보기 */}
-      <div className="w-full py-10 text-center text-[13px] text-[#A5A5A5] leading-relaxed">
-        <p>
-          로그인 시 <span className="underline cursor-pointer">서비스 이용약관</span> 및 <span className="underline cursor-pointer">개인정보 처리방침</span>에 동의하게 됩니다.
-        </p>
-        <div className="mt-5">
-          <span className="underline cursor-pointer hover:text-[#757575]">둘러보기</span>
         </div>
       </div>
     </div>

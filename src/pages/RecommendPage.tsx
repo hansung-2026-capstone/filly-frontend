@@ -1047,113 +1047,121 @@ export function RecommendPage() {
                     );
                   })}
                   {showSelectedCardPopup && (
-                    <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center md:absolute md:inset-0 md:z-20">
-                      <motion.div
-                        key={selectedCardId}
-                        initial={{ rotateY: 0 }}
-                        animate={{ rotateY: 180 }}
-                        transition={{
-                          duration: 0.95,
-                          ease: [0.22, 0.61, 0.36, 1],
-                        }}
-                        className="pointer-events-auto relative aspect-[1023/1537] h-[324px] [transform-style:preserve-3d] md:h-[348px]"
-                      >
-                        <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] [backface-visibility:hidden]">
-                          <img
-                            src={tarotCardImage}
-                            alt="선택된 추천 카드"
-                            decoding="async"
-                            loading="eager"
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-
-                        <div className="absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-5 shadow-[0_18px_34px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
-                          <div className="absolute inset-0 opacity-20 paper-texture" />
-                          <div className="absolute inset-3 rounded-md border border-border-medium" />
-                          <div className="pointer-events-none absolute inset-3 z-[2]">
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                handleCloseSelectedCard();
-                              }}
-                              aria-label="카드 닫기"
-                              className="pointer-events-auto absolute right-1 top-1 p-1 text-[var(--text-icon-muted)] transition-colors hover:text-[var(--text-icon-soft)]"
-                            >
-                              <X className="h-3.5 w-3.5" />
-                            </button>
+                    <>
+                      <div
+                        aria-hidden="true"
+                        className="fixed inset-0 z-40 bg-bg-overlay backdrop-blur-[2px] md:hidden"
+                      />
+                      <div className="pointer-events-none fixed inset-0 z-50 flex items-center justify-center md:absolute md:inset-0 md:z-20">
+                        <motion.div
+                          key={selectedCardId}
+                          initial={{ rotateY: 0 }}
+                          animate={{ rotateY: 180 }}
+                          transition={{
+                            duration: 0.95,
+                            ease: [0.22, 0.61, 0.36, 1],
+                          }}
+                          className="pointer-events-auto relative aspect-[1023/1537] h-[324px] [transform-style:preserve-3d] md:h-[348px]"
+                        >
+                          <div className="absolute inset-0 overflow-hidden rounded-md bg-[var(--bg-card-back)] shadow-[var(--shadow-subtle)] [backface-visibility:hidden]">
+                            <img
+                              src={tarotCardImage}
+                              alt="선택된 추천 카드"
+                              decoding="async"
+                              loading="eager"
+                              className="h-full w-full object-cover"
+                            />
                           </div>
-                          <div className="relative z-[1] flex h-full flex-col overflow-hidden text-text-heading">
-                            {revealingCardId === selectedCardId ? (
-                              <div className="flex h-full items-center justify-center text-center text-[14px] leading-[1.7] text-text-muted">
-                                추천을 펼치는 중...
-                              </div>
-                            ) : selectedRecommendationDetail ? (
-                              <>
-                                <div className="relative min-h-0 flex-1">
-                                  <div className="h-full space-y-2 overflow-y-auto pb-7 pr-1 pt-3">
-                                    <div className="flex items-center gap-2 text-[10.5px] tracking-[1.2px] text-text-secondary">
-                                      <span className="line-clamp-2 break-words leading-[1.45]">
-                                        {getRecommendationCategoryLabel(
-                                          selectedRecommendationDetail,
-                                        )}
-                                        {selectedRecommendationDetail.subCategory
-                                          ? ` / ${selectedRecommendationDetail.subCategory}`
-                                          : ""}
-                                      </span>
-                                    </div>
-                                    <div className="text-[15px] font-bold leading-[1.35]">
-                                      {selectedRecommendationDetail.title}
-                                    </div>
-                                    <div className="border-t border-border-medium" />
-                                    <div className="pt-1 text-[12.5px] leading-[1.55] text-text-muted">
-                                      {selectedRecommendationDetail.description}
-                                    </div>
-                                    <div className="pt-1 text-[12.5px] leading-[1.55] text-text-secondary">
-                                      {selectedRecommendationDetail.reason}
-                                    </div>
-                                    {selectedRecommendationDetail.searchKeyword && (
-                                      <div className="break-words pb-1 pt-1.5 text-[10px] leading-[1.45] text-text-secondary">
-                                        #
+
+                          <div className="absolute inset-0 overflow-hidden rounded-md bg-[#fefefe] p-5 shadow-[0_18px_34px_rgba(0,0,0,0.2)] [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                            <div className="absolute inset-0 opacity-20 paper-texture" />
+                            <div className="absolute inset-3 rounded-md border border-border-medium" />
+                            <div className="pointer-events-none absolute inset-3 z-[2]">
+                              <button
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  handleCloseSelectedCard();
+                                }}
+                                aria-label="카드 닫기"
+                                className="pointer-events-auto absolute right-1 top-1 p-1 text-[var(--text-icon-muted)] transition-colors hover:text-[var(--text-icon-soft)]"
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                            <div className="relative z-[1] flex h-full flex-col overflow-hidden text-text-heading">
+                              {revealingCardId === selectedCardId ? (
+                                <div className="flex h-full items-center justify-center text-center text-[14px] leading-[1.7] text-text-muted">
+                                  추천을 펼치는 중...
+                                </div>
+                              ) : selectedRecommendationDetail ? (
+                                <>
+                                  <div className="relative min-h-0 flex-1">
+                                    <div className="h-full space-y-2 overflow-y-auto pb-7 pr-1 pt-3">
+                                      <div className="flex items-center gap-2 text-[10.5px] tracking-[1.2px] text-text-secondary">
+                                        <span className="line-clamp-2 break-words leading-[1.45]">
+                                          {getRecommendationCategoryLabel(
+                                            selectedRecommendationDetail,
+                                          )}
+                                          {selectedRecommendationDetail.subCategory
+                                            ? ` / ${selectedRecommendationDetail.subCategory}`
+                                            : ""}
+                                        </span>
+                                      </div>
+                                      <div className="text-[15px] font-bold leading-[1.35]">
+                                        {selectedRecommendationDetail.title}
+                                      </div>
+                                      <div className="border-t border-border-medium" />
+                                      <div className="pt-1 text-[12.5px] leading-[1.55] text-text-muted">
                                         {
-                                          selectedRecommendationDetail.searchKeyword
+                                          selectedRecommendationDetail.description
                                         }
                                       </div>
-                                    )}
+                                      <div className="pt-1 text-[12.5px] leading-[1.55] text-text-secondary">
+                                        {selectedRecommendationDetail.reason}
+                                      </div>
+                                      {selectedRecommendationDetail.searchKeyword && (
+                                        <div className="break-words pb-1 pt-1.5 text-[10px] leading-[1.45] text-text-secondary">
+                                          #
+                                          {
+                                            selectedRecommendationDetail.searchKeyword
+                                          }
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div
+                                      aria-hidden="true"
+                                      className="pointer-events-none absolute inset-x-0 bottom-0 flex h-8 items-end justify-center bg-gradient-to-t from-[#fefefe] via-[#fefefe]/90 to-transparent pb-0.5 text-text-secondary"
+                                    >
+                                      <ChevronDown className="h-3.5 w-3.5" />
+                                    </div>
                                   </div>
-                                  <div
-                                    aria-hidden="true"
-                                    className="pointer-events-none absolute inset-x-0 bottom-0 flex h-8 items-end justify-center bg-gradient-to-t from-[#fefefe] via-[#fefefe]/90 to-transparent pb-0.5 text-text-secondary"
+                                  <button
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      handleShuffleCards();
+                                    }}
+                                    disabled={
+                                      isShuffling ||
+                                      isShuffleLocked ||
+                                      isPreparingShuffle ||
+                                      revealingCardId !== null ||
+                                      !canShuffleSelectedCard
+                                    }
+                                    className="mt-1 flex-shrink-0 self-center rounded-full border border-border-medium px-3 py-1 text-[10.5px] text-text-muted transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
                                   >
-                                    <ChevronDown className="h-3.5 w-3.5" />
-                                  </div>
-                                </div>
-                                <button
-                                  type="button"
-                                  onClick={(event) => {
-                                    event.stopPropagation();
-                                    handleShuffleCards();
-                                  }}
-                                  disabled={
-                                    isShuffling ||
-                                    isShuffleLocked ||
-                                    isPreparingShuffle ||
-                                    revealingCardId !== null ||
-                                    !canShuffleSelectedCard
-                                  }
-                                  className="mt-1 flex-shrink-0 self-center rounded-full border border-border-medium px-3 py-1 text-[10.5px] text-text-muted transition-colors hover:bg-bg-hover disabled:cursor-not-allowed disabled:opacity-50"
-                                >
-                                  {isShuffling || isPreparingShuffle
-                                    ? "뽑는 중..."
-                                    : "다른 카드 뽑기"}
-                                </button>
-                              </>
-                            ) : null}
+                                    {isShuffling || isPreparingShuffle
+                                      ? "뽑는 중..."
+                                      : "다른 카드 뽑기"}
+                                  </button>
+                                </>
+                              ) : null}
+                            </div>
                           </div>
-                        </div>
-                      </motion.div>
-                    </div>
+                        </motion.div>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
