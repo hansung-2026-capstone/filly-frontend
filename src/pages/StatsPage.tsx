@@ -253,8 +253,8 @@ export function StatsPage() {
             </button>
           </div>
         </div>
-        <div className="flex flex-col gap-3.5 md:flex-row md:gap-5 md:flex-shrink-0">
-          <div className="grid w-full grid-cols-3 gap-2 md:w-[110px] md:flex md:flex-col md:gap-3.5">
+        <div className="flex flex-col gap-3.5 md:flex-row md:gap-4 md:flex-shrink-0">
+          <div className="grid w-full grid-cols-3 gap-2 md:w-[126px] md:flex md:flex-col md:gap-3.5">
             <div className="h-[88px] w-full rounded-lg border border-border-medium bg-bg-beige-subtle overflow-hidden flex flex-col items-center justify-center gap-1">
               <span className="text-[12px] tracking-[1.5px] text-text-secondary">
                 일기 개수
@@ -277,13 +277,13 @@ export function StatsPage() {
               <span className="whitespace-nowrap text-[12px] tracking-[0.5px] text-text-secondary md:tracking-[1.5px]">
                 자주 나온 사람
               </span>
-              <span className="text-[18px] text-[var(--text-stats-primary)] text-center truncate max-w-full">
+              <span className="max-w-full line-clamp-2 text-center text-[16px] leading-tight keep-all text-[var(--text-stats-primary)]">
                 {statLoading ? "..." : stat?.topPeople?.[0] ?? "없음"}
               </span>
             </div>
           </div>
 
-          <div className="h-auto min-h-[260px] flex-1 rounded-lg border border-border-medium bg-bg-beige-subtle p-5 md:h-[292px] md:overflow-hidden">
+          <div className="h-auto min-h-[260px] flex-1 rounded-lg border border-border-medium bg-bg-beige-subtle p-4 md:h-[292px] md:overflow-hidden">
             <div className="text-[18px] text-[var(--text-stats-primary)] mb-8">
               감정 분포
             </div>
