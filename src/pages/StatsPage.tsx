@@ -21,6 +21,12 @@ const DAILY_PATTERN_EXCLUDED_VALUES = new Set([
   "false",
   "보통",
 ]);
+const DAILY_PATTERN_EXCLUDED_KEYS = new Set([
+  "personal_pattern_candidates",
+  "weekday_pattern",
+  "energy_level",
+  "spending",
+]);
 
 function buildEmotionGradient(entries: [string, number][]) {
   const total = entries.reduce((sum, [, value]) => sum + value, 0);
@@ -50,6 +56,10 @@ function isMeaningfulPatternValue(value: string) {
   return !DAILY_PATTERN_EXCLUDED_VALUES.has(value.trim().toLowerCase());
 }
 
+function isVisiblePatternGroup(key: string) {
+  return !DAILY_PATTERN_EXCLUDED_KEYS.has(key);
+}
+
 export function StatsPage() {
   const { current, history, loading: personaLoading, error } = usePersona();
   const now = new Date();
@@ -71,6 +81,7 @@ export function StatsPage() {
     });
   const visibleEmotionEntries = emotionEntries.slice(0, 5);
   const dailyPatternEntries = Object.entries(stat?.dailyPattern ?? {})
+    .filter(([key]) => isVisiblePatternGroup(key))
     .flatMap(([day, times]) =>
       Object.entries(times)
         .filter(([time, count]) => count > 0 && isMeaningfulPatternValue(time))
@@ -81,17 +92,13 @@ export function StatsPage() {
     )
     .sort((a, b) => b.count - a.count)
     .slice(0, 5);
-  const personalPatternEntries = Object.entries(
-    stat?.dailyPattern?.personalPatternCandidates ??
-      stat?.personalPatternCandidates ??
-      {},
-  )
-    .filter(([label, count]) => label.trim() && count > 0)
-    .sort(([, a], [, b]) => b - a)
+  const habitDiscoveryEntries = (stat?.habitDiscoveries ?? [])
+    .filter(({ message, count }) => message.trim() && count > 0)
+    .sort((a, b) => b.count - a.count)
     .slice(0, 4);
   const monthlyPatternEntries =
-    personalPatternEntries.length > 0
-      ? personalPatternEntries.map(([label]) => ({ label }))
+    habitDiscoveryEntries.length > 0
+      ? habitDiscoveryEntries.map(({ message }) => ({ label: message }))
       : dailyPatternEntries.map(({ label, count }) => ({
           label: `${label} ${count}회`,
         }));
