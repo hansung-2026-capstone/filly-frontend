@@ -139,7 +139,7 @@ export function ArchivePage() {
               type="button"
               onClick={openCreateModal}
               disabled={mutating}
-              className="relative h-full w-full border-none cursor-pointer font-['Nanum_Pen_Script']
+              className="relative h-full w-full border-none cursor-pointer font-['Gaegu']
                 border-2 border-dashed border-[var(--border-archive-add)] rounded-sm flex flex-col items-center
                 justify-center bg-[var(--bg-archive-add)] transition-all duration-200 disabled:cursor-not-allowed
                 disabled:opacity-60 hover:bg-[var(--bg-archive-add-hover)] hover:border-[var(--border-archive-add-hover)]
@@ -161,7 +161,7 @@ export function ArchivePage() {
                 <button
                   type="button"
                   onClick={() => setSelectedArchiveId(archive.id)}
-                  className={`relative w-full h-full border-none cursor-pointer font-['Nanum_Pen_Script']
+                  className={`relative w-full h-full border-none cursor-pointer font-['Gaegu']
                     rounded-sm flex flex-col items-center justify-center gap-0.5 transition-all duration-200
                     ${
                       selectedArchiveId === archive.id
