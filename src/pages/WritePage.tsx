@@ -143,10 +143,17 @@ export function WritePage() {
     id: index,
     url,
   }));
+  const canGenerateDraft =
+    hasDiaryText(shortText) || Boolean(voiceRecorder.record);
 
   const handleGenerateDraft = async () => {
     if (isFutureDate(selectedDate)) {
       setValidationMessage("오늘 이후 날짜의 일기 초안은 만들 수 없어요.");
+      return;
+    }
+
+    if (!canGenerateDraft) {
+      setValidationMessage("텍스트나 음성 중 하나 이상을 입력해주세요.");
       return;
     }
 
@@ -272,8 +279,13 @@ export function WritePage() {
           />
           <div className="flex justify-end pt-2">
             <button
+              type="button"
               onClick={handleGenerateDraft}
-              disabled={isDraftGenerating || diaryMutations.draftPending}
+              disabled={
+                isDraftGenerating ||
+                diaryMutations.draftPending ||
+                !canGenerateDraft
+              }
               className="py-2.5 px-8 bg-bg-strong-control text-notebook-page border-none rounded-md
                 cursor-pointer font-['Nanum_Myeongjo'] text-sm transition-all duration-150
                 hover:bg-bg-strong-control-hover shadow-[var(--shadow-action-button)]
