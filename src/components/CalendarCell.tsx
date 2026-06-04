@@ -5,10 +5,11 @@ interface CalendarCellProps {
   diary: DiaryItem | undefined;
   loading: boolean;
   dayTextClass: string;
+  isToday?: boolean;
   onClick?: (diary: DiaryItem) => void;
 }
 
-export function CalendarCell({ day, diary, loading, dayTextClass, onClick }: CalendarCellProps) {
+export function CalendarCell({ day, diary, loading, dayTextClass, isToday = false, onClick }: CalendarCellProps) {
   const clickable = !!diary && !!onClick;
 
   return (
@@ -17,7 +18,14 @@ export function CalendarCell({ day, diary, loading, dayTextClass, onClick }: Cal
         ${clickable ? 'cursor-pointer hover:bg-[var(--bg-editor-panel)] hover:border-[var(--border-calendar-hover)] hover:shadow-sm' : ''}`}
       onClick={() => clickable && onClick(diary)}
     >
-      <span className={`text-[12px] leading-none ${dayTextClass}`}>{day}</span>
+      <div className="flex items-center gap-1">
+        <span className={`text-[12px] leading-none ${dayTextClass}`}>{day}</span>
+        {isToday && day && (
+          <span className="text-[14px] leading-none text-[var(--star-filled)]" aria-hidden="true">
+            ★
+          </span>
+        )}
+      </div>
       {diary && (
         <div className="flex-1 flex items-center justify-center min-h-0 overflow-hidden">
           {diary.mediaUrls?.[0] ? (
