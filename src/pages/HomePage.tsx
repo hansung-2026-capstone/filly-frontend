@@ -147,12 +147,12 @@ function MobileCalendarGrid({
 export function HomePage() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth() + 1);
-  const today = new Date().getDate();
   const [showMonthModal, setShowMonthModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [selectedDiary, setSelectedDiary] = useState<DiaryItem | null>(null);
   const navigate = useNavigate();
   const weeks = getWeeksInMonth(currentYear, currentMonth);
+  const monthDisplayName = MONTHS[currentMonth - 1].name.slice(0, 3);
   const nextMonth = currentMonth === 12
     ? { year: currentYear + 1, month: 1 }
     : { year: currentYear, month: currentMonth + 1 };
@@ -193,13 +193,13 @@ export function HomePage() {
             <div className="relative w-full bg-[var(--login-logo-bg)] py-2.5 flex items-center justify-center">
               <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/35" />
               <span className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/35" />
-              <span className="text-[13px] font-bold tracking-[2px] text-white/95 uppercase">
-                {MONTHS[currentMonth - 1].name}
+              <span className="text-[15px] font-bold tracking-[2px] text-white/95 uppercase">
+                {currentYear}
               </span>
             </div>
             <div className="relative w-full flex flex-col items-center justify-center min-h-[72px] pt-0 pb-2">
-              <span className="text-[28px] font-light leading-none tracking-tighter text-text-stronger">
-                {String(today).padStart(2, "0")}
+              <span className="text-[18px] font-light leading-none tracking-[1.5px] text-text-stronger">
+                {monthDisplayName}
               </span>
               <ChevronDown
                 className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-3.5 h-3.5 text-[var(--text-control-muted)] group-hover:text-[var(--text-dark)] transition-colors duration-300"
