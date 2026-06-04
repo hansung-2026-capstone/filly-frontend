@@ -133,19 +133,21 @@ export function ArchivePage() {
           </div>
         )}
 
-        <div className="grid content-start gap-1.5 overflow-y-auto pt-1 grid-cols-4 md:min-h-0 md:flex-1 md:grid-cols-3 md:gap-2.5">
-          <button
-            type="button"
-            onClick={openCreateModal}
-            disabled={mutating}
-            className="relative border-none cursor-pointer font-['Nanum_Pen_Script'] aspect-square
-              border-2 border-dashed border-[var(--border-archive-add)] rounded-sm flex flex-col items-center
-              justify-center bg-[var(--bg-archive-add)] transition-all duration-200 disabled:cursor-not-allowed
-              disabled:opacity-60 hover:bg-[var(--bg-archive-add-hover)] hover:border-[var(--border-archive-add-hover)]
-              hover:shadow-[var(--shadow-subtle)] hover:-translate-y-0.5"
-          >
-            <Plus className="h-4 w-4 text-[var(--text-archive-add)] md:h-7 md:w-7" />
-          </button>
+        <div className="grid content-start gap-1.5 overflow-y-auto px-1 pt-1 grid-cols-4 md:min-h-0 md:flex-1 md:grid-cols-3 md:gap-2.5">
+          <div className="aspect-square p-1">
+            <button
+              type="button"
+              onClick={openCreateModal}
+              disabled={mutating}
+              className="relative h-full w-full border-none cursor-pointer font-['Nanum_Pen_Script']
+                border-2 border-dashed border-[var(--border-archive-add)] rounded-sm flex flex-col items-center
+                justify-center bg-[var(--bg-archive-add)] transition-all duration-200 disabled:cursor-not-allowed
+                disabled:opacity-60 hover:bg-[var(--bg-archive-add-hover)] hover:border-[var(--border-archive-add-hover)]
+                hover:shadow-[var(--shadow-subtle)] hover:-translate-y-0.5"
+            >
+              <Plus className="h-4 w-4 text-[var(--text-archive-add)] md:h-7 md:w-7" />
+            </button>
+          </div>
 
           {loadingArchives && (
             <div className="col-span-4 flex items-center justify-center text-xs text-text-secondary md:col-span-3">
@@ -155,7 +157,7 @@ export function ArchivePage() {
 
           {!loadingArchives &&
             archives.map((archive, index) => (
-              <div key={archive.id} className="relative group aspect-square">
+              <div key={archive.id} className="relative group aspect-square p-1">
                 <button
                   type="button"
                   onClick={() => setSelectedArchiveId(archive.id)}
