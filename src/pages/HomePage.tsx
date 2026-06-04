@@ -55,6 +55,7 @@ function CalendarColumn({
   const gridClass = columnCount === 3 ? "grid-cols-3" : "grid-cols-4";
   const visibleDays = WEEK_DAYS_SHORT.slice(dayOffset, dayOffset + columnCount);
   const visibleDayLabels = WEEK_DAYS_LONG.slice(dayOffset, dayOffset + columnCount);
+  const today = new Date();
 
   return (
     <div className={`${widthClass} hidden md:flex flex-col pt-10 pb-8 shrink-0`}>
@@ -81,6 +82,10 @@ function CalendarColumn({
             const diaryKey = day
               ? formatDateKeyFromParts(currentYear, currentMonth, day)
               : null;
+            const isToday = !!day
+              && today.getFullYear() === currentYear
+              && today.getMonth() + 1 === currentMonth
+              && today.getDate() === day;
 
             return (
               <CalendarCell
@@ -89,6 +94,7 @@ function CalendarColumn({
                 diary={diaryKey ? diaries[diaryKey] : undefined}
                 loading={loading}
                 dayTextClass={getDayTextClass(dayIndex)}
+                isToday={isToday}
                 onClick={onDiarySelect}
               />
             );
@@ -107,6 +113,8 @@ function MobileCalendarGrid({
   onDiarySelect,
   weeks,
 }: Omit<CalendarColumnProps, "columnCount" | "dayOffset">) {
+  const today = new Date();
+
   return (
     <div className="flex flex-col gap-2 px-3 pb-4 md:hidden">
       <div className="grid grid-cols-7 border-b border-[var(--border-calendar)] pb-2 text-center">
@@ -125,6 +133,10 @@ function MobileCalendarGrid({
             const diaryKey = day
               ? formatDateKeyFromParts(currentYear, currentMonth, day)
               : null;
+            const isToday = !!day
+              && today.getFullYear() === currentYear
+              && today.getMonth() + 1 === currentMonth
+              && today.getDate() === day;
 
             return (
               <div key={`${weekIndex}-${dayIndex}`} className="min-h-[46px]">
@@ -133,6 +145,7 @@ function MobileCalendarGrid({
                   diary={diaryKey ? diaries[diaryKey] : undefined}
                   loading={loading}
                   dayTextClass={getDayTextClass(dayIndex)}
+                  isToday={isToday}
                   onClick={onDiarySelect}
                 />
               </div>
@@ -193,7 +206,7 @@ export function HomePage() {
             <div className="relative w-full bg-[var(--login-logo-bg)] py-2.5 flex items-center justify-center">
               <span className="absolute left-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/35" />
               <span className="absolute right-2 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-white/35" />
-              <span className="text-[15px] font-bold tracking-[2px] text-white/95 uppercase">
+              <span className="text-[17px] font-bold tracking-[2px] text-white/95 uppercase">
                 {currentYear}
               </span>
             </div>
