@@ -22,6 +22,8 @@ import { hasDiaryText } from "../lib/diary";
 
 const EMOJIS = ["😊", "😢", "😤", "😌", "😰", "🥰", "😴", "🤩"];
 const DEFAULT_PREFERENCE = "none";
+const WARNING_MESSAGE_CLASS =
+  "w-full max-w-[320px] px-3 py-2 rounded-md bg-[var(--bg-error)] text-[12px] text-[var(--text-error)]";
 const DRAFT_SPARKLES = [
   { symbol: "✦", className: "left-3 top-8 text-[18px]", delay: "0ms" },
   { symbol: "✧", className: "right-5 top-3 text-[24px]", delay: "180ms" },
@@ -124,6 +126,7 @@ export function WritePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [shortText, setShortText] = useState("");
   const [finalText, setFinalText] = useState(editDiary?.rawContent ?? "");
+  const [draftValidationMessage, setDraftValidationMessage] = useState<string | null>(null);
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [draftContent, setDraftContent] = useState<string | undefined>(
     editDiary?.rawContent ?? undefined,
@@ -143,21 +146,19 @@ export function WritePage() {
     id: index,
     url,
   }));
-  const canGenerateDraft =
-    hasDiaryText(shortText) || Boolean(voiceRecorder.record);
 
   const handleGenerateDraft = async () => {
     if (isFutureDate(selectedDate)) {
-      setValidationMessage("오늘 이후 날짜의 일기 초안은 만들 수 없어요.");
+      setDraftValidationMessage("오늘 이후 날짜의 일기 초안은 만들 수 없어요.");
       return;
     }
 
-    if (!canGenerateDraft) {
-      setValidationMessage("텍스트나 음성 중 하나 이상을 입력해주세요.");
+    if (!hasDiaryText(shortText) && !voiceRecorder.record) {
+      setDraftValidationMessage("텍스트나 음성 중 하나 이상을 입력해주세요.");
       return;
     }
 
-    setValidationMessage(null);
+    setDraftValidationMessage(null);
     setIsDraftGenerating(true);
     try {
       const form = new FormData();
@@ -281,11 +282,7 @@ export function WritePage() {
             <button
               type="button"
               onClick={handleGenerateDraft}
-              disabled={
-                isDraftGenerating ||
-                diaryMutations.draftPending ||
-                !canGenerateDraft
-              }
+              disabled={isDraftGenerating || diaryMutations.draftPending}
               className="py-2.5 px-8 bg-bg-strong-control text-notebook-page border-none rounded-md
                 cursor-pointer font-['Nanum_Myeongjo'] text-sm transition-all duration-150
                 hover:bg-bg-strong-control-hover shadow-[var(--shadow-action-button)]
@@ -294,6 +291,11 @@ export function WritePage() {
               초안 생성
             </button>
           </div>
+          {draftValidationMessage && (
+            <p className={`m-0 self-end ${WARNING_MESSAGE_CLASS}`}>
+              {draftValidationMessage}
+            </p>
+          )}
         </div>
       </div>
 
@@ -388,7 +390,7 @@ export function WritePage() {
             {editDiary ? "일기 수정" : "일기 작성"}
           </button>
           {validationMessage && (
-            <p className="m-0 px-3 py-2 rounded-md bg-[var(--bg-error)] text-[12px] text-[var(--text-error)]">
+            <p className={`m-0 self-end ${WARNING_MESSAGE_CLASS}`}>
               {validationMessage}
             </p>
           )}
@@ -401,6 +403,7 @@ export function WritePage() {
         maxDate={new Date()}
         onDateSelect={(date) => {
           setSelectedDate(date);
+          setDraftValidationMessage(null);
           setValidationMessage(null);
           setShowDatePicker(false);
         }}
